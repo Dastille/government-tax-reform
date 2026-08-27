@@ -20,9 +20,23 @@ Read the paper: [tax-whitepaper.md](tax-whitepaper.md).
 
 The original file was committed as `tax-whitepaper. md` (a space before `md`). GitHub and most editors treat that as a broken extension. It now lives at `tax-whitepaper.md`.
 
-## Status
+## Does it close? (Public Accounts 2025)
 
-Sketch + static tables. Dynamic modelling is **not** in this repo; the year-1 / year-5 / year-10 table is illustrative.
+Federal, $ billions:
+
+| Source | 2025 |
+| --- | ---: |
+| Personal income tax | 234.3 |
+| Corporate income tax | 97.0 |
+| GST (5%) | 52.5 |
+
+GST at 5% raises $52.5B, so 20% on the **same base** is about **$210B**. PIT + CIT is **$331B**. The 20% VAT does not replace federal income tax. Then the rate **falls to 8%** (~$84B). Provinces and payroll are additional hole.
+
+Land value tax at 0.5–1% only produces the paper’s $50–100B if **urban land is taxed broadly**, not empty lots. Empty lots cannot close this.
+
+**Viable slice:** enlarge the GST credit (the dividend), enable municipal split-rate. **Not viable as written:** abolish income tax in year one and hope velocity fills a $100B+ gap.
+
+The year-1 / year-5 / year-10 table in the paper is a scenario, not a CGE run.
 
 ## License
 
