@@ -1,0 +1,38 @@
+name: revenue-model
+
+on:
+  push:
+    branches: [main, v2-sourced-revision]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: analysis
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: fmt
+        run: cargo fmt --check
+      - name: clippy
+        run: cargo clippy --all-targets -- -D warnings
+      - name: test
+        run: cargo test
+      - name: committed tables match the model
+        run: |
+          cargo run --release > /tmp/revenue_tables.md
+          diff -u output/revenue_tables.md /tmp/revenue_tables.md
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-audit
+      - name: audit
+        run: cargo audit
