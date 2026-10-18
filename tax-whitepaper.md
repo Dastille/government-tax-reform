@@ -14,7 +14,7 @@
 
 **Problem.** Income taxes discourage work, saving and investment more than taxes on spending do. The OECD's ranking puts corporate income tax as the most harmful to growth, then personal income tax, then consumption taxes, with recurrent property taxes the least harmful [R7]. This proposal abolishes five taxes: personal income tax (PIT), corporate income tax (CIT), payroll taxes, capital gains tax and recurrent property tax. It replaces them with one broad value-added tax (VAT) that starts at 20% and steps down to 8% over 10 years. A land value tax (LVT), an income-tested citizen dividend, an independent fiscal board and referendum entrenchment complete the design.
 
-**Thesis.** When income tax goes, people keep more of what they earn, so they spend more, and VAT revenue grows. A static 1-to-1 comparison misses this effect.
+**Thesis.** When income tax goes, people keep more of what they earn, so they spend more, and VAT revenue grows. A static one-for-one comparison misses this effect.
 
 **Method.**
 
@@ -346,8 +346,8 @@ Dynamic central case, no growth, no LVT. k = share of today's PIT + CIT still ne
 **Conclusion of the model.** Under FY2024-25 Canadian numbers:
 
 - 20% at launch supports partial replacement, with *k* ≈ 47% (A) to 56% (B).
-- Full abolition at 20% needs a VAT that performs close to New Zealand's (static rate needed with a New Zealand-level base: 19.0% under A, 22.1% under B).
-- 8% needs that plus sustained growth well above any cited estimate.
+- Full abolition at 20% needs a VAT that performs like New Zealand's (static rate needed with a New Zealand-level base: 19.0% under A, 22.1% under B).
+- 8% needs that plus a base 3.90× today's relative to needs: 14.6% a year faster than needs for 10 years, faster than even the high end of the original paper's unsourced growth addition (+1.5 to +2.5 points).
 - Property tax cannot be abolished on the scenario LVT alone.
 
 The fiscal board's certification rule keeps the original goal (abolition, then 8%) as a target that can be met, rather than a promise that cannot.
@@ -393,7 +393,7 @@ Static scaling (A) of two existing measures: the GST credit (PA 2025 Table 3.3) 
 
 | Proposal | What it proposed | How this design differs |
 |---|---|---|
-| Meade Report (UK, 1978) [R17] | A review of the whole UK tax system that recommended a universal expenditure tax: tax what people spend rather than what they earn. | Meade kept a progressive personal tax on spending. This design uses a VAT collected from businesses, and gets progressivity from the dividend rather than from rates. |
+| Meade Report (UK, 1978) [R17] | A review of the whole UK tax system that favoured an expenditure-tax base, setting out universal (ch. 9) and two-tier (ch. 10) variants: tax what people spend rather than what they earn. | Meade kept a progressive personal tax on spending. This design uses a VAT collected from businesses, and gets progressivity from the dividend rather than from rates. |
 | Hall-Rabushka flat tax (1985; 2nd ed. 1995) [R18] | One low flat rate replacing the federal income tax, taxing all income once, either at the business or at the worker, on a consumption-type base [R18, R19]. | Hall-Rabushka keeps a tax return for workers. This design removes personal returns and relies on a VAT plus transfers. |
 | Bradford X-tax (1986; 2004) [R19] | A consumption-type tax built like Hall-Rabushka, designed to replace the income tax on corporations and individuals while keeping "substantial scope for progressivity" at the worker level. | The X-tax keeps progressivity inside the tax. This design moves it into the dividend. |
 | US FairTax, H.R. 25 (119th Congress) [R20] | A national retail sales tax at 23% of gross (tax-inclusive) payments in 2027, replacing federal income, payroll, estate and gift taxes, with a monthly rebate (the "family consumption allowance"). | Closest in spirit (replace income and payroll taxes with a consumption tax plus a rebate). This design uses a multi-stage VAT rather than a retail sales tax, adds an LVT and a fiscal board, and its model states the rate needed instead of assuming one. |
@@ -408,7 +408,7 @@ Static scaling (A) of two existing measures: the GST credit (PA 2025 Table 3.3) 
 - **Denmark and Hungary.** Standard rates of 25% and 27% (2022) [R4, Annex 2.A.7]. VAT is 9.2% of GDP / 22.0% of taxes in Denmark and 10.1% / 28.9% in Hungary [R4, Annex 1.A.4]. Both still levy income taxes. Denmark's land tax is **unverified** here.
 - **Gulf states.** Saudi Arabia introduced VAT at 5% on 1 January 2018 [R15] and announced on 11 May 2020 that it would rise to 15% from July 2020 [R15b]: a large, fast rate change. Statements about personal income tax and about UAE, Bahrain and Oman VAT are **unverified** here.
 - **Canada 1991.** The 7% GST replaced the 13.5% federal sales tax (FST), in place since 1924, on 1 January 1991, together with the GST credit [R14, R14b]. It is now 5%.
-- **Singapore.** v1.1 described it as having "minimal income taxes". That is incorrect: the top resident PIT rate is 24% from YA2024, and GST has been 9% since 1 January 2024 [R16].
+- **Singapore.** v1.1 described it as having "minimal income taxes". That is incorrect: IRAS gives the current highest personal income tax rate as 24% and the current GST rate as 9% [R16].
 - **Breadth of VAT.** 175 countries and territories had a VAT as of 1 July 2024 [R4].
 - Land value taxation in parts of Australia is **unverified** here. The Pennsylvania cities example (added in v1.1, not part of the original design) has been removed.
 
@@ -480,7 +480,7 @@ Five steps: question each requirement and name who set it; delete what adds noth
 - [R15] Zakat, Tax and Customs Authority (Saudi Arabia), "About VAT" (5% from 1 January 2018). https://zatca.gov.sa/en/RulesRegulations/VAT/Pages/About-Vat.aspx
 - [R15b] Ministry of Finance (Saudi Arabia), "Additional Measures to Confront the Financial and Economic Impact of the Coronavirus Pandemic", 11 May 2020 ("VAT shall increase from 5% to 15% as of July 2020"). https://www.mof.gov.sa/en/MediaCenter/news/Pages/News_11052020.aspx
 - [R16] Inland Revenue Authority of Singapore, "Individual Income Tax rates" and "Current GST rates". https://www.iras.gov.sg/taxes/individual-income-tax/basics-of-individual-income-tax/tax-residency-and-tax-rates/individual-income-tax-rates · https://www.iras.gov.sg/taxes/goods-services-tax-(gst)/basics-of-gst/current-gst-rates
-- [R17] Meade, J. E. (chair) (1978), *The Structure and Reform of Direct Taxation*, Institute for Fiscal Studies / Allen and Unwin, ch. "A Universal Expenditure Tax" (Routledge reissue, https://doi.org/10.4324/9780203120798-22). https://ifs.org.uk/books/structure-and-reform-direct-taxation
+- [R17] Meade, J. E. (chair) (1978), *The Structure and Reform of Direct Taxation*, Institute for Fiscal Studies / Allen and Unwin, ch. 9 "A Universal Expenditure Tax" and ch. 10 "A Two-Tier Expenditure Tax" (chapter titles from the table of contents; Routledge reissue, https://doi.org/10.4324/9780203120798-22). https://ifs.org.uk/books/structure-and-reform-direct-taxation
 - [R18] Hall, R. E. and Rabushka, A., *The Flat Tax* (Hoover Institution Press; 1st ed. 1985, 2nd ed. 1995, reissued 2007). https://www.hoover.org/research/flat-tax
 - [R19] Bradford, D. F. (1986), *Untangling the Income Tax*, Harvard University Press; and (2004) *The X Tax in the World Economy*, AEI Press. https://www.aei.org/research-products/book/the-x-tax-in-the-world-economy/
 - [R20] U.S. Congress, H.R. 25 (119th Congress), *FairTax Act of 2025*, introduced text (Title I repeals; proposed sec. 101(b) rate; ch. 3 family consumption allowance). https://www.govinfo.gov/content/pkg/BILLS-119hr25ih/html/BILLS-119hr25ih.htm

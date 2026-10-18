@@ -3,13 +3,15 @@
 //! literals listed in the test allowlist, and `{{placeholders}}`.
 
 use crate::data::{
-    CIT, DIVIDEND_BOTTOM_SHARE, EI_PREMIUMS, END_RATE, FACTS, GROWTH_ADDITION_PP, GST_CREDIT,
-    GST_GROSS_EXTERNAL, GST_HOLIDAY_COST, GST_NET, GST_RATE, HFCE_PCT_GDP, IMPORTS_PCT_GDP,
+    CIT, DIVIDEND_BOTTOM_SHARE, EI_PREMIUMS, END_RATE, FACTS, GROWTH_ADDITION_PP,
+    GST_BEFORE_REMISSION, GST_CREDIT, GST_GROSS_EXTERNAL, GST_HOLIDAY_COST, GST_HOLIDAY_COST_2024,
+    GST_HOLIDAY_COST_2025, GST_NET, GST_RATE, GST_REMISSION, HFCE_PCT_GDP, IMPORTS_PCT_GDP,
     INVESTMENT_SHARE, LAND_VALUE_UNVERIFIED, LVT_CLAIM_HIGH, LVT_CLAIM_LOW, LVT_RATES,
     LVT_TAXABLE_SHARE_SCENARIO, MULTIPLIER_CIT, MULTIPLIER_PIT, NATIONAL_WEALTH_Q2_2025,
-    NON_RESIDENT, PATH_YEARS, PIT, RESIDENTIAL_REAL_ESTATE_Q2_2025, REVENUE_PCT_GDP,
-    SAVING_RATE_Q2_2024, SAVING_RATE_Q2_2025, START_RATE, TE_HOUSEHOLD, TE_PUBLIC_AND_THRESHOLD,
-    TOTAL_REVENUE, VRR_CANADA, VRR_NEW_ZEALAND, VRR_OECD_AVERAGE,
+    NON_RESIDENT, PATH_YEARS, PIT, POPULATION_2024, PROPERTY_TAX_PER_CAPITA_2024,
+    RESIDENTIAL_REAL_ESTATE_Q2_2025, REVENUE_PCT_GDP, SAVING_RATE_Q2_2024, SAVING_RATE_Q2_2025,
+    START_RATE, TE_HOUSEHOLD, TE_PUBLIC_AND_THRESHOLD, TOTAL_REVENUE, VRR_CANADA, VRR_NEW_ZEALAND,
+    VRR_OECD_AVERAGE,
 };
 use crate::error::{Error, Result};
 use crate::model::{
@@ -71,6 +73,38 @@ fn t1(x: f64) -> String {
 /// Per cent rounded to a whole number, without the sign ("47").
 fn pi(x: f64) -> String {
     format!("{x:.0}")
+}
+
+/// "more than" / "less than" / "the same as", comparing `a` with `b`.
+#[must_use]
+pub fn more_or_less(a: f64, b: f64) -> &'static str {
+    if a > b {
+        "more than"
+    } else if a < b {
+        "less than"
+    } else {
+        "the same as"
+    }
+}
+
+/// A share in words when it is within 4 points of a simple fraction ("about half",
+/// "about a third"); otherwise a whole per cent ("41%").
+#[must_use]
+pub fn fraction_words(x: f64) -> String {
+    const FRACTIONS: [(f64, &str); 5] = [
+        (0.25, "a quarter"),
+        (1.0 / 3.0, "a third"),
+        (0.5, "half"),
+        (2.0 / 3.0, "two-thirds"),
+        (0.75, "three-quarters"),
+    ];
+    let nearest = FRACTIONS
+        .iter()
+        .min_by(|p, q| (x - p.0).abs().total_cmp(&(x - q.0).abs()));
+    match nearest {
+        Some((f, w)) if (x - f).abs() <= 0.04 => format!("about {w}"),
+        _ => format!("{:.0}%", 100.0 * x),
+    }
 }
 
 /// Every named value the templates can use.
@@ -153,6 +187,17 @@ pub fn values() -> Result<BTreeMap<String, String>> {
     put("gst_rate", num(GST_RATE));
     put("it_b", b(income_taxes()));
     put("nr_b", b(NON_RESIDENT));
+    put("nr_m", thousands(&num(NON_RESIDENT)));
+    put("gst_before_m", thousands(&num(GST_BEFORE_REMISSION)));
+    put("gst_remission_m", thousands(&num(GST_REMISSION)));
+    put("gst_gross_m", thousands(&num(GST_GROSS_EXTERNAL)));
+    put("gst_credit_m", thousands(&num(GST_CREDIT)));
+    put("ei_m", thousands(&num(EI_PREMIUMS)));
+    put("total_rev_m", thousands(&num(TOTAL_REVENUE)));
+    put("holiday_2024_m", num(GST_HOLIDAY_COST_2024));
+    put("holiday_2025_m", num(GST_HOLIDAY_COST_2025));
+    put("property_pc", thousands(&num(PROPERTY_TAX_PER_CAPITA_2024)));
+    put("population", thousands(&num(POPULATION_2024)));
     put("ei_b", b(EI_PREMIUMS));
     put("credit_b", b(GST_CREDIT));
     put("holiday_b", b(GST_HOLIDAY_COST));
@@ -303,6 +348,99 @@ pub fn values() -> Result<BTreeMap<String, String>> {
     for (k, val) in FACTS {
         put(k, (*val).to_string());
     }
+    // Comparison words, generated from the values they compare.
+    let g_factor_hi = cen.breakeven_growth_factor(hi, core);
+    let g_lo_pa =
+        100.0 * crate::model::annualised(cen.breakeven_growth_factor(lo, core), PATH_YEARS);
+    let nz_needed = nz_a.required_rate(core);
+    let lvt_ratio = lvt_rate_to_replace_property_tax(scen_land) / LVT_RATES[1];
+    put("g_lo_a_pa", pct(g_lo_pa));
+    put("replaced_frac_a", fraction_words(1.0 - k_a));
+    put("base_frac_gdp", fraction_words(base0() / gdp()));
+    put(
+        "mpc_verdict_a",
+        if cen.breakeven_mpc(hi, core) > 1.0 {
+            "no possible MPC closes the gap on its own"
+        } else {
+            "an MPC within the possible range closes the gap on its own"
+        }
+        .into(),
+    );
+    put(
+        "g_hi_a_dir",
+        if g_factor_hi > 1.0 {
+            "larger"
+        } else {
+            "smaller"
+        }
+        .into(),
+    );
+    put(
+        "property_vs_lvt",
+        more_or_less(property_tax_total(), lvt_scenario()).into(),
+    );
+    put(
+        "b_vs_a",
+        if cb.revenue(hi) < cen.revenue(hi) {
+            "lower"
+        } else {
+            "higher"
+        }
+        .into(),
+    );
+    put("k_b_dir", if k_b > k_a { "rises" } else { "falls" }.into());
+    put(
+        "lvt_vs_design",
+        if lvt_ratio >= 2.0 {
+            "well above"
+        } else if lvt_ratio > 1.0 {
+            "above"
+        } else {
+            "within"
+        }
+        .into(),
+    );
+    put(
+        "nz_condition",
+        if nz_needed <= hi {
+            "needs a VAT that performs like New Zealand's"
+        } else {
+            "needs a VAT that performs better than New Zealand's"
+        }
+        .into(),
+    );
+    put(
+        "nz_verdict",
+        if nz_needed <= hi {
+            "is enough"
+        } else if nz_needed <= hi + 2.0 {
+            "comes close"
+        } else {
+            "is not enough"
+        }
+        .into(),
+    );
+    put(
+        "growth_vs_original",
+        if g_lo_pa > g_hi {
+            "faster than even the high end of"
+        } else if g_lo_pa >= g_lo {
+            "within the range of"
+        } else {
+            "below"
+        }
+        .into(),
+    );
+    let short = core - mul.revenue(hi);
+    put(
+        "mpc_effect_size",
+        if cen.revenue(hi) - half.revenue(hi) < 0.25 * short {
+            "small"
+        } else {
+            "large"
+        }
+        .into(),
+    );
     // Tables and blocks.
     let tables: [report::Section; 16] = [
         ("table:first_principles", report::table_first_principles),
@@ -326,7 +464,29 @@ pub fn values() -> Result<BTreeMap<String, String>> {
         let t = f()?;
         put(k, t.trim_end().to_string());
     }
+    let ledger = claims_inputs_table(&vals)?;
+    vals.insert("table:claims_inputs".into(), ledger);
     Ok(vals)
+}
+
+/// The inputs table of `CLAIMS.md`, rendered from [`crate::ledger::INPUTS`].
+///
+/// # Errors
+/// If a ledger row names an unknown placeholder.
+pub fn claims_inputs_table(vals: &BTreeMap<String, String>) -> Result<String> {
+    let mut rows = vec![
+        "| Claim | Status | Evidence |".to_string(),
+        "|---|---|---|".to_string(),
+    ];
+    for row in crate::ledger::INPUTS {
+        rows.push(format!(
+            "| {} | {} | {} |",
+            render_template(row.claim, vals)?,
+            row.status.label(),
+            render_template(row.evidence, vals)?
+        ));
+    }
+    Ok(rows.join("\n"))
 }
 
 /// Headline numbers block.

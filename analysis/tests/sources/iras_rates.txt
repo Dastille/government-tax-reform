@@ -1,0 +1,7 @@
+URL: https://www.iras.gov.sg/taxes/individual-income-tax/basics-of-individual-income-tax/tax-residency-and-tax-rates/individual-income-tax-rates ; https://www.iras.gov.sg/taxes/goods-services-tax-(gst)/basics-of-gst/current-gst-rates
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: curl, HTML tags stripped
+Excerpt (verbatim; whitespace collapsed):
+---
+The current highest personal income tax rate is at 24%.
+The current GST rate in Singapore is 9%.

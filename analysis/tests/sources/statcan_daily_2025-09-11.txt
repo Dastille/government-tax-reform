@@ -1,0 +1,8 @@
+URL: https://www150.statcan.gc.ca/n1/daily-quotidien/250911/dq250911a-eng.htm
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+The household saving rate (seasonally adjusted) fell to 5.0% in the second quarter of 2025, as the rise in household spending (+1.2%) outpaced sluggish growth in disposable income (+0.3%).
+The value of residential real estate stood at $8,375.9 billion in the second quarter of 2025, nearly unchanged from the previous quarter
+The total value of non-financial assets in Canada, also referred to as national wealth, dipped to $17,267.4 billion in the second quarter, following two consecutive quarterly increases.

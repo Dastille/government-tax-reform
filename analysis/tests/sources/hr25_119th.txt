@@ -1,0 +1,6 @@
+URL: https://www.govinfo.gov/content/pkg/BILLS-119hr25ih/html/BILLS-119hr25ih.htm
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: curl, HTML tags stripped (plain-text bill)
+Excerpt (verbatim; whitespace collapsed):
+---
+``(1) For 2027.--In the calendar year 2027, the rate of tax is 23 percent of the gross payments for the taxable property or service.

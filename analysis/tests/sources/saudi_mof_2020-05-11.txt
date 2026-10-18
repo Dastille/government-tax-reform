@@ -1,0 +1,6 @@
+URL: https://www.mof.gov.sa/en/MediaCenter/news/Pages/News_11052020.aspx
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: curl, HTML tags stripped
+Excerpt (verbatim; whitespace collapsed):
+---
+In addition, the cost-of-living allowance shall be discontinued as of June 2020 and VAT shall increase from 5% to 15% as of July 2020.

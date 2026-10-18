@@ -1,0 +1,6 @@
+URL: https://zatca.gov.sa/en/RulesRegulations/VAT/Pages/About-Vat.aspx
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+In February 2017 (Jumada Al-Awwal 1438), Saudi Arabia ratified the GCC VAT framework and imposed VAT on January 1, 2018 (Rabi Al-Thani 14, 1439). VAT was introduced at a standard rate of 5%.

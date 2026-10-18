@@ -24,8 +24,8 @@ Every scenario uses one stated price assumption. **A (central):** the VAT is pas
 
 {{table:readme}}
 
-- **Headline.** A {{start_rate}}% VAT, counting the extra spending from the income tax people keep, replaces about half of federal income tax. Under central assumptions, {{k_a}} of it must remain at launch.
-- **Full abolition** at {{start_rate}}% needs a taxable base about {{g_hi_a}}× larger than today's relative to spending needs. A New Zealand-style broad base comes close: with it, the static rate needed is {{nz_rate_needed_a}}.
+- **Headline.** A {{start_rate}}% VAT, counting the extra spending from the income tax people keep, replaces {{replaced_frac_a}} of federal income tax. Under central assumptions, {{k_a}} of it must remain at launch.
+- **Full abolition** at {{start_rate}}% needs a taxable base about {{g_hi_a}}× {{g_hi_a_dir}} than today's relative to spending needs. A New Zealand-style broad base {{nz_verdict}}: with it, the static rate needed is {{nz_rate_needed_a}}.
 - **The {{end_rate}}% endpoint** needs about {{g_lo_a}}× the base.
 - **Property tax** (about ${{property_b}}B) stays until LVT revenue replaces it.
 - Within each assumption, more revenue always means a lower required rate, and a test enforces this.

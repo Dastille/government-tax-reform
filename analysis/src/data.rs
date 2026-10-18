@@ -1,4 +1,5 @@
-//! Every input number, with its primary source. Units: millions of Canadian dollars
+//! Every input number, with its primary source. Each sourced value is checked against a
+//! committed verbatim excerpt in `tests/sources/` by `tests/sources.rs`. Units: millions of Canadian dollars
 //! unless stated otherwise. Nothing in this file is estimated by us; derived values
 //! live in `model.rs`.
 
@@ -72,9 +73,16 @@ pub const TE_PUBLIC_AND_THRESHOLD: [TaxExpenditure; 6] = [
     ("Rebate for qualifying NPOs", 115.0),
 ];
 
-/// Targeted Temporary GST/HST Relief (Dec 14, 2024 to Feb 15, 2025): 445 (2024) + 840 (2025).
-/// The whole holiday fell inside FY2024-25, so it depressed the `GST_NET` figure.
-pub const GST_HOLIDAY_COST: f64 = 445.0 + 840.0;
+/// Targeted Temporary GST/HST Relief (Dec 14, 2024 to Feb 15, 2025), calendar 2024 cost.
+pub const GST_HOLIDAY_COST_2024: f64 = 445.0;
+/// Targeted Temporary GST/HST Relief, calendar 2025 cost.
+pub const GST_HOLIDAY_COST_2025: f64 = 840.0;
+/// Whole GST holiday cost. It fell inside FY2024-25, so it depressed the `GST_NET` figure.
+pub const GST_HOLIDAY_COST: f64 = GST_HOLIDAY_COST_2024 + GST_HOLIDAY_COST_2025;
+
+/// Federal PIT bracket rates, 2023 taxation year, per cent (TE 2026 Part 2, background
+/// table "Federal Personal Income Tax Brackets and Rates, Tax Filers and Taxes Paid, 2023").
+pub const BRACKETS_2023: [f64; 5] = [15.0, 20.5, 26.0, 29.0, 33.0];
 
 // ---------------------------------------------------------------------------
 // OECD (2024), Consumption Tax Trends 2024, https://doi.org/10.1787/dcd4dd36-en
@@ -175,7 +183,8 @@ pub const INVESTMENT_SHARE: [f64; 2] = [60.0, 70.0];
 /// - Saudi Arabia: ZATCA "About VAT" (5% from 1 January 2018); Saudi Ministry of Finance,
 ///   11 May 2020, "VAT shall increase from 5% to 15% as of July 2020".
 ///   <https://www.mof.gov.sa/en/MediaCenter/news/Pages/News_11052020.aspx>
-/// - Singapore: IRAS (top resident PIT rate 24% from YA2024; GST 9% from 1 January 2024).
+/// - Singapore: IRAS ("The current highest personal income tax rate is at 24%"; "The current
+///   GST rate in Singapore is 9%").
 /// - Canada 1991: TE 2017 Part 10 (FST 13.5%); Library of Parliament PRB 00-03E (GST 7% from
 ///   1 January 1991).
 /// - 175 countries and territories with a VAT on 1 July 2024: OECD CTT 2024.

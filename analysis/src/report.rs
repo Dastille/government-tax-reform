@@ -25,9 +25,8 @@ use std::fmt::Write;
 const A: Incidence = Incidence::RealBaseFixed;
 const B: Incidence = Incidence::NominalSpendingFixed;
 
-/// 2023 federal PIT bracket rates (Report on Federal Tax Expenditures 2026, Part 2,
-/// background table). The first rate is 14% from 2026.
-pub const BRACKETS_2023: [f64; 5] = [15.0, 20.5, 26.0, 29.0, 33.0];
+/// 2023 federal PIT bracket rates; see [`crate::data::BRACKETS_2023`].
+pub use crate::data::BRACKETS_2023;
 
 /// Rates at which the model reports scenario tables, per cent.
 const TABLE_RATES: [f64; 6] = [5.0, 8.0, 10.0, 15.0, 20.0, 25.0];

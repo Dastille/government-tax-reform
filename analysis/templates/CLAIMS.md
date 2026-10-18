@@ -18,17 +18,36 @@ cargo test --manifest-path analysis/Cargo.toml
 
 ## What the document tests check, and what they do not
 
-The paper, README and this file are generated: `analysis/templates/*.md` plus values from the model (`analysis/src/docs.rs`).
+The paper, README and this file are generated: `analysis/templates/*.md` plus values from the model (`analysis/src/docs.rs`). The inputs table below is generated from `analysis/src/ledger.rs`.
 
 | Check | Status | Evidence |
 |---|---|---|
-| Each committed document is byte-for-byte equal to a fresh render of its template, so every number inserted from the model (tables, and inline placeholders) is the model's current value, in its place, integers included | Verified | `docs.rs` `committed_documents_equal_fresh_render` |
+| Each committed document is byte-for-byte equal to a fresh render of its template, so every number inserted from the model (tables, and inline placeholders) is the model's current value, in its place | Verified | `docs.rs` `committed_documents_equal_fresh_render` |
 | `analysis/output/revenue_tables.md` is byte-for-byte equal to a fresh render | Verified | `docs.rs` `committed_output_equals_fresh_render`; CI diff step |
-| Every number typed directly into a template (outside a placeholder) is on the allowlist, with a source and the line it appears on | Verified, with exclusions below | `docs.rs` `template_literals_are_placeholders_or_allowlisted` |
-| No allowlist entry is stale (each one matches a line in its template) | Verified | `docs.rs` `allowlist_entries_are_used` |
+| Every number typed into a template or a ledger row, with its prefix and suffix (`$227.0B`, `45pct`, `13.5%`, `45–90`, `x1.58`), is on the allowlist for the line it appears on | Verified, with the skips below | `docs.rs` `template_literals_are_placeholders_or_allowlisted` |
+| Number words typed into a template (the list is `NUMBER_WORDS` in `tests/docs.rs`) are on the allowlist for their line | Verified, with the limits below | same test |
+| Each allowlist entry matches exactly one line, the token is on it, and the entry's source quotes the token | Verified | `docs.rs` `allowlist_entries_are_used` |
+| Each sourced input equals the value in a committed verbatim excerpt of its source (URL and access date in each file), in the right row and column for tables | Verified | `sources.rs` `sourced_values_appear_in_their_excerpts`, `excerpt_files_have_url_and_access_date`; excerpts in `analysis/tests/sources/` |
+| Dates and mechanisms stated as text (GST start date, the FST start year, GST holiday dates, VAT-country date, CGEB dates, input-tax-credit mechanism, HST) appear in the paper and in a committed excerpt | Verified | `sources.rs` `paper_text_appears_in_its_excerpts` |
+| Every input constant in `data.rs` and every `FACTS` key has a row in the inputs table; every Verified or Derived row is backed by excerpt checks and names its excerpt; unverified inputs stay unverified | Verified | `sources.rs` `ledger_covers_every_input`, `verified_rows_have_excerpt_checks`, `unverified_inputs_are_not_marked_verified` |
+| Comparison words in the prose ("more than", "about half", "about a third", "larger", "lower", "well above", "is enough", "small next to") are generated from the values they compare | Verified | `docs.rs` `comparison_words_match_the_values`; `docs::values` |
 | Templates reference only known values, and every placeholder is closed | Verified | `render_template` errors; exercised by every render |
 
-**Not scanned for literals:** the References section of the paper (it holds citation years, table numbers and URLs); tokens joined to letters (`R4`, `FY2024-25`, `2.A.7`, commit ids); section numbers in headings and `§` references; numbered-list markers; URLs; HTML comments; code spans and code blocks. Each allowlist entry names its template, an anchor that must match exactly one line, and the token; the token must appear on that line as a whole token (not as part of a longer number), and every literal on every scanned line must be covered by an entry. The test checks the literal's **location**, not its correctness; its correctness rests on the cited source.
+**What the scan reads.** Every line of every template, including HTML comments, code spans, code blocks and the References section, plus every claim and evidence string in `ledger.rs`. Reference years, page and table numbers are allowlisted by line like any other number.
+
+**What the scan skips, and why.**
+
+- Placeholders: their values are generated and byte-checked.
+- URLs and link targets (anything containing `http`, `doi.org` or `](`).
+- Identifiers: a number preceded by a letter or `_` (`R14`, `FY2024-25`, `v2.0`, `YA2024`, `Q2`, `A1.1`); dotted ids joined to a letter (`2.A.7`); ids whose letters run into more digits (commit ids such as `07e4fb1`); StatCan table ids (`10-10-0147-01`).
+- `§` references to sections that exist in the paper (a reference to a missing section is reported); the section number at the start of a heading; ordered-list markers that continue their list (an out-of-sequence marker is reported).
+
+**Known limits.**
+
+- "one" and ordinals ("second quarter", "third bracket") are not scanned: they are mostly not quantities, so a quantity written that way needs review by eye.
+- The scan checks that a literal sits on a known line; whether it is correct rests on its source. Literals that are model inputs are instead checked against source excerpts (above).
+- Text inside the Rust table code (`report.rs`, `docs.rs`) is not scanned. Tables are built from constants; a few labels hold fixed numbers that are definitions (for example "maximum possible 1.0" for the MPC).
+- The excerpts were captured on 2026-10-18 through the fetch tool's HTML-to-Markdown rendering, `curl` or `pdftotext`, with whitespace collapsed. They are verbatim from those renderings, not byte copies of the pages, and a test cannot show that a live page still says the same thing.
 
 ## Within the model
 
@@ -45,24 +64,17 @@ The paper, README and this file are generated: `analysis/templates/*.md` plus va
 | Rate path {{start_rate}} − {{path_step}}t gives {{start_rate}} / {{path_mid}} / {{end_rate}} at t = 0 / 5 / {{path_years}}; v1.1's formula gave {{v11_end}} | Verified | `model.rs` `rate_path_is_consistent` |
 | LVT arithmetic: ${{lvt_claim_hi}}B at {{lvt_rate_hi}}% needs ${{land_needed_lo}}T of land | Verified (arithmetic); land value **UNVERIFIED** | `model.rs` `lvt_land_requirement` |
 
-## Inputs (sourced)
+## Inputs
 
-| Claim | Status | Evidence |
-|---|---|---|
-| PIT {{pit_m}}; CIT {{cit_m}}; net GST {{gst_m}} ($M, FY2024-25) | Verified (source) | Public Accounts 2025 Vol I Tables 3.2/3.3; `model.rs` `baseline_matches_public_accounts` |
-| Revenue {{rev_pct_gdp}}% of GDP, so GDP ≈ ${{gdp_b}}B | Verified (source, derived) | AFR 2024-25 |
-| Saving rate {{saving_2024}} (Q2 2024), {{saving_2025}} (Q2 2025) | Verified (source) | StatCan Daily 2024-09-12, 2025-09-11 |
-| HFCE {{hfce_pct}}% and imports {{imports_pct}}% of GDP (2024) | Verified (source) | World Bank WDI 4.8 |
-| Multipliers: PIT {{mult_pit}}, CIT {{mult_cit}} (short run) | Verified (source) | Budget 2009 Annex 1 Table A1.1 |
-| VRR: Canada {{vrr_ca}}, OECD average {{vrr_oecd}}, New Zealand {{vrr_nz}} | Verified (source) | OECD CTT 2024 Annex 2.A.7 |
-| Tax-expenditure costs | Verified (source) | Federal Tax Expenditures 2026 Part 2 |
-| National wealth ${{wealth_b}}B; residential real estate ${{res_re_b}}B | Verified (source) | StatCan Daily 2025-09-11 |
-| Recurrent property tax ≈ ${{property_b}}B (provincial + local, 2024) | Verified (source, derived) | Nova Scotia Finance from StatCan Table 10-10-0147-01 (per person) × StatCan population 1 July 2024 |
-| New Zealand GST {{nz_prev_rate}}% → {{nz_rate}}% on {{nz_rate_date}} | Verified (source) | Inland Revenue NZ, Taxation (Budget Measures) Act 2010 |
-| Saudi VAT {{sa_rate_2018}}% from {{sa_date_2018}}; {{sa_rate_2020}}% from {{sa_date_2020}} | Verified (source) | ZATCA "About VAT"; Saudi Ministry of Finance, 11 May 2020 |
-| FairTax rate {{fairtax_rate}}% of gross payments (2027) | Verified (source) | H.R. 25 (119th), introduced text |
-| Land-only value ~${{land_t}}T | **UNVERIFIED** | Secondary source; StatCan Table 36-10-0580 not downloaded |
-| Growth addition +{{growth_lo}}–{{growth_hi}} pp a year | **UNVERIFIED** (what-if only) | From the original paper; no source found |
+Generated from `analysis/src/ledger.rs`. Excerpt files are in `analysis/tests/sources/`.
+
+{{table:claims_inputs}}
+
+## Source caveats
+
+- **Meade Report [R17].** The paper says the committee "favoured an expenditure-tax base, setting out universal (ch. 9) and two-tier (ch. 10) variants". The chapter titles come from the book's table of contents; the report's text was not read for this revision, so the characterisation is secondary.
+- **Hall-Rabushka [R18], Bradford [R19] and the Carter Commission [R21]** are described from publisher pages and a secondary summary; the primary texts were not opened. The paper dates the Carter report 1966, as The Canadian Encyclopedia does; the external audit notes it was dated December 1966 and tabled in February 1967, which was not checked against the report itself.
+- **Saudi Ministry of Finance [R15b].** The page URL encodes 11 May 2020 and its dateline reads 5/12/2020; the paper uses 11 May 2020. The quoted sentence is in the excerpt.
 
 ## Not quantified / UNVERIFIED
 

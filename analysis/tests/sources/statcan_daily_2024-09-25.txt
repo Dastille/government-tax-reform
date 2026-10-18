@@ -1,0 +1,8 @@
+URL: https://www150.statcan.gc.ca/n1/daily-quotidien/240925/dq240925d-eng.htm
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+Quarterly population estimate — Canada
+41,288,599
+July 1, 2024

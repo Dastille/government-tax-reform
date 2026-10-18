@@ -14,7 +14,7 @@
 
 **Problem.** Income taxes discourage work, saving and investment more than taxes on spending do. The OECD's ranking puts corporate income tax as the most harmful to growth, then personal income tax, then consumption taxes, with recurrent property taxes the least harmful [R7]. This proposal abolishes five taxes: personal income tax (PIT), corporate income tax (CIT), payroll taxes, capital gains tax and recurrent property tax. It replaces them with one broad value-added tax (VAT) that starts at {{start_rate}}% and steps down to {{end_rate}}% over {{path_years}} years. A land value tax (LVT), an income-tested citizen dividend, an independent fiscal board and referendum entrenchment complete the design.
 
-**Thesis.** When income tax goes, people keep more of what they earn, so they spend more, and VAT revenue grows. A static 1-to-1 comparison misses this effect.
+**Thesis.** When income tax goes, people keep more of what they earn, so they spend more, and VAT revenue grows. A static one-for-one comparison misses this effect.
 
 **Method.**
 
@@ -30,11 +30,11 @@
 - A {{start_rate}}% VAT on Canada's current federal base raises **${{static_hi_a}}B** statically.
 - With the thesis modelled at central values, it raises **${{dyn_hi_a}}B**, or **${{mult_hi_a}}B** if Finance Canada's short-run multipliers are added.
 - The revenue needed is **${{need_core_b}}B**: PIT plus CIT plus today's GST.
-- So a {{start_rate}}% VAT replaces about half of the income taxes. Under central values, **{{k_a}}** of today's PIT and CIT must remain (**k**). Full replacement on today's base needs a rate of **{{rate_dyn_a}}**, or **{{rate_mult_a}}** with the multiplier, against {{rate_static_a}} statically.
-- The spending effect is real, but no possible MPC closes the gap on its own: the MPC would have to be {{mpc_be_a}}. Only about {{taxable_share_pct}}% of new consumer spending falls in today's taxable base, and that spending pays VAT-inclusive prices.
-- Full abolition at {{start_rate}}% needs a taxable base about **{{g_hi_a}}×** larger relative to spending needs. The {{end_rate}}% endpoint needs about **{{g_lo_a}}×**.
-- The LVT must first replace about **${{property_b}}B** of recurrent property tax, more than the LVT scenario raises (${{lvt_scenario}}B).
-- **Sensitivity B** gives a lower floor: ${{static_hi_b}}B static and ${{dyn_hi_b}}B dynamic at {{start_rate}}%, k = {{k_b}}. The conclusion is the same under either assumption.
+- So a {{start_rate}}% VAT replaces {{replaced_frac_a}} of the income taxes. Under central values, **{{k_a}}** of today's PIT and CIT must remain (**k**). Full replacement on today's base needs a rate of **{{rate_dyn_a}}**, or **{{rate_mult_a}}** with the multiplier, against {{rate_static_a}} statically.
+- The spending effect is real, but {{mpc_verdict_a}}: the MPC would have to be {{mpc_be_a}}. Only about {{taxable_share_pct}}% of new consumer spending falls in today's taxable base, and that spending pays VAT-inclusive prices.
+- Full abolition at {{start_rate}}% needs a taxable base about **{{g_hi_a}}×** {{g_hi_a_dir}} relative to spending needs. The {{end_rate}}% endpoint needs about **{{g_lo_a}}×**.
+- The LVT must first replace about **${{property_b}}B** of recurrent property tax, {{property_vs_lvt}} the LVT scenario raises (${{lvt_scenario}}B).
+- **Sensitivity B** gives a {{b_vs_a}} floor: ${{static_hi_b}}B static and ${{dyn_hi_b}}B dynamic at {{start_rate}}%, k = {{k_b}}. The conclusion is the same under either assumption.
 - v2.0 therefore keeps every mechanism of the design. Income taxes are reduced as far as VAT and LVT revenue allows, and they are abolished, and the VAT rate stepped down, only when the fiscal board certifies that revenue covers the need.
 
 **Key figures:**
@@ -152,7 +152,7 @@ Every scenario under both assumptions:
 
 - **Consistency.** Under one assumption, more revenue at a given rate always means a lower required rate; the test suite checks this across every scenario, both assumptions and several rates. An earlier draft of v2.0 computed static under A and dynamic under B, which produced an apparent contradiction; it is fixed.
 - **The thesis is right about direction.** At the central MPC, real taxable consumption at {{start_rate}}% is ${{real_base_a}}B under A and ${{real_base_b}}B under B, against ${{base0_b}}B today.
-- **Break-even.** The MPC would need to be **{{mpc_be_a}}** (A), **{{mpc_be_s1}}** even if every new dollar were taxable, or {{mpc_be_b}} under B; an MPC cannot exceed 1. What can close the gap is a **larger taxable base**: **{{g_hi_a}}×** today's relative to spending needs, {{g_hi_a_pa}} a year faster than needs for {{path_years}} years. With the multiplier it is {{g_hi_mult}}× ({{g_hi_mult_pa}} a year); under B it is {{g_hi_b}}× ({{g_hi_b_pa}} a year).
+- **Break-even.** The MPC would need to be **{{mpc_be_a}}** (A), **{{mpc_be_s1}}** even if every new dollar were taxable, or {{mpc_be_b}} under B; an MPC cannot exceed 1. What can close the gap is a **{{g_hi_a_dir}} taxable base**: **{{g_hi_a}}×** today's relative to spending needs, {{g_hi_a_pa}} a year faster than needs for {{path_years}} years. With the multiplier it is {{g_hi_mult}}× ({{g_hi_mult_pa}} a year); under B it is {{g_hi_b}}× ({{g_hi_b_pa}} a year).
 - The original paper's growth addition of +{{growth_lo}} to +{{growth_hi}} points a year is **unsourced** and is used only as a what-if: it gives {{growth_f_lo}}× to {{growth_f_hi}}× over {{path_years}} years.
 
 {{table:breakeven}}
@@ -179,7 +179,7 @@ The original ${{lvt_claim_lo}}–{{lvt_claim_hi}}B a year needs ${{land_needed_l
 
 {{table:property}}
 
-At the scenario's taxable land, the LVT would need a rate of {{lvt_replace_scen}}, well above the design's {{lvt_rate_hi}}%, just to replace property tax. Until LVT revenue covers property tax in a jurisdiction, the property tax stays (§4).
+At the scenario's taxable land, the LVT would need a rate of {{lvt_replace_scen}}, {{lvt_vs_design}} the design's {{lvt_rate_hi}}%, just to replace property tax. Until LVT revenue covers property tax in a jurisdiction, the property tax stays (§4).
 
 ### 5.5 The rate path and the conditions for {{end_rate}}%
 
@@ -194,8 +194,8 @@ At the scenario's taxable land, the LVT would need a rate of {{lvt_replace_scen}
 **Conclusion of the model.** Under FY2024-25 Canadian numbers:
 
 - {{start_rate}}% at launch supports partial replacement, with *k* ≈ {{k_a_round}}% (A) to {{k_b_round}}% (B).
-- Full abolition at {{start_rate}}% needs a VAT that performs close to New Zealand's (static rate needed with a New Zealand-level base: {{nz_rate_needed_a}} under A, {{nz_rate_needed_b}} under B).
-- {{end_rate}}% needs that plus sustained growth well above any cited estimate.
+- Full abolition at {{start_rate}}% {{nz_condition}} (static rate needed with a New Zealand-level base: {{nz_rate_needed_a}} under A, {{nz_rate_needed_b}} under B).
+- {{end_rate}}% needs that plus a base {{g_lo_a}}× today's relative to needs: {{g_lo_a_pa}} a year faster than needs for {{path_years}} years, {{growth_vs_original}} the original paper's unsourced growth addition (+{{growth_lo}} to +{{growth_hi}} points).
 - Property tax cannot be abolished on the scenario LVT alone.
 
 The fiscal board's certification rule keeps the original goal (abolition, then {{end_rate}}%) as a target that can be met, rather than a promise that cannot.
@@ -217,13 +217,13 @@ The fiscal board's certification rule keeps the original goal (abolition, then {
 ## 7. Counter-arguments, answered with numbers
 
 1. **"{{start_rate}}% raises only about ${{static_hi_a}}B, not ${{it_b}}B" (static).** Correct. With the thesis modelled at central values, {{start_rate}}% raises ${{dyn_hi_a}}B, or ${{mult_hi_a}}B with the multiplier. That still falls about ${{short_lo}}–{{short_hi}}B short of the core need, so v2.0 makes abolition conditional (§4) instead of claiming it.
-2. **"People will save the windfall."** Even at MPC = {{mpc_half}}, revenue at {{start_rate}}% is ${{mpc_half_rev}}B, against ${{dyn_hi_a}}B at {{mpc_central}}. The MPC moves revenue by about ${{mpc_effect}}B, which is small next to the gap.
+2. **"People will save the windfall."** Even at MPC = {{mpc_half}}, revenue at {{start_rate}}% is ${{mpc_half_rev}}B, against ${{dyn_hi_a}}B at {{mpc_central}}. The MPC moves revenue by about ${{mpc_effect}}B, which is {{mpc_effect_size}} next to the gap.
 3. **"Imports leak."** Imports are {{imports_pct}}% of GDP, but a destination-based VAT taxes them at the border, so they do not reduce the base. They reduce only the domestic multiplier, and the Finance Canada multipliers already account for that.
 4. **"High rates invite evasion."** At {{leak20_pct}}% compliance leakage, the required rate rises from {{rate_static_a}} to {{leak20_rate}} (§5.3). This is why the design puts upfront investment in enforcement and administration first.
 5. **"It is regressive."** The credit floor costs ${{credit_hi}}B at {{start_rate}}%; zero-rating groceries costs ${{groceries_hi}}B. Evidence favours the transfer [R6, R12].
 6. **"Retirees pay twice"** (taxed on income while working, then on spending in retirement). This is valid for spending out of savings accumulated before the switch. It is **not quantified** here. A phase-in and the dividend reduce the problem but do not remove it.
 7. **"Property tax is the least harmful tax; why abolish it?"** [R7]. Answered in §5.4: the LVT keeps the land part and drops the buildings part, but it must first raise about ${{property_b}}B, so property tax stays until it does.
-8. **The strongest counter-argument: the base is too narrow for the rate to be credible.** Canada's effective VAT base is about a third of GDP (${{base0_b}}B of ${{gdp_b}}B). The taxes to be replaced are worth {{it_pct_gdp}} of GDP. So the rate has to be about {{rate_static_a_round}}% statically, or about {{rate_dyn_a_round}}% counting the spending effect ({{rate_dyn_b_round}}% under assumption B). The highest standard VAT rate in the OECD is Hungary's {{hu_rate}}% [R4, Annex Table 2.A.7]. *Answer:* the design does not need {{rate_dyn_a_round}}% if the base becomes as broad and well-collected as New Zealand's (VRR {{vrr_nz}}, which needs {{nz_rate_needed_a}}). Until then, the board keeps part of the income tax. The counter-argument limits the *speed* of reform, not its direction.
+8. **The strongest counter-argument: the base is too narrow for the rate to be credible.** Canada's effective VAT base is {{base_frac_gdp}} of GDP (${{base0_b}}B of ${{gdp_b}}B). The taxes to be replaced are worth {{it_pct_gdp}} of GDP. So the rate has to be about {{rate_static_a_round}}% statically, or about {{rate_dyn_a_round}}% counting the spending effect ({{rate_dyn_b_round}}% under assumption B). The highest standard VAT rate in the OECD is Hungary's {{hu_rate}}% [R4, Annex Table 2.A.7]. *Answer:* the design does not need {{rate_dyn_a_round}}% if the base becomes as broad and well-collected as New Zealand's (VRR {{vrr_nz}}, which needs {{nz_rate_needed_a}}). Until then, the board keeps part of the income tax. The counter-argument limits the *speed* of reform, not its direction.
 
 ---
 
@@ -233,7 +233,7 @@ The fiscal board's certification rule keeps the original goal (abolition, then {
 
 | Proposal | What it proposed | How this design differs |
 |---|---|---|
-| Meade Report (UK, 1978) [R17] | A review of the whole UK tax system that recommended a universal expenditure tax: tax what people spend rather than what they earn. | Meade kept a progressive personal tax on spending. This design uses a VAT collected from businesses, and gets progressivity from the dividend rather than from rates. |
+| Meade Report (UK, 1978) [R17] | A review of the whole UK tax system that favoured an expenditure-tax base, setting out universal (ch. 9) and two-tier (ch. 10) variants: tax what people spend rather than what they earn. | Meade kept a progressive personal tax on spending. This design uses a VAT collected from businesses, and gets progressivity from the dividend rather than from rates. |
 | Hall-Rabushka flat tax (1985; 2nd ed. 1995) [R18] | One low flat rate replacing the federal income tax, taxing all income once, either at the business or at the worker, on a consumption-type base [R18, R19]. | Hall-Rabushka keeps a tax return for workers. This design removes personal returns and relies on a VAT plus transfers. |
 | Bradford X-tax (1986; 2004) [R19] | A consumption-type tax built like Hall-Rabushka, designed to replace the income tax on corporations and individuals while keeping "substantial scope for progressivity" at the worker level. | The X-tax keeps progressivity inside the tax. This design moves it into the dividend. |
 | US FairTax, H.R. 25 (119th Congress) [R20] | A national retail sales tax at {{fairtax_rate}}% of gross (tax-inclusive) payments in 2027, replacing federal income, payroll, estate and gift taxes, with a monthly rebate (the "family consumption allowance"). | Closest in spirit (replace income and payroll taxes with a consumption tax plus a rebate). This design uses a multi-stage VAT rather than a retail sales tax, adds an LVT and a fiscal board, and its model states the rate needed instead of assuming one. |
@@ -248,7 +248,7 @@ The fiscal board's certification rule keeps the original goal (abolition, then {
 - **Denmark and Hungary.** Standard rates of {{dk_rate}}% and {{hu_rate}}% (2022) [R4, Annex 2.A.7]. VAT is {{dk_vat_gdp}}% of GDP / {{dk_vat_taxes}}% of taxes in Denmark and {{hu_vat_gdp}}% / {{hu_vat_taxes}}% in Hungary [R4, Annex 1.A.4]. Both still levy income taxes. Denmark's land tax is **unverified** here.
 - **Gulf states.** Saudi Arabia introduced VAT at {{sa_rate_2018}}% on {{sa_date_2018}} [R15] and announced on 11 May 2020 that it would rise to {{sa_rate_2020}}% from {{sa_date_2020}} [R15b]: a large, fast rate change. Statements about personal income tax and about UAE, Bahrain and Oman VAT are **unverified** here.
 - **Canada 1991.** The {{gst_1991_rate}}% GST replaced the {{fst_rate}}% federal sales tax (FST), in place since 1924, on 1 January 1991, together with the GST credit [R14, R14b]. It is now {{gst_rate}}%.
-- **Singapore.** v1.1 described it as having "minimal income taxes". That is incorrect: the top resident PIT rate is {{sg_pit_top}}% from YA2024, and GST has been {{sg_gst}}% since 1 January 2024 [R16].
+- **Singapore.** v1.1 described it as having "minimal income taxes". That is incorrect: IRAS gives the current highest personal income tax rate as {{sg_pit_top}}% and the current GST rate as {{sg_gst}}% [R16].
 - **Breadth of VAT.** {{vat_countries}} countries and territories had a VAT as of 1 July 2024 [R4].
 - Land value taxation in parts of Australia is **unverified** here. The Pennsylvania cities example (added in v1.1, not part of the original design) has been removed.
 
@@ -260,7 +260,7 @@ Five steps: question each requirement and name who set it; delete what adds noth
 
 | Requirement | From | Question asked | Decision |
 |---|---|---|---|
-| Abolish PIT, CIT, payroll, capital gains and property tax | Ashlynn (ab193f4) | Does a {{start_rate}}% VAT pay for it? | **Kept as the goal, made conditional.** k = {{k_a}} of income tax remains at launch; full abolition needs a base about {{g_hi_a}}× larger |
+| Abolish PIT, CIT, payroll, capital gains and property tax | Ashlynn (ab193f4) | Does a {{start_rate}}% VAT pay for it? | **Kept as the goal, made conditional.** k = {{k_a}} of income tax remains at launch; full abolition needs a base about {{g_hi_a}}× {{g_hi_a_dir}} |
 | Abolish recurrent property tax | Ashlynn (ab193f4) | The OECD ranks it least harmful [R7]: why abolish? | **Kept, reason stated** (§5.4): the LVT keeps the land part. Property tax stays until the LVT replaces about ${{property_b}}B |
 | VAT {{start_rate}}% → {{end_rate}}% over {{path_years}} years | Ashlynn (ab193f4) | Is the path consistent, and is {{end_rate}}% reachable? | **Kept.** Formula fixed; steps need certification; {{end_rate}}% needs about {{g_lo_a}}× the base |
 | Thesis: kept income is spent, so VAT revenue grows | Ashlynn (ab193f4; steering 2026-10-18) | How large is the effect? | **Central and modelled.** It adds about ${{dyn_gain_lo}}–{{dyn_gain_hi}}B at {{start_rate}}% (A); the MPC needed to close the gap alone is {{mpc_be_a}} |
@@ -286,7 +286,7 @@ Five steps: question each requirement and name who set it; delete what adds noth
 ## 10. Limitations
 
 - **Accounting model, not a general-equilibrium model.** The MPC, taxable share and multipliers are fixed. There are no wage, price-level, exchange-rate or interest-rate responses beyond the stated incidence assumption.
-- **Incidence.** Headline figures assume full pass-through with the real basket held (A). If nominal spending does not rise with prices (B), revenue at {{start_rate}}% is about ${{ab_gap}}B lower and k rises from {{k_a}} to {{k_b}}. Reality is likely between the two; it is not estimated here.
+- **Incidence.** Headline figures assume full pass-through with the real basket held (A). If nominal spending does not rise with prices (B), revenue at {{start_rate}}% is about ${{ab_gap}}B {{b_vs_a}} and k {{k_b_dir}} from {{k_a}} to {{k_b}}. Reality is likely between the two; it is not estimated here.
 - **Federal only.** Provincial PIT, CIT and sales taxes are excluded, as is the provincial share of HST. A full Canadian reform would need provincial agreement. The constitutional route to referendum entrenchment in Canada is **unverified**.
 - **Property tax total** is derived from a per-person figure (Nova Scotia Finance, from StatCan CGFS) times the 1 July 2024 population; it covers provincial and local property taxes.
 - **One base year** (FY2024-25), which includes the GST holiday (${{holiday_b}}B).
@@ -317,10 +317,10 @@ Five steps: question each requirement and name who set it; delete what adds noth
 - [R13] Canada Revenue Agency, "Canada Groceries and Essentials Benefit (CGEB)". https://www.canada.ca/en/revenue-agency/services/child-family-benefits/canada-groceries-essentials-benefit.html
 - [R14] Library of Parliament, *The Goods and Services Tax* (PRB 00-03E). https://publications.gc.ca/Collection-R/LoPBdP/BP/prb0003-e.htm
 - [R14b] Department of Finance Canada, *Report on Federal Tax Expenditures 2017*, Part 10. https://www.canada.ca/en/department-finance/services/publications/federal-tax-expenditures/2017/part-10.html
-- [R15] Zakat, Tax and Customs Authority (Saudi Arabia), "About VAT" (5% from 1 January 2018). https://zatca.gov.sa/en/RulesRegulations/VAT/Pages/About-Vat.aspx
-- [R15b] Ministry of Finance (Saudi Arabia), "Additional Measures to Confront the Financial and Economic Impact of the Coronavirus Pandemic", 11 May 2020 ("VAT shall increase from 5% to 15% as of July 2020"). https://www.mof.gov.sa/en/MediaCenter/news/Pages/News_11052020.aspx
+- [R15] Zakat, Tax and Customs Authority (Saudi Arabia), "About VAT" ({{sa_rate_2018}}% from {{sa_date_2018}}). https://zatca.gov.sa/en/RulesRegulations/VAT/Pages/About-Vat.aspx
+- [R15b] Ministry of Finance (Saudi Arabia), "Additional Measures to Confront the Financial and Economic Impact of the Coronavirus Pandemic", 11 May 2020 ("VAT shall increase from {{sa_rate_2018}}% to {{sa_rate_2020}}% as of {{sa_date_2020}}"). https://www.mof.gov.sa/en/MediaCenter/news/Pages/News_11052020.aspx
 - [R16] Inland Revenue Authority of Singapore, "Individual Income Tax rates" and "Current GST rates". https://www.iras.gov.sg/taxes/individual-income-tax/basics-of-individual-income-tax/tax-residency-and-tax-rates/individual-income-tax-rates · https://www.iras.gov.sg/taxes/goods-services-tax-(gst)/basics-of-gst/current-gst-rates
-- [R17] Meade, J. E. (chair) (1978), *The Structure and Reform of Direct Taxation*, Institute for Fiscal Studies / Allen and Unwin, ch. "A Universal Expenditure Tax" (Routledge reissue, https://doi.org/10.4324/9780203120798-22). https://ifs.org.uk/books/structure-and-reform-direct-taxation
+- [R17] Meade, J. E. (chair) (1978), *The Structure and Reform of Direct Taxation*, Institute for Fiscal Studies / Allen and Unwin, ch. 9 "A Universal Expenditure Tax" and ch. 10 "A Two-Tier Expenditure Tax" (chapter titles from the table of contents; Routledge reissue, https://doi.org/10.4324/9780203120798-22). https://ifs.org.uk/books/structure-and-reform-direct-taxation
 - [R18] Hall, R. E. and Rabushka, A., *The Flat Tax* (Hoover Institution Press; 1st ed. 1985, 2nd ed. 1995, reissued 2007). https://www.hoover.org/research/flat-tax
 - [R19] Bradford, D. F. (1986), *Untangling the Income Tax*, Harvard University Press; and (2004) *The X Tax in the World Economy*, AEI Press. https://www.aei.org/research-products/book/the-x-tax-in-the-world-economy/
 - [R20] U.S. Congress, H.R. 25 (119th Congress), *FairTax Act of 2025*, introduced text (Title I repeals; proposed sec. 101(b) rate; ch. 3 family consumption allowance). https://www.govinfo.gov/content/pkg/BILLS-119hr25ih/html/BILLS-119hr25ih.htm

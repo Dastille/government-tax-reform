@@ -35,7 +35,7 @@ Every scenario uses one stated price assumption. **A (central):** the VAT is pas
 | Recurrent property tax the LVT must replace first | 92.6 | | StatCan CGFS (derived) |
 
 - **Headline.** A 20% VAT, counting the extra spending from the income tax people keep, replaces about half of federal income tax. Under central assumptions, 47.3% of it must remain at launch.
-- **Full abolition** at 20% needs a taxable base about 1.58× larger than today's relative to spending needs. A New Zealand-style broad base comes close: with it, the static rate needed is 19.0%.
+- **Full abolition** at 20% needs a taxable base about 1.58× larger than today's relative to spending needs. A New Zealand-style broad base is enough: with it, the static rate needed is 19.0%.
 - **The 8% endpoint** needs about 3.90× the base.
 - **Property tax** (about $92.6B) stays until LVT revenue replaces it.
 - Within each assumption, more revenue always means a lower required rate, and a test enforces this.

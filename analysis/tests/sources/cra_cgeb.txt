@@ -1,0 +1,7 @@
+URL: https://www.canada.ca/en/revenue-agency/services/child-family-benefits/canada-groceries-essentials-benefit.html
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+The Canada Groceries and Essentials Benefit (CGEB) replaced the GST/HST credit in July 2026.
+In July 2026, there was a 25% increase to the benefit amount which will remain for 5 years from 2026 to 2031.
