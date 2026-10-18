@@ -36,25 +36,14 @@ pub fn static_revenue(rate: f64, extra_at_5: f64) -> f64 {
     (GST_NET + extra_at_5) * rate / GST_RATE
 }
 
-/// Rate that raises `need` on today's base plus `extra_at_5`, static.
-pub fn static_required_rate(need: f64, extra_at_5: f64) -> f64 {
-    need / ((GST_NET + extra_at_5) / GST_RATE)
+/// Base factor for broadening the base by `extra_at_5` (valued at today's 5% rate).
+pub fn broadening_factor(extra_at_5: f64) -> f64 {
+    (GST_NET + extra_at_5) / GST_NET
 }
 
-/// Static required rate if the base performed like a VAT with revenue ratio `vrr`.
-pub fn vrr_required_rate(need: f64, vrr: f64) -> f64 {
-    static_required_rate(need, 0.0) * VRR_CANADA / vrr
-}
-
-/// Static revenue when a fraction `leak` of the *incremental* revenue is lost to
-/// non-compliance or avoidance. `leak` is an assumption, not a measured value.
-pub fn leaky_revenue(rate: f64, leak: f64) -> f64 {
-    GST_NET + (static_revenue(rate, 0.0) - GST_NET) * (1.0 - leak)
-}
-
-/// Rate needed under leakage `leak`.
-pub fn leaky_required_rate(need: f64, leak: f64) -> f64 {
-    GST_RATE * (1.0 + (need / GST_NET - 1.0) / (1.0 - leak))
+/// Base factor for collecting like a VAT with revenue ratio `vrr` instead of Canada's.
+pub fn vrr_factor(vrr: f64) -> f64 {
+    vrr / VRR_CANADA
 }
 
 // --------------------------------------------------------------------------- dynamic
@@ -86,93 +75,148 @@ pub fn apc(saving_rate: f64) -> f64 {
     1.0 - saving_rate
 }
 
-/// The behavioural assumptions of the dynamic scenario.
+/// What happens to prices and nominal spending when the VAT rate changes.
+/// Every scenario (static included) is computed under the same assumption, so
+/// "dynamic" differs from "static" only by the spending effect.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Incidence {
+    /// Central. The VAT is passed fully into prices and households keep buying the same
+    /// real (tax-exclusive) basket; nominal spending rises with the tax. Revenue on the
+    /// existing base is linear in the rate: rate x base. This is how official static
+    /// costings scale a sales tax.
+    RealBaseFixed,
+    /// Sensitivity. Prices rise by the tax but nominal spending on the existing base does
+    /// not, so a higher rate buys a smaller real basket. Revenue = rate/(1+rate) x spending.
+    NominalSpendingFixed,
+}
+
+impl Incidence {
+    pub fn label(self) -> &'static str {
+        match self {
+            Incidence::RealBaseFixed => "A: real base fixed (central)",
+            Incidence::NominalSpendingFixed => "B: nominal spending fixed",
+        }
+    }
+}
+
+/// One revenue scenario. Static is `mpc = 0`, no multiplier.
 #[derive(Clone, Copy, Debug)]
-pub struct Dynamic {
-    /// Marginal propensity to consume out of the money households and firms keep.
+pub struct Scenario {
+    pub incidence: Incidence,
+    /// Marginal propensity to consume out of the income tax people keep (0 = static).
     pub mpc: f64,
-    /// Share of that new spending that falls in the taxable base.
+    /// Share of new spending that falls in the taxable base.
     pub taxable_share: f64,
     /// Add Finance Canada's short-run demand multipliers (PIT 1.0, CIT 0.3).
     pub multiplier: bool,
-    /// Cumulative real growth of the base relative to the revenue requirement (1.0 = none).
-    pub growth_factor: f64,
+    /// Multiplier on the whole taxable base: growth beyond needs, broadening, or VRR.
+    pub base_factor: f64,
+    /// Share of revenue above today's net GST lost to non-compliance (assumption).
+    pub leak: f64,
 }
 
-impl Dynamic {
-    /// Ashlynn's mechanism with central, sourced values: MPC = 1 - saving rate (Q2 2025),
-    /// taxable share calibrated to today's GST base, no multiplier, no growth.
-    pub fn central() -> Self {
-        Dynamic {
-            mpc: apc(SAVING_RATE_Q2_2025),
+impl Scenario {
+    pub fn static_case(incidence: Incidence) -> Self {
+        Scenario {
+            incidence,
+            mpc: 0.0,
             taxable_share: taxable_share_central(),
             multiplier: false,
-            growth_factor: 1.0,
+            base_factor: 1.0,
+            leak: 0.0,
         }
     }
 
-    /// Extra taxable spending per dollar of income tax removed (first round, plus
-    /// multiplier-driven GDP times today's spending-to-GDP ratio).
-    fn extra_spending(&self, removed_share: f64) -> f64 {
+    /// Ashlynn's mechanism with central, sourced values: MPC = 1 - saving rate (Q2 2025),
+    /// taxable share calibrated to today's GST base, no multiplier, no growth.
+    pub fn dynamic(incidence: Incidence) -> Self {
+        Scenario {
+            mpc: apc(SAVING_RATE_Q2_2025),
+            ..Self::static_case(incidence)
+        }
+    }
+
+    /// Central case used for headline figures: dynamic, incidence A.
+    pub fn central() -> Self {
+        Self::dynamic(Incidence::RealBaseFixed)
+    }
+
+    /// Extra nominal taxable spending when `removed` (0..1) of PIT + CIT is removed.
+    pub fn extra_spending(&self, removed: f64) -> f64 {
         let first_round = self.mpc * self.taxable_share * income_taxes();
         let demand = if self.multiplier {
             (MULTIPLIER_PIT * PIT + MULTIPLIER_CIT * CIT) * spending0() / gdp()
         } else {
             0.0
         };
-        removed_share * (first_round + demand)
+        removed * (first_round + demand)
     }
 
-    /// Tax-inclusive taxable spending after removing `removed_share` of PIT + CIT.
-    pub fn spending(&self, removed_share: f64) -> f64 {
-        (spending0() + self.extra_spending(removed_share)) * self.growth_factor
-    }
-
-    /// VAT revenue at `rate` (%) when all of PIT + CIT is removed. The VAT is fully
-    /// passed into prices, so revenue = tau / (1 + tau) x tax-inclusive spending.
-    pub fn revenue(&self, rate: f64) -> f64 {
+    /// Real (tax-exclusive) taxable base at `rate` (%) with `removed` of PIT + CIT gone.
+    pub fn real_base_at(&self, rate: f64, removed: f64) -> f64 {
         let t = rate / 100.0;
-        t / (1.0 + t) * self.spending(1.0)
-    }
-
-    /// Real (tax-exclusive) taxable consumption at `rate`, all of PIT + CIT removed.
-    pub fn real_base(&self, rate: f64) -> f64 {
-        self.spending(1.0) / (1.0 + rate / 100.0)
-    }
-
-    /// Rate (%) that raises `need` when all of PIT + CIT is removed.
-    pub fn required_rate(&self, need: f64) -> f64 {
-        let a = need / self.spending(1.0);
-        100.0 * a / (1.0 - a)
-    }
-
-    /// MPC that closes the gap at `rate` (other parameters fixed). Can exceed 1.
-    pub fn breakeven_mpc(&self, rate: f64, need: f64) -> f64 {
-        let t = rate / 100.0;
-        let x_needed = need * (1.0 + t) / t / self.growth_factor;
-        let demand = if self.multiplier {
-            (MULTIPLIER_PIT * PIT + MULTIPLIER_CIT * CIT) * spending0() / gdp()
-        } else {
-            0.0
+        let new = self.extra_spending(removed) / (1.0 + t);
+        let existing = match self.incidence {
+            Incidence::RealBaseFixed => base0(),
+            Incidence::NominalSpendingFixed => spending0() / (1.0 + t),
         };
-        (x_needed - spending0() - demand) / (self.taxable_share * income_taxes())
+        (existing + new) * self.base_factor
     }
 
-    /// Cumulative base growth (relative to needs) that closes the gap at `rate`.
+    /// VAT revenue at `rate` (%) with `removed` share of PIT + CIT abolished.
+    pub fn vat_at(&self, rate: f64, removed: f64) -> f64 {
+        let gross = rate / 100.0 * self.real_base_at(rate, removed);
+        if self.leak == 0.0 {
+            gross
+        } else {
+            GST_NET + (gross - GST_NET) * (1.0 - self.leak)
+        }
+    }
+
+    /// VAT revenue at `rate` with all of PIT + CIT abolished.
+    pub fn revenue(&self, rate: f64) -> f64 {
+        self.vat_at(rate, 1.0)
+    }
+
+    /// Real taxable base at `rate`, all of PIT + CIT abolished.
+    pub fn real_base(&self, rate: f64) -> f64 {
+        self.real_base_at(rate, 1.0)
+    }
+
+    /// Rate (%) at which revenue (all income tax abolished) equals `need`. Bisection;
+    /// revenue is increasing in the rate under both incidence assumptions.
+    pub fn required_rate(&self, need: f64) -> f64 {
+        let (mut lo, mut hi) = (0.0_f64, 1000.0_f64);
+        for _ in 0..200 {
+            let mid = 0.5 * (lo + hi);
+            if self.revenue(mid) < need {
+                lo = mid;
+            } else {
+                hi = mid;
+            }
+        }
+        0.5 * (lo + hi)
+    }
+
+    /// MPC that closes the gap at `rate` (revenue is linear in MPC). Can exceed 1.
+    pub fn breakeven_mpc(&self, rate: f64, need: f64) -> f64 {
+        let r0 = Scenario { mpc: 0.0, ..*self }.revenue(rate);
+        let r1 = Scenario { mpc: 1.0, ..*self }.revenue(rate);
+        (need - r0) / (r1 - r0)
+    }
+
+    /// Cumulative base factor that closes the gap at `rate` (revenue is linear in it
+    /// when there is no leakage).
     pub fn breakeven_growth_factor(&self, rate: f64, need: f64) -> f64 {
-        need / self.revenue(rate) * self.growth_factor
+        need / self.revenue(rate) * self.base_factor
     }
 
-    /// Share of today's PIT + CIT that must stay in place so that VAT at `rate`
-    /// plus the remaining income tax raises `need`. The removed share (1 - kept)
-    /// drives the extra spending. Returns a value that may exceed 1.
+    /// Share k of today's PIT + CIT that must remain so that VAT at `rate` plus k x
+    /// (PIT + CIT) equals `need`. VAT is linear in the removed share (1 - k).
     pub fn income_tax_kept(&self, rate: f64, need: f64) -> f64 {
-        let a = (rate / 100.0) / (1.0 + rate / 100.0);
-        let x0 = spending0() * self.growth_factor;
-        let d = self.extra_spending(1.0) * self.growth_factor;
-        let y = income_taxes();
-        // a * (x0 + (1 - k) d) + k y = need  =>  k = (need - a x0 - a d) / (y - a d)
-        ((need - a * x0 - a * d) / (y - a * d)).max(0.0)
+        let all = self.vat_at(rate, 1.0);
+        let none = self.vat_at(rate, 0.0);
+        ((need - all) / (none - all + income_taxes())).max(0.0)
     }
 }
 

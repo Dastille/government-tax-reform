@@ -12,6 +12,8 @@ const SOURCED_NOT_COMPUTED: &[(&str, &str)] = &[
     ("10.0", "OECD CTT 2024 Annex 1.A.4: NZ VAT % of GDP"),
     ("30.3", "OECD CTT 2024 Annex 1.A.4: NZ VAT % of taxes"),
     ("10.1", "OECD CTT 2024 Annex 1.A.4: Hungary VAT % of GDP"),
+    ("22.0", "OECD CTT 2024 Annex 1.A.4: Denmark VAT % of taxes"),
+    ("9.2", "OECD CTT 2024 Annex 1.A.4: Denmark VAT % of GDP"),
     ("28.9", "OECD CTT 2024 Annex 1.A.4: Hungary VAT % of taxes"),
     ("41.2", "AFR 2024-25: federal debt % of GDP"),
     ("16.7", "definition: 20 / 120"),

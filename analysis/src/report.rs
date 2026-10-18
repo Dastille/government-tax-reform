@@ -4,6 +4,9 @@ use crate::data::*;
 use crate::model::*;
 use std::fmt::Write;
 
+const A: Incidence = Incidence::RealBaseFixed;
+const B: Incidence = Incidence::NominalSpendingFixed;
+
 /// $M -> "$B" with one decimal.
 fn b(x: f64) -> String {
     format!("{:.1}", x / 1000.0)
@@ -16,6 +19,56 @@ fn pct(x: f64) -> String {
 /// background table). The first rate is 14% from 2026.
 const BRACKETS_2023: [f64; 5] = [15.0, 20.5, 26.0, 29.0, 33.0];
 
+/// The LVT scenario used in stacks: 1% on half of the (unverified) land value.
+pub fn lvt_scenario() -> f64 {
+    lvt_revenue(1.0, LAND_VALUE_UNVERIFIED * 0.5)
+}
+
+/// Named scenarios under one incidence assumption, used by Table 5b and the tests.
+pub fn named_scenarios(inc: Incidence) -> Vec<(&'static str, Scenario)> {
+    let st = Scenario::static_case(inc);
+    let d = Scenario::dynamic(inc);
+    vec![
+        ("Static (no spending effect)", st),
+        ("Dynamic, MPC 0.50", Scenario { mpc: 0.5, ..d }),
+        ("Dynamic, central (MPC 0.95)", d),
+        (
+            "Dynamic, every new dollar taxable",
+            Scenario {
+                taxable_share: 1.0,
+                ..d
+            },
+        ),
+        (
+            "Dynamic + multiplier",
+            Scenario {
+                multiplier: true,
+                ..d
+            },
+        ),
+        (
+            "Static, 20% compliance leakage",
+            Scenario { leak: 0.2, ..st },
+        ),
+        (
+            "Static, all exemptions and rebates taxed",
+            Scenario {
+                base_factor: broadening_factor(
+                    te_sum(&TE_HOUSEHOLD) + te_sum(&TE_PUBLIC_AND_THRESHOLD),
+                ),
+                ..st
+            },
+        ),
+        (
+            "Static, New Zealand VRR",
+            Scenario {
+                base_factor: vrr_factor(VRR_NEW_ZEALAND),
+                ..st
+            },
+        ),
+    ]
+}
+
 pub fn render() -> String {
     let mut s = String::new();
     let w = &mut s;
@@ -25,7 +78,6 @@ pub fn render() -> String {
     let hh = te_sum(&TE_HOUSEHOLD);
     let pub_thr = te_sum(&TE_PUBLIC_AND_THRESHOLD);
     let groceries = TE_HOUSEHOLD[0].1;
-    let c = Dynamic::central();
 
     writeln!(
         w,
@@ -42,6 +94,7 @@ pub fn render() -> String {
         "All amounts are $ billions, federal government, fiscal year April 2024 to March 2025.\n"
     )
     .unwrap();
+    writeln!(w, "**Incidence assumption.** Every scenario, static included, is computed under one stated assumption about prices and nominal spending. **A (central): real base fixed** - the VAT is passed into prices and households keep buying the same tax-exclusive basket, so revenue on today's base = rate x base. **B (sensitivity): nominal spending fixed** - prices rise but nominal spending on today's base does not, so revenue = rate/(1+rate) x spending. \"Dynamic\" differs from \"static\" only by the extra spending from the income tax people keep; that new spending buys rate-inclusive goods under both A and B.\n").unwrap();
 
     writeln!(w, "{}", first_principles()).unwrap();
     writeln!(w, "{}", key_figures()).unwrap();
@@ -97,30 +150,25 @@ pub fn render() -> String {
     ] {
         writeln!(w, "| {k} | {} | {src} |", b(v)).unwrap();
     }
-    writeln!(
-        w,
-        "\nEffective (net) base = net GST / 5% = {}. Gross base = gross GST from outside parties / 5% = {}. PIT + CIT = {} of GDP.",
-        b(base0()),
-        b(GST_GROSS_EXTERNAL / (GST_RATE / 100.0)),
-        pct(100.0 * it / gdp())
-    )
-    .unwrap();
+    writeln!(w, "\nEffective (net) base = net GST / 5% = {}. Gross base = gross GST from outside parties / 5% = {}. PIT + CIT = {} of GDP.", b(base0()), b(GST_GROSS_EXTERNAL / (GST_RATE / 100.0)), pct(100.0 * it / gdp())).unwrap();
     writeln!(w, "\nRevenue to replace if PIT and CIT go and a VAT absorbs the GST (\"core need\"): **{}**. Adding non-resident tax and EI premiums (\"full federal scope\"): **{}**.\n", b(core), b(full)).unwrap();
 
     // ---------------------------------------------------------------- T2
-    writeln!(w, "## Table 2. Static scaling of today's GST base\n").unwrap();
+    let st_a = Scenario::static_case(A);
+    let st_b = Scenario::static_case(B);
     writeln!(
         w,
-        "Static = same tax-exclusive base, credit scaled with the rate.\n"
+        "## Table 2. Static: today's GST base, no spending effect\n"
     )
     .unwrap();
-    writeln!(w, "| VAT rate | Revenue | Net new vs today's GST | Share of PIT+CIT replaced | Gap to core need |\n|---:|---:|---:|---:|---:|").unwrap();
+    writeln!(w, "| VAT rate | Revenue (A) | Revenue (B) | Net new vs today's GST (A) | Share of PIT+CIT replaced (A) | Gap to core need (A) |\n|---:|---:|---:|---:|---:|---:|").unwrap();
     for r in [5.0, 8.0, 10.0, 15.0, 20.0, 25.0] {
-        let rev = static_revenue(r, 0.0);
+        let rev = st_a.revenue(r);
         writeln!(
             w,
-            "| {r:.0}% | {} | {} | {} | {} |",
+            "| {r:.0}% | {} | {} | {} | {} | {} |",
             b(rev),
+            b(st_b.revenue(r)),
             b(rev - GST_NET),
             pct(100.0 * (rev - GST_NET) / it),
             b(core - rev)
@@ -135,77 +183,94 @@ pub fn render() -> String {
     )
     .unwrap();
     writeln!(w, "Tax-expenditure costs are calendar 2024 values at the 5% rate (Report on Federal Tax Expenditures 2026, Part 2). Finance Canada notes that removing a measure would not yield its full cost.\n").unwrap();
-    writeln!(w, "| Base | Extra base, $B at 5% | Rate for core need | Rate for full scope |\n|---|---:|---:|---:|").unwrap();
-    let rows = [
-        ("Today's base (FY2024-25)", 0.0),
+    writeln!(w, "| Base | Extra base, $B at 5% | Core need (A) | Core need (B) | Full scope (A) |\n|---|---:|---:|---:|---:|").unwrap();
+    let rows: [(&str, String, f64); 7] = [
+        ("Today's base (FY2024-25)", b(0.0), 1.0),
         (
             "Add back the Dec 2024-Feb 2025 GST holiday",
-            GST_HOLIDAY_COST,
+            b(GST_HOLIDAY_COST),
+            broadening_factor(GST_HOLIDAY_COST),
         ),
-        ("Tax basic groceries", groceries),
-        ("Tax all 11 household zero-ratings/exemptions", hh),
+        (
+            "Tax basic groceries",
+            b(groceries),
+            broadening_factor(groceries),
+        ),
+        (
+            "Tax all 11 household zero-ratings/exemptions",
+            b(hh),
+            broadening_factor(hh),
+        ),
         (
             "Households + public-body rebates + small-supplier threshold",
-            hh + pub_thr,
+            b(hh + pub_thr),
+            broadening_factor(hh + pub_thr),
+        ),
+        (
+            "OECD-average VAT revenue ratio (0.58)",
+            "n/a".into(),
+            vrr_factor(VRR_OECD_AVERAGE),
+        ),
+        (
+            "New Zealand VAT revenue ratio (0.96)",
+            "n/a".into(),
+            vrr_factor(VRR_NEW_ZEALAND),
         ),
     ];
-    for (k, extra) in rows {
+    for (k, extra, f) in rows {
+        let sa = Scenario {
+            base_factor: f,
+            ..st_a
+        };
+        let sb = Scenario {
+            base_factor: f,
+            ..st_b
+        };
         writeln!(
             w,
-            "| {k} | {} | {} | {} |",
-            b(extra),
-            pct(static_required_rate(core, extra)),
-            pct(static_required_rate(full, extra))
-        )
-        .unwrap();
-    }
-    for (k, v) in [
-        ("OECD-average VAT revenue ratio (0.58)", VRR_OECD_AVERAGE),
-        ("New Zealand VAT revenue ratio (0.96)", VRR_NEW_ZEALAND),
-    ] {
-        writeln!(
-            w,
-            "| {k} | n/a | {} | {} |",
-            pct(vrr_required_rate(core, v)),
-            pct(vrr_required_rate(full, v))
+            "| {k} | {extra} | {} | {} | {} |",
+            pct(sa.required_rate(core)),
+            pct(sb.required_rate(core)),
+            pct(sa.required_rate(full))
         )
         .unwrap();
     }
 
     // ---------------------------------------------------------------- T4
-    writeln!(w, "\n## Table 4. Compliance leakage (assumption sweep)\n").unwrap();
-    writeln!(w, "Leakage = share of the *extra* revenue lost to evasion or avoidance at higher rates. No Canadian estimate is used; these are what-ifs.\n").unwrap();
     writeln!(
         w,
-        "| Leakage | Revenue at 20% | Rate for core need |\n|---:|---:|---:|"
+        "\n## Table 4. Compliance leakage (assumption sweep, static)\n"
     )
     .unwrap();
+    writeln!(w, "Leakage = share of revenue above today's net GST lost to evasion or avoidance at higher rates. No Canadian estimate is used; these are what-ifs.\n").unwrap();
+    writeln!(w, "| Leakage | Revenue at 20% (A) | Rate for core need (A) | Revenue at 20% (B) | Rate for core need (B) |\n|---:|---:|---:|---:|---:|").unwrap();
     for l in [0.0, 0.1, 0.2, 0.3] {
+        let sa = Scenario { leak: l, ..st_a };
+        let sb = Scenario { leak: l, ..st_b };
         writeln!(
             w,
-            "| {:.0}% | {} | {} |",
+            "| {:.0}% | {} | {} | {} | {} |",
             l * 100.0,
-            b(leaky_revenue(20.0, l)),
-            pct(leaky_required_rate(core, l))
+            b(sa.revenue(20.0)),
+            pct(sa.required_rate(core)),
+            b(sb.revenue(20.0)),
+            pct(sb.required_rate(core))
         )
         .unwrap();
     }
 
     // ---------------------------------------------------------------- T5
+    let c = Scenario::central();
+    let cb = Scenario::dynamic(B);
     writeln!(
         w,
         "\n## Table 5. Dynamic scenario: households keep the income tax and spend it\n"
     )
     .unwrap();
-    writeln!(
-        w,
-        "All {} of PIT + CIT stays with households and firms. A share (MPC) is spent; a share of that spending (taxable share) lands in the VAT base. The VAT is passed fully into prices, so revenue = rate/(1+rate) x tax-inclusive spending. Central taxable share = today's effective GST base / household consumption = **{:.2}**. Imports ({IMPORTS_PCT_GDP}% of GDP, World Bank WDI 4.8) do not leak from the base (GST/VAT applies at the border); they matter only for the multiplier. \"+mult\" adds Finance Canada's short-run multipliers (PIT 1.0, CIT 0.3).\n",
-        b(it),
-        taxable_share_central()
-    )
-    .unwrap();
-    writeln!(w, "| MPC | Rev. at 20% (central share) | Rate for core need | Rev. at 20% (share = 1) | Rate for core need | Rev. at 20% (central + mult) | Rate for core need |\n|---:|---:|---:|---:|---:|---:|---:|").unwrap();
+    writeln!(w, "All {} of PIT + CIT stays with households and firms. A share (MPC) is spent; a share of that spending (taxable share) lands in the VAT base and buys goods at rate-inclusive prices. Central taxable share = today's effective GST base / household consumption = **{:.2}**. Imports ({IMPORTS_PCT_GDP}% of GDP, World Bank WDI 4.8) do not leak from the base (GST/VAT applies at the border); they matter only for the multiplier. \"+mult\" adds Finance Canada's short-run multipliers (PIT 1.0, CIT 0.3). MPC 0.000 is the static case.\n", b(it), taxable_share_central()).unwrap();
+    writeln!(w, "| MPC | Rev. at 20% (A) | Rate for core need (A) | Rev. at 20%, share = 1 (A) | Rate (A) | Rev. at 20%, + mult (A) | Rate (A) | Rev. at 20% (B) | Rate for core need (B) |\n|---:|---:|---:|---:|---:|---:|---:|---:|---:|").unwrap();
     for m in [
+        0.0,
         0.50,
         0.60,
         0.70,
@@ -214,69 +279,94 @@ pub fn render() -> String {
         apc(SAVING_RATE_Q2_2024),
         apc(SAVING_RATE_Q2_2025),
     ] {
-        let d1 = Dynamic { mpc: m, ..c };
-        let d2 = Dynamic {
+        let d1 = Scenario { mpc: m, ..c };
+        let d2 = Scenario {
             mpc: m,
             taxable_share: 1.0,
             ..c
         };
-        let d3 = Dynamic {
+        let d3 = Scenario {
             mpc: m,
             multiplier: true,
             ..c
         };
+        let d4 = Scenario { mpc: m, ..cb };
         writeln!(
             w,
-            "| {m:.3} | {} | {} | {} | {} | {} | {} |",
+            "| {m:.3} | {} | {} | {} | {} | {} | {} | {} | {} |",
             b(d1.revenue(20.0)),
             pct(d1.required_rate(core)),
             b(d2.revenue(20.0)),
             pct(d2.required_rate(core)),
             b(d3.revenue(20.0)),
-            pct(d3.required_rate(core))
+            pct(d3.required_rate(core)),
+            b(d4.revenue(20.0)),
+            pct(d4.required_rate(core))
         )
         .unwrap();
     }
     writeln!(
         w,
-        "\nPrice effect: in the central row (MPC 0.950), real taxable consumption at 20% is {} versus {} today ({:+.1}%): the income people keep slightly more than offsets the higher prices.",
+        "\nReal taxable consumption at 20%, central MPC: {} under A, {} under B, versus {} today.",
         b(c.real_base(20.0)),
-        b(base0()),
-        100.0 * (c.real_base(20.0) / base0() - 1.0)
+        b(cb.real_base(20.0)),
+        b(base0())
     )
     .unwrap();
     writeln!(w, "\nMPC rows 0.928 and 0.950 are 1 minus the household saving rate in Q2 2024 (7.2%) and Q2 2025 (5.0%); an average propensity is an upper bound for spending out of a tax cut.\n").unwrap();
 
+    // ---------------------------------------------------------------- T5b
+    writeln!(w, "## Table 5b. Incidence sensitivity for every scenario\n").unwrap();
+    writeln!(w, "Within each assumption, higher revenue at 20% always means a lower or equal required rate (tested). Comparisons across A and B are not like-for-like: B's revenue curve flattens as the rate rises.\n").unwrap();
+    writeln!(w, "| Scenario | Rev. at 20% (A) | Rate for core need (A) | Rev. at 20% (B) | Rate for core need (B) |\n|---|---:|---:|---:|---:|").unwrap();
+    for ((k, sa), (_, sb)) in named_scenarios(A).into_iter().zip(named_scenarios(B)) {
+        writeln!(
+            w,
+            "| {k} | {} | {} | {} | {} |",
+            b(sa.revenue(20.0)),
+            pct(sa.required_rate(core)),
+            b(sb.revenue(20.0)),
+            pct(sb.required_rate(core))
+        )
+        .unwrap();
+    }
+
     // ---------------------------------------------------------------- T6
     writeln!(
         w,
-        "## Table 6. Break-even conditions (dynamic, central values unless stated)\n"
+        "\n## Table 6. Break-even conditions (dynamic, central values unless stated)\n"
     )
     .unwrap();
     writeln!(w, "| Condition | At 20% | At 8% |\n|---|---:|---:|").unwrap();
-    let ones = Dynamic {
-        taxable_share: 1.0,
-        ..c
-    };
-    let mult = Dynamic {
+    let mult = Scenario {
         multiplier: true,
         ..c
     };
-    writeln!(
-        w,
-        "| MPC needed, central taxable share (max possible 1.0) | {:.2} | {:.2} |",
-        c.breakeven_mpc(20.0, core),
-        c.breakeven_mpc(8.0, core)
-    )
-    .unwrap();
-    writeln!(
-        w,
-        "| MPC needed, every new dollar taxable | {:.2} | {:.2} |",
-        ones.breakeven_mpc(20.0, core),
-        ones.breakeven_mpc(8.0, core)
-    )
-    .unwrap();
-    for (k, d) in [("central", c), ("central + multiplier", mult)] {
+    let rows6: [(&str, Scenario); 3] = [
+        ("central share (A)", c),
+        (
+            "every new dollar taxable (A)",
+            Scenario {
+                taxable_share: 1.0,
+                ..c
+            },
+        ),
+        ("central share (B)", cb),
+    ];
+    for (k, d) in rows6 {
+        writeln!(
+            w,
+            "| MPC needed, {k} (max possible 1.0) | {:.2} | {:.2} |",
+            d.breakeven_mpc(20.0, core),
+            d.breakeven_mpc(8.0, core)
+        )
+        .unwrap();
+    }
+    for (k, d) in [
+        ("central (A)", c),
+        ("central + multiplier (A)", mult),
+        ("central (B)", cb),
+    ] {
         let g20 = d.breakeven_growth_factor(20.0, core);
         let g8 = d.breakeven_growth_factor(8.0, core);
         writeln!(
@@ -293,36 +383,36 @@ pub fn render() -> String {
         .unwrap();
     }
     for g in GROWTH_ADDITION_PP {
+        let f = (1.0 + g / 100.0f64).powi(10);
         writeln!(
             w,
-            "| The paper's growth addition {g} pp/yr gives, after 10 years | x{:.2} | x{:.2} |",
-            (1.0 + g / 100.0f64).powi(10),
-            (1.0 + g / 100.0f64).powi(10)
+            "| The paper's growth addition {g} pp/yr gives, after 10 years | x{f:.2} | x{f:.2} |"
         )
         .unwrap();
     }
 
     // ---------------------------------------------------------------- T7
     writeln!(w, "\n## Table 7. The 20% to 8% path, made consistent\n").unwrap();
-    writeln!(w, "rate(t) = 20 - 1.2 t, t = years since launch (0..10). The v1.1 formula `20 - 1.2 x (year - 1)` for years 1-10 reaches {:.1}% in year 10, not 8%. Coverage = VAT revenue / core need. Growth columns assume the base grows that much faster than the revenue requirement every year (generous).\n", v11_path_rate(10)).unwrap();
-    writeln!(w, "| t | Rate | Revenue, no growth | Coverage | Coverage, +1.5 pp/yr | Coverage, +2.5 pp/yr |\n|---:|---:|---:|---:|---:|---:|").unwrap();
+    writeln!(w, "rate(t) = 20 - 1.2 t, t = years since launch (0..10). The v1.1 formula `20 - 1.2 x (year - 1)` for years 1-10 reaches {:.1}% in year 10, not 8%. Coverage = VAT revenue / core need, all income tax abolished, dynamic central. Growth columns assume the base grows that much faster than the revenue requirement every year (generous).\n", v11_path_rate(10)).unwrap();
+    writeln!(w, "| t | Rate | Revenue, no growth (A) | Coverage (A) | Coverage, +1.5 pp/yr (A) | Coverage, +2.5 pp/yr (A) | Coverage (B) |\n|---:|---:|---:|---:|---:|---:|---:|").unwrap();
     for t in 0..=PATH_YEARS {
         let r = path_rate(t);
-        let g15 = Dynamic {
-            growth_factor: 1.015f64.powi(t as i32),
+        let g15 = Scenario {
+            base_factor: 1.015f64.powi(t as i32),
             ..c
         };
-        let g25 = Dynamic {
-            growth_factor: 1.025f64.powi(t as i32),
+        let g25 = Scenario {
+            base_factor: 1.025f64.powi(t as i32),
             ..c
         };
         writeln!(
             w,
-            "| {t} | {r:.1}% | {} | {} | {} | {} |",
+            "| {t} | {r:.1}% | {} | {} | {} | {} | {} |",
             b(c.revenue(r)),
             pct(100.0 * c.revenue(r) / core),
             pct(100.0 * g15.revenue(r) / core),
-            pct(100.0 * g25.revenue(r) / core)
+            pct(100.0 * g25.revenue(r) / core),
+            pct(100.0 * cb.revenue(r) / core)
         )
         .unwrap();
     }
@@ -369,41 +459,49 @@ pub fn render() -> String {
         "\n## Table 9. What would make 8% in year 10 reach the core need\n"
     )
     .unwrap();
-    writeln!(w, "Each row stacks one more lever on the dynamic central case. LVT row uses 1% on 50% of the unverified land value and assumes none of it is needed to replace municipal property taxes (optimistic).\n").unwrap();
-    writeln!(w, "| Stack | Revenue at 8%, no growth | LVT | Base growth beyond needs required over 10 yrs | Per year |\n|---|---:|---:|---:|---:|").unwrap();
-    let lvt = lvt_revenue(1.0, LAND_VALUE_UNVERIFIED * 0.5);
-    let broaden = (GST_NET + hh + pub_thr) / GST_NET;
-    let nz = VRR_NEW_ZEALAND / VRR_CANADA;
-    let stacks: [(&str, Dynamic, f64); 5] = [
-        ("Dynamic central (her mechanism)", c, 0.0),
-        ("+ Finance Canada multiplier", mult, 0.0),
-        ("+ LVT", mult, lvt),
-        (
-            "+ tax every exemption and rebate in Table 3",
-            Dynamic {
-                growth_factor: broaden,
-                ..mult
-            },
-            lvt,
-        ),
-        (
-            "+ New Zealand-level base and compliance instead",
-            Dynamic {
-                growth_factor: nz,
-                ..mult
-            },
-            lvt,
-        ),
-    ];
-    for (k, d, l) in stacks {
-        let rev = d.revenue(8.0);
-        let g = (core - l) / rev;
+    writeln!(w, "Each row stacks one more lever on the dynamic central case. The LVT row uses 1% on 50% of the unverified land value and assumes none of it is needed to replace municipal property taxes (optimistic).\n").unwrap();
+    writeln!(w, "| Stack | Revenue at 8%, no growth (A) | LVT | Base growth beyond needs over 10 yrs (A) | Per year (A) | Over 10 yrs (B) | Per year (B) |\n|---|---:|---:|---:|---:|---:|---:|").unwrap();
+    let lvt = lvt_scenario();
+    let broaden = broadening_factor(hh + pub_thr);
+    let nz = vrr_factor(VRR_NEW_ZEALAND);
+    let stack = |inc: Incidence| -> Vec<(&'static str, Scenario, f64)> {
+        let d = Scenario::dynamic(inc);
+        let m = Scenario {
+            multiplier: true,
+            ..d
+        };
+        vec![
+            ("Dynamic central (her mechanism)", d, 0.0),
+            ("+ Finance Canada multiplier", m, 0.0),
+            ("+ LVT", m, lvt),
+            (
+                "+ tax every exemption and rebate in Table 3",
+                Scenario {
+                    base_factor: broaden,
+                    ..m
+                },
+                lvt,
+            ),
+            (
+                "+ New Zealand-level base and compliance instead",
+                Scenario {
+                    base_factor: nz,
+                    ..m
+                },
+                lvt,
+            ),
+        ]
+    };
+    for ((k, da, l), (_, db, _)) in stack(A).into_iter().zip(stack(B)) {
+        let ga = (core - l) / da.revenue(8.0);
+        let gb = (core - l) / db.revenue(8.0);
         writeln!(
             w,
-            "| {k} | {} | {} | x{g:.2} | {} |",
-            b(rev),
+            "| {k} | {} | {} | x{ga:.2} | {} | x{gb:.2} | {} |",
+            b(da.revenue(8.0)),
             b(l),
-            pct(100.0 * annualised(g.max(1.0), 10))
+            pct(100.0 * annualised(ga.max(1.0), 10)),
+            pct(100.0 * annualised(gb.max(1.0), 10))
         )
         .unwrap();
     }
@@ -414,22 +512,23 @@ pub fn render() -> String {
         "\n## Table 10. Policy v2: income tax that must remain while the VAT phases in\n"
     )
     .unwrap();
-    writeln!(w, "Dynamic central case, no growth, no LVT. \"Kept\" = share of today's PIT + CIT still needed. Bracket rates scale the 2023 federal schedule (15/20.5/26/29/33%) by that share.\n").unwrap();
-    writeln!(w, "| VAT rate | VAT revenue | Income tax kept | Kept, $B | Federal bracket rates |\n|---:|---:|---:|---:|---|").unwrap();
+    writeln!(w, "Dynamic central case, no growth, no LVT. \"Kept\" (k) = share of today's PIT + CIT still needed; the removed share (1 - k) drives the extra spending. Bracket rates scale the 2023 federal schedule (15/20.5/26/29/33%) by k.\n").unwrap();
+    writeln!(w, "| VAT rate | VAT revenue (A) | k (A) | Kept, $B (A) | Federal bracket rates (A) | k (B) |\n|---:|---:|---:|---:|---|---:|").unwrap();
     for r in [10.0, 15.0, 20.0, 25.0, 30.0] {
         let k = c.income_tax_kept(r, core);
-        let rev = core - k * it;
+        let rev = c.vat_at(r, 1.0 - k);
         let br: Vec<String> = BRACKETS_2023
             .iter()
             .map(|x| format!("{:.1}", x * k))
             .collect();
         writeln!(
             w,
-            "| {r:.0}% | {} | {} | {} | {} |",
+            "| {r:.0}% | {} | {} | {} | {} | {} |",
             b(rev),
             pct(100.0 * k),
             b(k * it),
-            br.join(" / ")
+            br.join(" / "),
+            pct(100.0 * cb.income_tax_kept(r, core))
         )
         .unwrap();
     }
@@ -440,7 +539,7 @@ pub fn render() -> String {
         "\n## Table 11. Cost of protecting low-income households at each VAT rate\n"
     )
     .unwrap();
-    writeln!(w, "Static scaling of two existing measures: the GST credit (PA 2025 Table 3.3) and zero-rating of basic groceries (Tax Expenditures 2026).\n").unwrap();
+    writeln!(w, "Static scaling (A) of two existing measures: the GST credit (PA 2025 Table 3.3) and zero-rating of basic groceries (Tax Expenditures 2026).\n").unwrap();
     writeln!(
         w,
         "| VAT rate | GST-credit equivalent | Cost of zero-rating groceries |\n|---:|---:|---:|"
@@ -460,15 +559,13 @@ pub fn render() -> String {
 
 /// The chain from raw official quantities to the headline, one line per step.
 pub fn first_principles() -> String {
-    let c = Dynamic::central();
+    let c = Scenario::central();
     let it = income_taxes();
-    let new_spend = c.mpc * c.taxable_share * it;
-    let x = c.spending(1.0);
-    let lvt = lvt_revenue(1.0, LAND_VALUE_UNVERIFIED * 0.5);
+    let new_spend = c.extra_spending(1.0);
     let k = c.income_tax_kept(20.0, need_core());
     let mut s = String::new();
     let w = &mut s;
-    writeln!(w, "## Table 0. First-principles derivation\n").unwrap();
+    writeln!(w, "## Table 0. First-principles derivation (incidence A)\n").unwrap();
     writeln!(w, "<!-- first-principles:begin -->").unwrap();
     writeln!(w, "| Step | Quantity | Value | From |\n|---:|---|---:|---|").unwrap();
     let rows: Vec<(String, String, String)> = vec![
@@ -476,15 +573,15 @@ pub fn first_principles() -> String {
         ("Household final consumption (HFCE), $B".into(), b(hfce()), "55.6% x GDP (World Bank WDI 4.8)".into()),
         ("Effective taxed base, $B".into(), b(base0()), "net GST 52.5 / statutory rate 5% (Public Accounts 2025, Table 3.3)".into()),
         ("Coverage-and-compliance ratio".into(), format!("{:.3}", taxable_share_central()), "step 3 / step 2 (measured, not assumed; OECD VRR for Canada, on a wider denominator: 0.50)".into()),
-        ("Static VAT revenue at 20%, $B".into(), b(static_revenue(20.0, 0.0)), "step 2 x step 4 x 20%".into()),
+        ("Static VAT revenue at 20%, $B".into(), b(Scenario::static_case(Incidence::RealBaseFixed).revenue(20.0)), "step 2 x step 4 x 20% (prices rise by the tax; same real basket)".into()),
         ("Income tax kept by households and firms, $B".into(), b(it), "PIT 234.3 + CIT 97.0 (Public Accounts 2025, Table 3.2)".into()),
         ("New taxable spending, $B".into(), b(new_spend), format!("MPC {:.2} (1 - saving rate 5.0%, StatCan) x step 4 x step 6", c.mpc)),
-        ("Tax-inclusive taxable spending X, $B".into(), b(x), "step 3 x 1.05 + step 7".into()),
-        ("Dynamic VAT revenue at 20%, $B".into(), b(c.revenue(20.0)), "0.20 / 1.20 x step 8 (VAT passed into prices)".into()),
+        ("Extra real base at 20%, $B".into(), b(new_spend / 1.2), "step 7 / 1.20 (new spending pays the VAT-inclusive price)".into()),
+        ("Dynamic VAT revenue at 20%, $B".into(), b(c.revenue(20.0)), "20% x (step 3 + step 8)".into()),
         ("Core need, $B".into(), b(need_core()), "PIT + CIT + net GST".into()),
-        ("Rate that meets the core need".into(), pct(c.required_rate(need_core())), "step 10 / (step 8 - step 10)".into()),
+        ("Rate that meets the core need".into(), pct(c.required_rate(need_core())), "solves rate x (step 3 + step 7 / (1 + rate)) = step 10".into()),
         ("Share of income tax still needed at 20% (k)".into(), pct(100.0 * k), "solves VAT(20%, 1-k) + k x step 6 = step 10".into()),
-        ("LVT scenario, $B".into(), b(lvt), "land 6,400 (unverified) x 50% taxable x 1%".into()),
+        ("LVT scenario, $B".into(), b(lvt_scenario()), "land 6,400 (unverified) x 50% taxable x 1%".into()),
     ];
     for (i, (q, v, f)) in rows.into_iter().enumerate() {
         writeln!(w, "| {} | {q} | {v} | {f} |", i + 1).unwrap();
@@ -495,37 +592,41 @@ pub fn first_principles() -> String {
 
 /// Headline numbers. The paper embeds this block verbatim; a test checks it.
 pub fn key_figures() -> String {
-    let c = Dynamic::central();
-    let m = Dynamic {
+    let st = Scenario::static_case(A);
+    let c = Scenario::central();
+    let m = Scenario {
         multiplier: true,
         ..c
+    };
+    let stb = Scenario::static_case(B);
+    let cb = Scenario::dynamic(B);
+    let nz = Scenario {
+        base_factor: vrr_factor(VRR_NEW_ZEALAND),
+        ..st
     };
     let core = need_core();
     format!(
         "<!-- key-figures:begin -->\n\
-| Key figure (Canada FY2024-25, federal) | Value |\n\
+| Key figure (Canada FY2024-25, federal; incidence A unless stated) | Value |\n\
 |---|---:|\n\
 | Core need (PIT + CIT + net GST), $B | {} |\n\
-| VAT revenue at 20%, static, $B | {} |\n\
-| VAT revenue at 20%, dynamic central (MPC 0.95), $B | {} |\n\
-| VAT revenue at 20%, dynamic + multiplier, $B | {} |\n\
-| Rate for core need: static / dynamic / dynamic + multiplier | {} / {} / {} |\n\
+| VAT revenue at 20%: static / dynamic central (MPC 0.95) / dynamic + multiplier, $B | {} / {} / {} |\n\
+| Rate for core need: static / dynamic central / dynamic + multiplier | {} / {} / {} |\n\
 | Income tax still needed at 20%, dynamic central (k) | {} |\n\
 | MPC needed to close the gap at 20% (maximum possible 1.0) | {:.2} |\n\
 | Base growth beyond needs to abolish income tax at 20% / at 8% | x{:.2} / x{:.2} |\n\
 | Rate for core need with a New Zealand-level base (VRR 0.96), static | {} |\n\
+| Sensitivity B: revenue at 20% static / dynamic, $B | {} / {} |\n\
+| Sensitivity B: rate for core need static / dynamic; k at 20% | {} / {}; {} |\n\
 <!-- key-figures:end -->\n",
         b(core),
-        b(static_revenue(20.0, 0.0)),
-        b(c.revenue(20.0)),
-        b(m.revenue(20.0)),
-        pct(static_required_rate(core, 0.0)),
-        pct(c.required_rate(core)),
-        pct(m.required_rate(core)),
+        b(st.revenue(20.0)), b(c.revenue(20.0)), b(m.revenue(20.0)),
+        pct(st.required_rate(core)), pct(c.required_rate(core)), pct(m.required_rate(core)),
         pct(100.0 * c.income_tax_kept(20.0, core)),
         c.breakeven_mpc(20.0, core),
-        c.breakeven_growth_factor(20.0, core),
-        c.breakeven_growth_factor(8.0, core),
-        pct(vrr_required_rate(core, VRR_NEW_ZEALAND)),
+        c.breakeven_growth_factor(20.0, core), c.breakeven_growth_factor(8.0, core),
+        pct(nz.required_rate(core)),
+        b(stb.revenue(20.0)), b(cb.revenue(20.0)),
+        pct(stb.required_rate(core)), pct(cb.required_rate(core)), pct(100.0 * cb.income_tax_kept(20.0, core)),
     )
 }

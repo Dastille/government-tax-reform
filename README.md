@@ -19,20 +19,24 @@ The full specification is §4 of the paper, which is the single source of truth.
 
 ## What the numbers say (Canada, FY2024-25, federal, $B)
 
-| | $B | Source |
-|---|---:|---|
-| Personal income tax | 234.3 | Public Accounts 2025, Vol I, Table 3.2 |
-| Corporate income tax | 97.0 | Public Accounts 2025, Vol I, Table 3.2 |
-| Net GST (5%) | 52.5 | Public Accounts 2025, Vol I, Table 3.3 |
-| **Core need** (PIT + CIT + GST) | **383.8** | sum |
-| VAT at 20%, static | 210.0 | model |
-| VAT at 20%, households spend the income tax they keep (MPC 0.95) | 215.9 | model |
-| ...plus Finance Canada short-run multipliers | 231.7 | model |
+Every scenario uses one stated price assumption. **A (central):** the VAT is passed into prices and the real basket is held. **B (sensitivity):** nominal spending is held. See the paper's §2.
 
-- **Headline.** A 20% VAT, even counting the extra spending from the income tax people keep, replaces about half of federal income tax: 56.1% of it must remain at launch under central assumptions.
-- **Full abolition** at 20% needs a taxable base about 1.78× larger than today's relative to spending needs, for example a New Zealand-style broad base. With such a base, the static rate needed is 19.0%.
-- **The 8% endpoint** needs about 4× the base.
-- The paper's §9 lists every original requirement, who it came from, and whether it was kept, reframed or deleted.
+| | A | B | Source |
+|---|---:|---:|---|
+| Personal income tax | 234.3 | | Public Accounts 2025, Vol I, Table 3.2 |
+| Corporate income tax | 97.0 | | Public Accounts 2025, Vol I, Table 3.2 |
+| Net GST (5%) | 52.5 | | Public Accounts 2025, Vol I, Table 3.3 |
+| **Core need** (PIT + CIT + GST) | **383.8** | | sum |
+| VAT at 20%, static | 210.0 | 183.8 | model |
+| VAT at 20%, households spend the income tax they keep (MPC 0.95) | 242.2 | 215.9 | model |
+| Rate needed for the core need, static / dynamic | 36.5% / 32.1% | 53.4% / 42.1% | model |
+| Share of income tax that must remain at 20% (k) | 47.3% | 56.1% | model |
+
+- **Headline.** A 20% VAT, counting the extra spending from the income tax people keep, replaces about half of federal income tax. Under central assumptions, 47.3% of it must remain at launch.
+- **Full abolition** at 20% needs a taxable base about 1.58× larger than today's relative to spending needs. A New Zealand-style broad base comes close: with it, the static rate needed is 19.0%.
+- **The 8% endpoint** needs about 3.90× the base.
+- Within each assumption, more revenue always means a lower required rate, and a test enforces this.
+- The paper's §9 lists every original requirement, who it came from, and whether it was kept, reframed or deleted. [CLAIMS.md](CLAIMS.md) maps every claim to its test or source.
 
 ## Run the model
 
