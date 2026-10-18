@@ -1,57 +1,97 @@
-//! Renders every table the whitepaper quotes, as Markdown.
+//! Renders every table the whitepaper quotes, as Markdown. Each `table_*` function returns
+//! the table body (no heading) so the same text can be embedded in the paper and in
+//! `output/revenue_tables.md`. Source text is formatted from `data.rs`, never typed in.
 
-use crate::data::*;
-use crate::model::*;
+use crate::data::{
+    CIT, EI_PREMIUMS, END_RATE, GROWTH_ADDITION_PP, GST_BEFORE_REMISSION, GST_CREDIT,
+    GST_GROSS_EXTERNAL, GST_HOLIDAY_COST, GST_NET, GST_RATE, GST_REMISSION, HFCE_PCT_GDP,
+    IMPORTS_PCT_GDP, LAND_VALUE_UNVERIFIED, LVT_CLAIM_HIGH, LVT_CLAIM_LOW, LVT_RATES,
+    LVT_TAXABLE_SHARE_SCENARIO, MULTIPLIER_CIT, MULTIPLIER_PIT, NATIONAL_WEALTH_Q2_2025,
+    NON_RESIDENT, PATH_YEARS, PIT, POPULATION_2024, PROPERTY_TAX_PER_CAPITA_2024,
+    RESIDENTIAL_REAL_ESTATE_Q2_2025, REVENUE_PCT_GDP, SAVING_RATE_Q2_2024, SAVING_RATE_Q2_2025,
+    START_RATE, TE_HOUSEHOLD, TE_PUBLIC_AND_THRESHOLD, TOTAL_REVENUE, VRR_CANADA, VRR_NEW_ZEALAND,
+    VRR_OECD_AVERAGE,
+};
+use crate::docs::{bc, thousands};
+use crate::error::Result;
+use crate::model::{
+    annualised, apc, base0, broadening_factor, gdp, hfce, income_taxes, lvt_land_needed,
+    lvt_rate_to_replace_property_tax, lvt_revenue, lvt_scenario, need_core, need_full, path_rate,
+    property_tax_total, taxable_share_central, te_sum, v11_path_rate, vrr_factor, Incidence,
+    Scenario,
+};
 use std::fmt::Write;
 
 const A: Incidence = Incidence::RealBaseFixed;
 const B: Incidence = Incidence::NominalSpendingFixed;
 
-/// $M -> "$B" with one decimal.
-fn b(x: f64) -> String {
+/// 2023 federal PIT bracket rates (Report on Federal Tax Expenditures 2026, Part 2,
+/// background table). The first rate is 14% from 2026.
+pub const BRACKETS_2023: [f64; 5] = [15.0, 20.5, 26.0, 29.0, 33.0];
+
+/// Rates at which the model reports scenario tables, per cent.
+const TABLE_RATES: [f64; 6] = [5.0, 8.0, 10.0, 15.0, 20.0, 25.0];
+
+/// $M -> $B with one decimal.
+#[must_use]
+pub fn b(x: f64) -> String {
     format!("{:.1}", x / 1000.0)
 }
-fn pct(x: f64) -> String {
+
+/// Per-cent value with one decimal and a % sign.
+#[must_use]
+pub fn pct(x: f64) -> String {
     format!("{x:.1}%")
 }
 
-/// 2023 federal PIT bracket rates (Report on Federal Tax Expenditures 2026, Part 2,
-/// background table). The first rate is 14% from 2026.
-const BRACKETS_2023: [f64; 5] = [15.0, 20.5, 26.0, 29.0, 33.0];
+/// A rate written without trailing zeros (20.0 -> "20", 0.5 -> "0.5").
+#[must_use]
+pub fn num(x: f64) -> String {
+    let s = format!("{x:.3}");
+    let s = s.trim_end_matches('0').trim_end_matches('.');
+    s.to_string()
+}
 
-/// The LVT scenario used in stacks: 1% on half of the (unverified) land value.
-pub fn lvt_scenario() -> f64 {
-    lvt_revenue(1.0, LAND_VALUE_UNVERIFIED * 0.5)
+/// Bracket schedule as "15/20.5/26/29/33".
+fn brackets_text() -> String {
+    BRACKETS_2023
+        .iter()
+        .map(|x| num(*x))
+        .collect::<Vec<_>>()
+        .join("/")
 }
 
 /// Named scenarios under one incidence assumption, used by Table 5b and the tests.
-pub fn named_scenarios(inc: Incidence) -> Vec<(&'static str, Scenario)> {
+#[must_use]
+pub fn named_scenarios(inc: Incidence) -> Vec<(String, Scenario)> {
     let st = Scenario::static_case(inc);
     let d = Scenario::dynamic(inc);
-    vec![
-        ("Static (no spending effect)", st),
-        ("Dynamic, MPC 0.50", Scenario { mpc: 0.5, ..d }),
-        ("Dynamic, central (MPC 0.95)", d),
+    let half = Scenario { mpc: 0.5, ..d };
+    let leak = Scenario { leak: 0.2, ..st };
+    let list: Vec<(String, Scenario)> = vec![
+        ("Static (no spending effect)".into(), st),
+        (format!("Dynamic, MPC {:.2}", half.mpc), half),
+        (format!("Dynamic, central (MPC {:.2})", d.mpc), d),
         (
-            "Dynamic, every new dollar taxable",
+            "Dynamic, every new dollar taxable".into(),
             Scenario {
                 taxable_share: 1.0,
                 ..d
             },
         ),
         (
-            "Dynamic + multiplier",
+            "Dynamic + multiplier".into(),
             Scenario {
                 multiplier: true,
                 ..d
             },
         ),
         (
-            "Static, 20% compliance leakage",
-            Scenario { leak: 0.2, ..st },
+            format!("Static, {}% compliance leakage", num(100.0 * leak.leak)),
+            leak,
         ),
         (
-            "Static, all exemptions and rebates taxed",
+            "Static, all exemptions and rebates taxed".into(),
             Scenario {
                 base_factor: broadening_factor(
                     te_sum(&TE_HOUSEHOLD) + te_sum(&TE_PUBLIC_AND_THRESHOLD),
@@ -60,49 +100,36 @@ pub fn named_scenarios(inc: Incidence) -> Vec<(&'static str, Scenario)> {
             },
         ),
         (
-            "Static, New Zealand VRR",
+            "Static, New Zealand VRR".into(),
             Scenario {
                 base_factor: vrr_factor(VRR_NEW_ZEALAND),
                 ..st
             },
         ),
-    ]
+    ];
+    list
 }
 
-pub fn render() -> String {
+/// Explanation of the two incidence assumptions (used in the output file).
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn incidence_note() -> Result<String> {
     let mut s = String::new();
-    let w = &mut s;
-    let core = need_core();
-    let full = need_full();
+    writeln!(s, "**Incidence assumption.** Every scenario, static included, is computed under one stated assumption about prices and nominal spending. **A (central): real base fixed** - the VAT is passed into prices and households keep buying the same tax-exclusive basket, so revenue on today's base = rate x base. **B (sensitivity): nominal spending fixed** - prices rise but nominal spending on today's base does not, so revenue = rate/(1+rate) x spending. \"Dynamic\" differs from \"static\" only by the extra spending from the income tax people keep; that new spending buys rate-inclusive goods under both A and B.")?;
+    Ok(s)
+}
+
+/// Table 1: sourced baseline.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_baseline() -> Result<String> {
+    let mut w = String::new();
     let it = income_taxes();
-    let hh = te_sum(&TE_HOUSEHOLD);
-    let pub_thr = te_sum(&TE_PUBLIC_AND_THRESHOLD);
-    let groceries = TE_HOUSEHOLD[0].1;
-
-    writeln!(
-        w,
-        "<!-- Generated by `cargo run --release` in analysis/. Do not edit by hand. -->"
-    )
-    .unwrap();
-    writeln!(
-        w,
-        "# Revenue model output (Canada, FY2024-25 worked example)\n"
-    )
-    .unwrap();
-    writeln!(
-        w,
-        "All amounts are $ billions, federal government, fiscal year April 2024 to March 2025.\n"
-    )
-    .unwrap();
-    writeln!(w, "**Incidence assumption.** Every scenario, static included, is computed under one stated assumption about prices and nominal spending. **A (central): real base fixed** - the VAT is passed into prices and households keep buying the same tax-exclusive basket, so revenue on today's base = rate x base. **B (sensitivity): nominal spending fixed** - prices rise but nominal spending on today's base does not, so revenue = rate/(1+rate) x spending. \"Dynamic\" differs from \"static\" only by the extra spending from the income tax people keep; that new spending buys rate-inclusive goods under both A and B.\n").unwrap();
-
-    writeln!(w, "{}", first_principles()).unwrap();
-    writeln!(w, "{}", key_figures()).unwrap();
-
-    // ---------------------------------------------------------------- T1
-    writeln!(w, "## Table 1. Baseline (sourced)\n").unwrap();
-    writeln!(w, "| Item | $B | Source |\n|---|---:|---|").unwrap();
-    for (k, v, src) in [
+    writeln!(w, "| Item | $B | Source |\n|---|---:|---|")?;
+    let gdp_src = format!("total revenue / {REVENUE_PCT_GDP}% of GDP (AFR 2024-25, derived)");
+    let rows: [(&str, f64, &str); 12] = [
         ("Personal income tax (PIT)", PIT, "PA 2025 Vol I Table 3.2"),
         ("Corporate income tax (CIT)", CIT, "PA 2025 Vol I Table 3.2"),
         ("PIT + CIT", it, "sum"),
@@ -133,7 +160,7 @@ pub fn render() -> String {
             "PA 2025 Vol I Table 3.3",
         ),
         (
-            "Net GST (federal 5%, incl. federal part of HST)",
+            "Net GST from outside parties",
             GST_NET,
             "PA 2025 Vol I Table 3.3",
         ),
@@ -142,48 +169,69 @@ pub fn render() -> String {
             TOTAL_REVENUE,
             "AFR 2024-25 Table 4",
         ),
-        (
-            "Nominal GDP implied by revenue ratio 16.6%",
-            gdp(),
-            "AFR 2024-25 Table 2 (derived)",
-        ),
-    ] {
-        writeln!(w, "| {k} | {} | {src} |", b(v)).unwrap();
+        ("Nominal GDP", gdp(), &gdp_src),
+    ];
+    for (k, v, src) in rows {
+        writeln!(w, "| {k} | {} | {src} |", b(v))?;
     }
-    writeln!(w, "\nEffective (net) base = net GST / 5% = {}. Gross base = gross GST from outside parties / 5% = {}. PIT + CIT = {} of GDP.", b(base0()), b(GST_GROSS_EXTERNAL / (GST_RATE / 100.0)), pct(100.0 * it / gdp())).unwrap();
-    writeln!(w, "\nRevenue to replace if PIT and CIT go and a VAT absorbs the GST (\"core need\"): **{}**. Adding non-resident tax and EI premiums (\"full federal scope\"): **{}**.\n", b(core), b(full)).unwrap();
-
-    // ---------------------------------------------------------------- T2
-    let st_a = Scenario::static_case(A);
-    let st_b = Scenario::static_case(B);
     writeln!(
         w,
-        "## Table 2. Static: today's GST base, no spending effect\n"
-    )
-    .unwrap();
-    writeln!(w, "| VAT rate | Revenue (A) | Revenue (B) | Net new vs today's GST (A) | Share of PIT+CIT replaced (A) | Gap to core need (A) |\n|---:|---:|---:|---:|---:|---:|").unwrap();
-    for r in [5.0, 8.0, 10.0, 15.0, 20.0, 25.0] {
+        "\nEffective (net) base = net GST / {}% = {}. Gross base = gross GST / {}% = {}. PIT + CIT = {} of GDP. Core need (PIT + CIT + net GST) = **{}**; full federal scope (adds non-resident tax and EI premiums) = **{}**.",
+        num(GST_RATE),
+        b(base0()),
+        num(GST_RATE),
+        b(GST_GROSS_EXTERNAL / (GST_RATE / 100.0)),
+        pct(100.0 * it / gdp()),
+        b(need_core()),
+        b(need_full())
+    )?;
+    Ok(w)
+}
+
+/// Table 2: static revenue on today's base under A and B.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_static() -> Result<String> {
+    let mut w = String::new();
+    let (st_a, st_b) = (Scenario::static_case(A), Scenario::static_case(B));
+    let (core, it) = (need_core(), income_taxes());
+    writeln!(w, "| VAT rate | Revenue (A) | Revenue (B) | Net new vs today's GST (A) | Share of PIT+CIT replaced (A) | Gap to core need (A) |\n|---:|---:|---:|---:|---:|---:|")?;
+    for r in TABLE_RATES {
         let rev = st_a.revenue(r);
         writeln!(
             w,
-            "| {r:.0}% | {} | {} | {} | {} | {} |",
+            "| {}% | {} | {} | {} | {} | {} |",
+            num(r),
             b(rev),
             b(st_b.revenue(r)),
             b(rev - GST_NET),
             pct(100.0 * (rev - GST_NET) / it),
             b(core - rev)
-        )
-        .unwrap();
+        )?;
     }
+    Ok(w)
+}
 
-    // ---------------------------------------------------------------- T3
-    writeln!(
-        w,
-        "\n## Table 3. Rate needed (static) under base broadening\n"
-    )
-    .unwrap();
-    writeln!(w, "Tax-expenditure costs are calendar 2024 values at the 5% rate (Report on Federal Tax Expenditures 2026, Part 2). Finance Canada notes that removing a measure would not yield its full cost.\n").unwrap();
-    writeln!(w, "| Base | Extra base, $B at 5% | Core need (A) | Core need (B) | Full scope (A) |\n|---|---:|---:|---:|---:|").unwrap();
+/// Table 3: static required rate under base broadening and VRR scenarios.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_broadening() -> Result<String> {
+    let mut w = String::new();
+    let (st_a, st_b) = (Scenario::static_case(A), Scenario::static_case(B));
+    let (core, full) = (need_core(), need_full());
+    let hh = te_sum(&TE_HOUSEHOLD);
+    let pub_thr = te_sum(&TE_PUBLIC_AND_THRESHOLD);
+    let groceries = TE_HOUSEHOLD[0].1;
+    writeln!(w, "Tax-expenditure costs are calendar 2024 values at the {}% rate (Report on Federal Tax Expenditures 2026, Part 2). Finance Canada notes that removing a measure would not yield its full cost.\n", num(GST_RATE))?;
+    writeln!(w, "| Base | Extra base, $B at {}% | Core need (A) | Core need (B) | Full scope (A) |\n|---|---:|---:|---:|---:|", num(GST_RATE))?;
+    let oecd = format!("OECD-average VAT revenue ratio ({VRR_OECD_AVERAGE:.2})");
+    let nz = format!("New Zealand VAT revenue ratio ({VRR_NEW_ZEALAND:.2})");
+    let all = format!(
+        "Tax all {} household zero-ratings/exemptions",
+        TE_HOUSEHOLD.len()
+    );
     let rows: [(&str, String, f64); 7] = [
         ("Today's base (FY2024-25)", b(0.0), 1.0),
         (
@@ -196,26 +244,14 @@ pub fn render() -> String {
             b(groceries),
             broadening_factor(groceries),
         ),
-        (
-            "Tax all 11 household zero-ratings/exemptions",
-            b(hh),
-            broadening_factor(hh),
-        ),
+        (&all, b(hh), broadening_factor(hh)),
         (
             "Households + public-body rebates + small-supplier threshold",
             b(hh + pub_thr),
             broadening_factor(hh + pub_thr),
         ),
-        (
-            "OECD-average VAT revenue ratio (0.58)",
-            "n/a".into(),
-            vrr_factor(VRR_OECD_AVERAGE),
-        ),
-        (
-            "New Zealand VAT revenue ratio (0.96)",
-            "n/a".into(),
-            vrr_factor(VRR_NEW_ZEALAND),
-        ),
+        (&oecd, "n/a".into(), vrr_factor(VRR_OECD_AVERAGE)),
+        (&nz, "n/a".into(), vrr_factor(VRR_NEW_ZEALAND)),
     ];
     for (k, extra, f) in rows {
         let sa = Scenario {
@@ -232,44 +268,43 @@ pub fn render() -> String {
             pct(sa.required_rate(core)),
             pct(sb.required_rate(core)),
             pct(sa.required_rate(full))
-        )
-        .unwrap();
+        )?;
     }
+    Ok(w)
+}
 
-    // ---------------------------------------------------------------- T4
-    writeln!(
-        w,
-        "\n## Table 4. Compliance leakage (assumption sweep, static)\n"
-    )
-    .unwrap();
-    writeln!(w, "Leakage = share of revenue above today's net GST lost to evasion or avoidance at higher rates. No Canadian estimate is used; these are what-ifs.\n").unwrap();
-    writeln!(w, "| Leakage | Revenue at 20% (A) | Rate for core need (A) | Revenue at 20% (B) | Rate for core need (B) |\n|---:|---:|---:|---:|---:|").unwrap();
-    for l in [0.0, 0.1, 0.2, 0.3] {
+/// Compliance leakage what-ifs.
+const LEAKS: [f64; 4] = [0.0, 0.1, 0.2, 0.3];
+
+/// Table 4: compliance leakage.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_leakage() -> Result<String> {
+    let mut w = String::new();
+    let (st_a, st_b) = (Scenario::static_case(A), Scenario::static_case(B));
+    let core = need_core();
+    writeln!(w, "Leakage = share of revenue above today's net GST lost to evasion or avoidance at higher rates. No Canadian estimate is used; these are what-ifs.\n")?;
+    writeln!(w, "| Leakage | Revenue at {r}% (A) | Rate for core need (A) | Revenue at {r}% (B) | Rate for core need (B) |\n|---:|---:|---:|---:|---:|", r = num(START_RATE))?;
+    for l in LEAKS {
         let sa = Scenario { leak: l, ..st_a };
         let sb = Scenario { leak: l, ..st_b };
         writeln!(
             w,
-            "| {:.0}% | {} | {} | {} | {} |",
-            l * 100.0,
-            b(sa.revenue(20.0)),
+            "| {}% | {} | {} | {} | {} |",
+            num(l * 100.0),
+            b(sa.revenue(START_RATE)),
             pct(sa.required_rate(core)),
-            b(sb.revenue(20.0)),
+            b(sb.revenue(START_RATE)),
             pct(sb.required_rate(core))
-        )
-        .unwrap();
+        )?;
     }
+    Ok(w)
+}
 
-    // ---------------------------------------------------------------- T5
-    let c = Scenario::central();
-    let cb = Scenario::dynamic(B);
-    writeln!(
-        w,
-        "\n## Table 5. Dynamic scenario: households keep the income tax and spend it\n"
-    )
-    .unwrap();
-    writeln!(w, "All {} of PIT + CIT stays with households and firms. A share (MPC) is spent; a share of that spending (taxable share) lands in the VAT base and buys goods at rate-inclusive prices. Central taxable share = today's effective GST base / household consumption = **{:.2}**. Imports ({IMPORTS_PCT_GDP}% of GDP, World Bank WDI 4.8) do not leak from the base (GST/VAT applies at the border); they matter only for the multiplier. \"+mult\" adds Finance Canada's short-run multipliers (PIT 1.0, CIT 0.3). MPC 0.000 is the static case.\n", b(it), taxable_share_central()).unwrap();
-    writeln!(w, "| MPC | Rev. at 20% (A) | Rate for core need (A) | Rev. at 20%, share = 1 (A) | Rate (A) | Rev. at 20%, + mult (A) | Rate (A) | Rev. at 20% (B) | Rate for core need (B) |\n|---:|---:|---:|---:|---:|---:|---:|---:|---:|").unwrap();
-    for m in [
+/// MPC values swept in Table 5.
+fn mpc_sweep() -> [f64; 8] {
+    [
         0.0,
         0.50,
         0.60,
@@ -278,7 +313,21 @@ pub fn render() -> String {
         0.90,
         apc(SAVING_RATE_Q2_2024),
         apc(SAVING_RATE_Q2_2025),
-    ] {
+    ]
+}
+
+/// Table 5: dynamic scenario, MPC sweep.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_dynamic() -> Result<String> {
+    let mut w = String::new();
+    let (c, cb) = (Scenario::central(), Scenario::dynamic(B));
+    let core = need_core();
+    let r = START_RATE;
+    writeln!(w, "All {} of PIT + CIT stays with households and firms. A share (MPC) is spent; a share of that spending (taxable share = {:.2}) lands in the VAT base and pays rate-inclusive prices. Imports ({IMPORTS_PCT_GDP}% of GDP) do not leak from a destination-based base; they matter only for the multiplier. \"+ mult\" adds Finance Canada's short-run multipliers (PIT {MULTIPLIER_PIT:.1}, CIT {MULTIPLIER_CIT:.1}). MPC 0.000 is the static case.\n", b(income_taxes()), taxable_share_central())?;
+    writeln!(w, "| MPC | Rev. at {r}% (A) | Rate for core need (A) | Rev., share = 1 (A) | Rate (A) | Rev., + mult (A) | Rate (A) | Rev. at {r}% (B) | Rate for core need (B) |\n|---:|---:|---:|---:|---:|---:|---:|---:|---:|", r = num(r))?;
+    for m in mpc_sweep() {
         let d1 = Scenario { mpc: m, ..c };
         let d2 = Scenario {
             mpc: m,
@@ -294,55 +343,74 @@ pub fn render() -> String {
         writeln!(
             w,
             "| {m:.3} | {} | {} | {} | {} | {} | {} | {} | {} |",
-            b(d1.revenue(20.0)),
+            b(d1.revenue(r)),
             pct(d1.required_rate(core)),
-            b(d2.revenue(20.0)),
+            b(d2.revenue(r)),
             pct(d2.required_rate(core)),
-            b(d3.revenue(20.0)),
+            b(d3.revenue(r)),
             pct(d3.required_rate(core)),
-            b(d4.revenue(20.0)),
+            b(d4.revenue(r)),
             pct(d4.required_rate(core))
-        )
-        .unwrap();
+        )?;
     }
     writeln!(
         w,
-        "\nReal taxable consumption at 20%, central MPC: {} under A, {} under B, versus {} today.",
-        b(c.real_base(20.0)),
-        b(cb.real_base(20.0)),
+        "\nMPC rows {:.3} and {:.3} are 1 minus the household saving rate in Q2 2024 ({}) and Q2 2025 ({}); an average propensity is an upper bound for spending out of a tax cut. Real taxable consumption at {}%, central MPC: {} (A), {} (B), versus {} today.",
+        apc(SAVING_RATE_Q2_2024),
+        apc(SAVING_RATE_Q2_2025),
+        pct(100.0 * SAVING_RATE_Q2_2024),
+        pct(100.0 * SAVING_RATE_Q2_2025),
+        num(r),
+        b(c.real_base(r)),
+        b(cb.real_base(r)),
         b(base0())
-    )
-    .unwrap();
-    writeln!(w, "\nMPC rows 0.928 and 0.950 are 1 minus the household saving rate in Q2 2024 (7.2%) and Q2 2025 (5.0%); an average propensity is an upper bound for spending out of a tax cut.\n").unwrap();
+    )?;
+    Ok(w)
+}
 
-    // ---------------------------------------------------------------- T5b
-    writeln!(w, "## Table 5b. Incidence sensitivity for every scenario\n").unwrap();
-    writeln!(w, "Within each assumption, higher revenue at 20% always means a lower or equal required rate (tested). Comparisons across A and B are not like-for-like: B's revenue curve flattens as the rate rises.\n").unwrap();
-    writeln!(w, "| Scenario | Rev. at 20% (A) | Rate for core need (A) | Rev. at 20% (B) | Rate for core need (B) |\n|---|---:|---:|---:|---:|").unwrap();
+/// Table 5b: every scenario under both incidence assumptions.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_sensitivity() -> Result<String> {
+    let mut w = String::new();
+    let core = need_core();
+    let r = START_RATE;
+    writeln!(w, "Within each assumption, higher revenue at a given rate always means a lower or equal required rate (tested). Comparisons across A and B are not like-for-like: B's revenue curve flattens as the rate rises.\n")?;
+    writeln!(w, "| Scenario | Rev. at {r}% (A) | Rate for core need (A) | Rev. at {r}% (B) | Rate for core need (B) |\n|---|---:|---:|---:|---:|", r = num(r))?;
     for ((k, sa), (_, sb)) in named_scenarios(A).into_iter().zip(named_scenarios(B)) {
         writeln!(
             w,
             "| {k} | {} | {} | {} | {} |",
-            b(sa.revenue(20.0)),
+            b(sa.revenue(r)),
             pct(sa.required_rate(core)),
-            b(sb.revenue(20.0)),
+            b(sb.revenue(r)),
             pct(sb.required_rate(core))
-        )
-        .unwrap();
+        )?;
     }
+    Ok(w)
+}
 
-    // ---------------------------------------------------------------- T6
-    writeln!(
-        w,
-        "\n## Table 6. Break-even conditions (dynamic, central values unless stated)\n"
-    )
-    .unwrap();
-    writeln!(w, "| Condition | At 20% | At 8% |\n|---|---:|---:|").unwrap();
+/// Table 6: break-even conditions.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_breakeven() -> Result<String> {
+    let mut w = String::new();
+    let (c, cb) = (Scenario::central(), Scenario::dynamic(B));
     let mult = Scenario {
         multiplier: true,
         ..c
     };
-    let rows6: [(&str, Scenario); 3] = [
+    let core = need_core();
+    let (hi, lo) = (START_RATE, END_RATE);
+    writeln!(
+        w,
+        "| Condition | At {}% | At {}% |\n|---|---:|---:|",
+        num(hi),
+        num(lo)
+    )?;
+    let rows: [(&str, Scenario); 3] = [
         ("central share (A)", c),
         (
             "every new dollar taxable (A)",
@@ -353,56 +421,66 @@ pub fn render() -> String {
         ),
         ("central share (B)", cb),
     ];
-    for (k, d) in rows6 {
+    for (k, d) in rows {
         writeln!(
             w,
             "| MPC needed, {k} (max possible 1.0) | {:.2} | {:.2} |",
-            d.breakeven_mpc(20.0, core),
-            d.breakeven_mpc(8.0, core)
-        )
-        .unwrap();
+            d.breakeven_mpc(hi, core),
+            d.breakeven_mpc(lo, core)
+        )?;
     }
     for (k, d) in [
         ("central (A)", c),
         ("central + multiplier (A)", mult),
         ("central (B)", cb),
     ] {
-        let g20 = d.breakeven_growth_factor(20.0, core);
-        let g8 = d.breakeven_growth_factor(8.0, core);
+        let (g_hi, g_lo) = (
+            d.breakeven_growth_factor(hi, core),
+            d.breakeven_growth_factor(lo, core),
+        );
         writeln!(
             w,
-            "| Base growth beyond needs, {k}: cumulative | x{g20:.2} | x{g8:.2} |"
-        )
-        .unwrap();
+            "| Base growth beyond needs, {k}: cumulative | x{g_hi:.2} | x{g_lo:.2} |"
+        )?;
         writeln!(
             w,
-            "| ... same, per year over 10 years | {} | {} |",
-            pct(100.0 * annualised(g20, 10)),
-            pct(100.0 * annualised(g8, 10))
-        )
-        .unwrap();
+            "| ... same, per year over {PATH_YEARS} years | {} | {} |",
+            pct(100.0 * annualised(g_hi, PATH_YEARS)),
+            pct(100.0 * annualised(g_lo, PATH_YEARS))
+        )?;
     }
     for g in GROWTH_ADDITION_PP {
-        let f = (1.0 + g / 100.0f64).powi(10);
-        writeln!(
-            w,
-            "| The paper's growth addition {g} pp/yr gives, after 10 years | x{f:.2} | x{f:.2} |"
-        )
-        .unwrap();
+        let f = growth_factor(g, PATH_YEARS);
+        writeln!(w, "| What-if growth addition {} pp/yr (unsourced) gives, after {PATH_YEARS} years | x{f:.2} | x{f:.2} |", num(g))?;
     }
+    Ok(w)
+}
 
-    // ---------------------------------------------------------------- T7
-    writeln!(w, "\n## Table 7. The 20% to 8% path, made consistent\n").unwrap();
-    writeln!(w, "rate(t) = 20 - 1.2 t, t = years since launch (0..10). The v1.1 formula `20 - 1.2 x (year - 1)` for years 1-10 reaches {:.1}% in year 10, not 8%. Coverage = VAT revenue / core need, all income tax abolished, dynamic central. Growth columns assume the base grows that much faster than the revenue requirement every year (generous).\n", v11_path_rate(10)).unwrap();
-    writeln!(w, "| t | Rate | Revenue, no growth (A) | Coverage (A) | Coverage, +1.5 pp/yr (A) | Coverage, +2.5 pp/yr (A) | Coverage (B) |\n|---:|---:|---:|---:|---:|---:|---:|").unwrap();
+/// Cumulative factor from `pp` percentage points a year over `years`.
+fn growth_factor(pp: f64, years: u32) -> f64 {
+    (1.0 + pp / 100.0).powf(f64::from(years))
+}
+
+/// Table 7: the rate path.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_path() -> Result<String> {
+    let mut w = String::new();
+    let (c, cb) = (Scenario::central(), Scenario::dynamic(B));
+    let core = need_core();
+    let step = (START_RATE - END_RATE) / f64::from(PATH_YEARS);
+    let [g1, g2] = GROWTH_ADDITION_PP;
+    writeln!(w, "rate(t) = {} - {} t, t = years since launch (0..{PATH_YEARS}). The v1.1 formula `20 - 1.2 x (year - 1)` for years 1-{PATH_YEARS} reaches {}% in year {PATH_YEARS}. Coverage = VAT revenue / core need, all income tax abolished, dynamic central. Growth columns are what-ifs (unsourced): the base grows that much faster than the revenue requirement every year.\n", num(START_RATE), num(step), num(v11_path_rate(PATH_YEARS)))?;
+    writeln!(w, "| t | Rate | Revenue, no growth (A) | Coverage (A) | Coverage, +{} pp/yr (A) | Coverage, +{} pp/yr (A) | Coverage (B) |\n|---:|---:|---:|---:|---:|---:|---:|", num(g1), num(g2))?;
     for t in 0..=PATH_YEARS {
         let r = path_rate(t);
-        let g15 = Scenario {
-            base_factor: 1.015f64.powi(t as i32),
+        let s1 = Scenario {
+            base_factor: growth_factor(g1, t),
             ..c
         };
-        let g25 = Scenario {
-            base_factor: 1.025f64.powi(t as i32),
+        let s2 = Scenario {
+            base_factor: growth_factor(g2, t),
             ..c
         };
         writeln!(
@@ -410,60 +488,109 @@ pub fn render() -> String {
             "| {t} | {r:.1}% | {} | {} | {} | {} | {} |",
             b(c.revenue(r)),
             pct(100.0 * c.revenue(r) / core),
-            pct(100.0 * g15.revenue(r) / core),
-            pct(100.0 * g25.revenue(r) / core),
+            pct(100.0 * s1.revenue(r) / core),
+            pct(100.0 * s2.revenue(r) / core),
             pct(100.0 * cb.revenue(r) / core)
-        )
-        .unwrap();
+        )?;
     }
+    Ok(w)
+}
 
-    // ---------------------------------------------------------------- T8
-    writeln!(w, "\n## Table 8. Land value tax\n").unwrap();
+/// Table 8: land value tax.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_lvt() -> Result<String> {
+    let mut w = String::new();
     writeln!(
         w,
-        "Taxable (unimproved) land value needed for the paper's $50-100B:\n"
-    )
-    .unwrap();
-    writeln!(w, "| LVT rate | For $50B | For $100B |\n|---:|---:|---:|").unwrap();
+        "Taxable (unimproved) land value needed for the original ${}-{}B a year ($B of land):\n",
+        b(LVT_CLAIM_LOW),
+        b(LVT_CLAIM_HIGH)
+    )?;
+    writeln!(
+        w,
+        "| LVT rate | For ${}B | For ${}B |\n|---:|---:|---:|",
+        b(LVT_CLAIM_LOW),
+        b(LVT_CLAIM_HIGH)
+    )?;
     for r in LVT_RATES {
         writeln!(
             w,
-            "| {r}% | {} | {} |",
-            b(lvt_land_needed(LVT_CLAIM_LOW, r)),
-            b(lvt_land_needed(LVT_CLAIM_HIGH, r))
-        )
-        .unwrap();
+            "| {}% | {} | {} |",
+            num(r),
+            bc(lvt_land_needed(LVT_CLAIM_LOW, r)),
+            bc(lvt_land_needed(LVT_CLAIM_HIGH, r))
+        )?;
     }
-    writeln!(w, "\nFor scale (verified): national wealth, all non-financial assets, Q2 2025 = {}; household residential real estate, land plus buildings, Q2 2025 = {}.\n", b(NATIONAL_WEALTH_Q2_2025), b(RESIDENTIAL_REAL_ESTATE_Q2_2025)).unwrap();
-    writeln!(w, "Revenue if total land value is {} (**unverified**, see data.rs) and only part of it is taxable:\n", b(LAND_VALUE_UNVERIFIED)).unwrap();
+    writeln!(w, "\nFor scale (verified): national wealth, all non-financial assets, Q2 2025 = ${}B; household residential real estate, land plus buildings, Q2 2025 = ${}B. Revenue ($B a year) if total land value is ${}B (**unverified**) and only part of it is taxable:\n", bc(NATIONAL_WEALTH_Q2_2025), bc(RESIDENTIAL_REAL_ESTATE_Q2_2025), bc(LAND_VALUE_UNVERIFIED))?;
     writeln!(
         w,
-        "| Taxable share of land | At 0.5% | At 1% |\n|---:|---:|---:|"
-    )
-    .unwrap();
+        "| Taxable share of land | At {}% | At {}% |\n|---:|---:|---:|",
+        num(LVT_RATES[0]),
+        num(LVT_RATES[1])
+    )?;
     for sh in [0.10, 0.25, 0.50, 1.00] {
         let l = LAND_VALUE_UNVERIFIED * sh;
         writeln!(
             w,
-            "| {:.0}% | {} | {} |",
-            sh * 100.0,
-            b(lvt_revenue(0.5, l)),
-            b(lvt_revenue(1.0, l))
-        )
-        .unwrap();
+            "| {}% | {} | {} |",
+            num(sh * 100.0),
+            b(lvt_revenue(LVT_RATES[0], l)),
+            b(lvt_revenue(LVT_RATES[1], l))
+        )?;
     }
+    Ok(w)
+}
 
-    // ---------------------------------------------------------------- T9
+/// Table 8b: recurrent property tax the LVT must replace first.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_property() -> Result<String> {
+    let mut w = String::new();
+    let scenario_land = LAND_VALUE_UNVERIFIED * LVT_TAXABLE_SHARE_SCENARIO;
+    writeln!(w, "| Quantity | Value | From |\n|---|---:|---|")?;
+    writeln!(w, "| Property tax per person, provincial + local, 2024 | ${} | StatCan CGFS Table 10-10-0147-01, via Nova Scotia Finance |", thousands(&thousands(&num(PROPERTY_TAX_PER_CAPITA_2024))))?;
     writeln!(
         w,
-        "\n## Table 9. What would make 8% in year 10 reach the core need\n"
-    )
-    .unwrap();
-    writeln!(w, "Each row stacks one more lever on the dynamic central case. The LVT row uses 1% on 50% of the unverified land value and assumes none of it is needed to replace municipal property taxes (optimistic).\n").unwrap();
-    writeln!(w, "| Stack | Revenue at 8%, no growth (A) | LVT | Base growth beyond needs over 10 yrs (A) | Per year (A) | Over 10 yrs (B) | Per year (B) |\n|---|---:|---:|---:|---:|---:|---:|").unwrap();
+        "| Population, 1 July 2024 | {} | StatCan Daily 2024-09-25 |",
+        thousands(&num(POPULATION_2024))
+    )?;
+    writeln!(
+        w,
+        "| Recurrent property tax revenue, $B | {} | per person x population (derived) |",
+        b(property_tax_total())
+    )?;
+    writeln!(
+        w,
+        "| LVT scenario revenue, $B | {} | {}% on {}% of land (land value unverified) |",
+        b(lvt_scenario()),
+        num(LVT_RATES[1]),
+        num(100.0 * LVT_TAXABLE_SHARE_SCENARIO)
+    )?;
+    writeln!(w, "| LVT rate needed to replace property tax, scenario land | {} | property tax / ({}% of land) |", pct(lvt_rate_to_replace_property_tax(scenario_land)), num(100.0 * LVT_TAXABLE_SHARE_SCENARIO))?;
+    writeln!(
+        w,
+        "| LVT rate needed to replace property tax, all land | {} | property tax / all land |",
+        pct(lvt_rate_to_replace_property_tax(LAND_VALUE_UNVERIFIED))
+    )?;
+    Ok(w)
+}
+
+/// Table 9: what would make the end rate reach the core need.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_stack() -> Result<String> {
+    let mut w = String::new();
+    let core = need_core();
+    let r = END_RATE;
     let lvt = lvt_scenario();
-    let broaden = broadening_factor(hh + pub_thr);
+    let broaden = broadening_factor(te_sum(&TE_HOUSEHOLD) + te_sum(&TE_PUBLIC_AND_THRESHOLD));
     let nz = vrr_factor(VRR_NEW_ZEALAND);
+    writeln!(w, "Each row stacks one more lever on the dynamic central case. The LVT row assumes none of the LVT is needed to replace property taxes (optimistic; see Table 8b).\n")?;
+    writeln!(w, "| Stack | Revenue at {r}%, no growth (A) | LVT | Base growth beyond needs over {PATH_YEARS} yrs (A) | Per year (A) | Over {PATH_YEARS} yrs (B) | Per year (B) |\n|---|---:|---:|---:|---:|---:|---:|", r = num(r))?;
     let stack = |inc: Incidence| -> Vec<(&'static str, Scenario, f64)> {
         let d = Scenario::dynamic(inc);
         let m = Scenario {
@@ -493,27 +620,30 @@ pub fn render() -> String {
         ]
     };
     for ((k, da, l), (_, db, _)) in stack(A).into_iter().zip(stack(B)) {
-        let ga = (core - l) / da.revenue(8.0);
-        let gb = (core - l) / db.revenue(8.0);
+        let ga = (core - l) / da.revenue(r);
+        let gb = (core - l) / db.revenue(r);
         writeln!(
             w,
             "| {k} | {} | {} | x{ga:.2} | {} | x{gb:.2} | {} |",
-            b(da.revenue(8.0)),
+            b(da.revenue(r)),
             b(l),
-            pct(100.0 * annualised(ga.max(1.0), 10)),
-            pct(100.0 * annualised(gb.max(1.0), 10))
-        )
-        .unwrap();
+            pct(100.0 * annualised(ga.max(1.0), PATH_YEARS)),
+            pct(100.0 * annualised(gb.max(1.0), PATH_YEARS))
+        )?;
     }
+    Ok(w)
+}
 
-    // ---------------------------------------------------------------- T10
-    writeln!(
-        w,
-        "\n## Table 10. Policy v2: income tax that must remain while the VAT phases in\n"
-    )
-    .unwrap();
-    writeln!(w, "Dynamic central case, no growth, no LVT. \"Kept\" (k) = share of today's PIT + CIT still needed; the removed share (1 - k) drives the extra spending. Bracket rates scale the 2023 federal schedule (15/20.5/26/29/33%) by k.\n").unwrap();
-    writeln!(w, "| VAT rate | VAT revenue (A) | k (A) | Kept, $B (A) | Federal bracket rates (A) | k (B) |\n|---:|---:|---:|---:|---|---:|").unwrap();
+/// Table 10: share of income tax that must remain (k) and scaled bracket rates.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_k() -> Result<String> {
+    let mut w = String::new();
+    let (c, cb) = (Scenario::central(), Scenario::dynamic(B));
+    let (core, it) = (need_core(), income_taxes());
+    writeln!(w, "Dynamic central case, no growth, no LVT. k = share of today's PIT + CIT still needed; the removed share (1 - k) drives the extra spending. Bracket rates scale the 2023 federal schedule ({}%) by k.\n", brackets_text())?;
+    writeln!(w, "| VAT rate | VAT revenue (A) | k (A) | Kept, $B (A) | Federal bracket rates (A) | k (B) |\n|---:|---:|---:|---:|---|---:|")?;
     for r in [10.0, 15.0, 20.0, 25.0, 30.0] {
         let k = c.income_tax_kept(r, core);
         let rev = c.vat_at(r, 1.0 - k);
@@ -523,110 +653,162 @@ pub fn render() -> String {
             .collect();
         writeln!(
             w,
-            "| {r:.0}% | {} | {} | {} | {} | {} |",
+            "| {}% | {} | {} | {} | {} | {} |",
+            num(r),
             b(rev),
             pct(100.0 * k),
             b(k * it),
             br.join(" / "),
             pct(100.0 * cb.income_tax_kept(r, core))
-        )
-        .unwrap();
+        )?;
     }
+    Ok(w)
+}
 
-    // ---------------------------------------------------------------- T11
-    writeln!(
-        w,
-        "\n## Table 11. Cost of protecting low-income households at each VAT rate\n"
-    )
-    .unwrap();
-    writeln!(w, "Static scaling (A) of two existing measures: the GST credit (PA 2025 Table 3.3) and zero-rating of basic groceries (Tax Expenditures 2026).\n").unwrap();
+/// Table 11: cost of protecting low-income households.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_protect() -> Result<String> {
+    let mut w = String::new();
+    let groceries = TE_HOUSEHOLD[0].1;
+    writeln!(w, "Static scaling (A) of two existing measures: the GST credit (PA 2025 Table 3.3) and zero-rating of basic groceries (Tax Expenditures 2026).\n")?;
     writeln!(
         w,
         "| VAT rate | GST-credit equivalent | Cost of zero-rating groceries |\n|---:|---:|---:|"
-    )
-    .unwrap();
+    )?;
     for r in [5.0, 10.0, 15.0, 20.0, 25.0] {
         writeln!(
             w,
-            "| {r:.0}% | {} | {} |",
+            "| {}% | {} | {} |",
+            num(r),
             b(GST_CREDIT * r / GST_RATE),
             b(groceries * r / GST_RATE)
-        )
-        .unwrap();
+        )?;
     }
-    s
+    Ok(w)
 }
 
-/// The chain from raw official quantities to the headline, one line per step.
-pub fn first_principles() -> String {
+/// Table 0: chain from raw official quantities to the headline.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_first_principles() -> Result<String> {
     let c = Scenario::central();
     let it = income_taxes();
     let new_spend = c.extra_spending(1.0);
-    let k = c.income_tax_kept(20.0, need_core());
-    let mut s = String::new();
-    let w = &mut s;
-    writeln!(w, "## Table 0. First-principles derivation (incidence A)\n").unwrap();
-    writeln!(w, "<!-- first-principles:begin -->").unwrap();
-    writeln!(w, "| Step | Quantity | Value | From |\n|---:|---|---:|---|").unwrap();
+    let r = START_RATE;
+    let tau = r / 100.0;
+    let k = c.income_tax_kept(r, need_core());
+    let mut w = String::new();
+    writeln!(w, "| Step | Quantity | Value | From |\n|---:|---|---:|---|")?;
+    // Step numbers referenced in the "From" column, so the chain text cannot drift.
+    let (hfce_s, base_s, share_s, it_s, new_s, extra_s, need_s) = (2, 3, 4, 6, 7, 8, 10);
     let rows: Vec<(String, String, String)> = vec![
-        ("GDP, $B".into(), b(gdp()), "total revenue 511.0 / revenue share of GDP 16.6% (AFR 2024-25)".into()),
-        ("Household final consumption (HFCE), $B".into(), b(hfce()), "55.6% x GDP (World Bank WDI 4.8)".into()),
-        ("Effective taxed base, $B".into(), b(base0()), "net GST 52.5 / statutory rate 5% (Public Accounts 2025, Table 3.3)".into()),
-        ("Coverage-and-compliance ratio".into(), format!("{:.3}", taxable_share_central()), "step 3 / step 2 (measured, not assumed; OECD VRR for Canada, on a wider denominator: 0.50)".into()),
-        ("Static VAT revenue at 20%, $B".into(), b(Scenario::static_case(Incidence::RealBaseFixed).revenue(20.0)), "step 2 x step 4 x 20% (prices rise by the tax; same real basket)".into()),
-        ("Income tax kept by households and firms, $B".into(), b(it), "PIT 234.3 + CIT 97.0 (Public Accounts 2025, Table 3.2)".into()),
-        ("New taxable spending, $B".into(), b(new_spend), format!("MPC {:.2} (1 - saving rate 5.0%, StatCan) x step 4 x step 6", c.mpc)),
-        ("Extra real base at 20%, $B".into(), b(new_spend / 1.2), "step 7 / 1.20 (new spending pays the VAT-inclusive price)".into()),
-        ("Dynamic VAT revenue at 20%, $B".into(), b(c.revenue(20.0)), "20% x (step 3 + step 8)".into()),
+        ("GDP, $B".into(), b(gdp()), format!("total revenue {} / revenue share of GDP {REVENUE_PCT_GDP}% (AFR 2024-25)", b(TOTAL_REVENUE))),
+        ("Household final consumption (HFCE), $B".into(), b(hfce()), format!("{HFCE_PCT_GDP}% x GDP (World Bank WDI 4.8)")),
+        ("Effective taxed base, $B".into(), b(base0()), format!("net GST {} / statutory rate {}% (PA 2025, Table 3.3)", b(GST_NET), num(GST_RATE))),
+        ("Coverage-and-compliance ratio".into(), format!("{:.3}", taxable_share_central()), format!("step {base_s} / step {hfce_s} (measured; OECD VRR for Canada, on a wider denominator: {VRR_CANADA:.2})")),
+        (format!("Static VAT revenue at {}%, $B", num(r)), b(Scenario::static_case(A).revenue(r)), format!("step {hfce_s} x step {share_s} x {}% (prices rise by the tax; same real basket)", num(r))),
+        ("Income tax kept by households and firms, $B".into(), b(it), format!("PIT {} + CIT {} (PA 2025, Table 3.2)", b(PIT), b(CIT))),
+        ("New taxable spending, $B".into(), b(new_spend), format!("MPC {:.2} (1 - saving rate {}, StatCan) x step {share_s} x step {it_s}", c.mpc, pct(100.0 * SAVING_RATE_Q2_2025))),
+        (format!("Extra real base at {}%, $B", num(r)), b(new_spend / (1.0 + tau)), format!("step {new_s} / {:.2} (new spending pays the VAT-inclusive price)", 1.0 + tau)),
+        (format!("Dynamic VAT revenue at {}%, $B", num(r)), b(c.revenue(r)), format!("{}% x (step {base_s} + step {extra_s})", num(r))),
         ("Core need, $B".into(), b(need_core()), "PIT + CIT + net GST".into()),
-        ("Rate that meets the core need".into(), pct(c.required_rate(need_core())), "solves rate x (step 3 + step 7 / (1 + rate)) = step 10".into()),
-        ("Share of income tax still needed at 20% (k)".into(), pct(100.0 * k), "solves VAT(20%, 1-k) + k x step 6 = step 10".into()),
-        ("LVT scenario, $B".into(), b(lvt_scenario()), "land 6,400 (unverified) x 50% taxable x 1%".into()),
+        ("Rate that meets the core need".into(), pct(c.required_rate(need_core())), format!("solves rate x (step {base_s} + step {new_s} / (1 + rate)) = step {need_s}")),
+        (format!("Share of income tax still needed at {}% (k)", num(r)), pct(100.0 * k), format!("solves VAT({}%, 1-k) + k x step {it_s} = step {need_s}", num(r))),
+        ("LVT scenario, $B".into(), b(lvt_scenario()), format!("land {} (unverified) x {}% taxable x {}%", b(LAND_VALUE_UNVERIFIED), num(100.0 * LVT_TAXABLE_SHARE_SCENARIO), num(LVT_RATES[1]))),
+        ("Recurrent property tax to replace first, $B".into(), b(property_tax_total()), format!("${} per person x {} people (StatCan)", thousands(&num(PROPERTY_TAX_PER_CAPITA_2024)), thousands(&num(POPULATION_2024)))),
     ];
+    debug_assert!(rows[hfce_s - 1]
+        .0
+        .starts_with("Household final consumption"));
+    debug_assert!(rows[base_s - 1].0.starts_with("Effective taxed base"));
+    debug_assert!(rows[share_s - 1].0.starts_with("Coverage"));
+    debug_assert!(rows[it_s - 1].0.starts_with("Income tax kept"));
+    debug_assert!(rows[new_s - 1].0.starts_with("New taxable spending"));
+    debug_assert!(rows[extra_s - 1].0.starts_with("Extra real base"));
+    debug_assert!(rows[need_s - 1].0.starts_with("Core need"));
     for (i, (q, v, f)) in rows.into_iter().enumerate() {
-        writeln!(w, "| {} | {q} | {v} | {f} |", i + 1).unwrap();
+        writeln!(w, "| {} | {q} | {v} | {f} |", i + 1)?;
     }
-    writeln!(w, "<!-- first-principles:end -->").unwrap();
-    s
+    Ok(w)
 }
 
-/// Headline numbers. The paper embeds this block verbatim; a test checks it.
-pub fn key_figures() -> String {
-    let st = Scenario::static_case(A);
-    let c = Scenario::central();
-    let m = Scenario {
-        multiplier: true,
-        ..c
-    };
-    let stb = Scenario::static_case(B);
-    let cb = Scenario::dynamic(B);
-    let nz = Scenario {
-        base_factor: vrr_factor(VRR_NEW_ZEALAND),
-        ..st
-    };
-    let core = need_core();
-    format!(
-        "<!-- key-figures:begin -->\n\
-| Key figure (Canada FY2024-25, federal; incidence A unless stated) | Value |\n\
-|---|---:|\n\
-| Core need (PIT + CIT + net GST), $B | {} |\n\
-| VAT revenue at 20%: static / dynamic central (MPC 0.95) / dynamic + multiplier, $B | {} / {} / {} |\n\
-| Rate for core need: static / dynamic central / dynamic + multiplier | {} / {} / {} |\n\
-| Income tax still needed at 20%, dynamic central (k) | {} |\n\
-| MPC needed to close the gap at 20% (maximum possible 1.0) | {:.2} |\n\
-| Base growth beyond needs to abolish income tax at 20% / at 8% | x{:.2} / x{:.2} |\n\
-| Rate for core need with a New Zealand-level base (VRR 0.96), static | {} |\n\
-| Sensitivity B: revenue at 20% static / dynamic, $B | {} / {} |\n\
-| Sensitivity B: rate for core need static / dynamic; k at 20% | {} / {}; {} |\n\
-<!-- key-figures:end -->\n",
-        b(core),
-        b(st.revenue(20.0)), b(c.revenue(20.0)), b(m.revenue(20.0)),
-        pct(st.required_rate(core)), pct(c.required_rate(core)), pct(m.required_rate(core)),
-        pct(100.0 * c.income_tax_kept(20.0, core)),
-        c.breakeven_mpc(20.0, core),
-        c.breakeven_growth_factor(20.0, core), c.breakeven_growth_factor(8.0, core),
-        pct(nz.required_rate(core)),
-        b(stb.revenue(20.0)), b(cb.revenue(20.0)),
-        pct(stb.required_rate(core)), pct(cb.required_rate(core)), pct(100.0 * cb.income_tax_kept(20.0, core)),
-    )
+/// A named table: (key or title, function that renders its body).
+pub type Section = (&'static str, fn() -> Result<String>);
+
+/// The full model output (`output/revenue_tables.md`).
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn render() -> Result<String> {
+    let mut s = String::new();
+    writeln!(
+        s,
+        "<!-- Generated by `cargo run --release` in analysis/. Do not edit by hand. -->"
+    )?;
+    writeln!(
+        s,
+        "# Revenue model output (Canada, FY2024-25 worked example)\n"
+    )?;
+    writeln!(
+        s,
+        "All amounts are $ billions, federal government, fiscal year April 2024 to March 2025.\n"
+    )?;
+    writeln!(s, "{}", incidence_note()?)?;
+    let sections: [Section; 15] = [
+        (
+            "Table 0. First-principles derivation (incidence A)",
+            table_first_principles,
+        ),
+        ("Table 1. Baseline (sourced)", table_baseline),
+        (
+            "Table 2. Static: today's GST base, no spending effect",
+            table_static,
+        ),
+        (
+            "Table 3. Rate needed (static) under base broadening",
+            table_broadening,
+        ),
+        (
+            "Table 4. Compliance leakage (assumption sweep, static)",
+            table_leakage,
+        ),
+        (
+            "Table 5. Dynamic scenario: households keep the income tax and spend it",
+            table_dynamic,
+        ),
+        (
+            "Table 5b. Incidence sensitivity for every scenario",
+            table_sensitivity,
+        ),
+        (
+            "Table 6. Break-even conditions (dynamic, central values unless stated)",
+            table_breakeven,
+        ),
+        ("Table 7. The rate path, made consistent", table_path),
+        ("Table 8. Land value tax", table_lvt),
+        (
+            "Table 8b. Recurrent property tax the LVT must replace first",
+            table_property,
+        ),
+        (
+            "Table 9. What would make the end rate reach the core need",
+            table_stack,
+        ),
+        (
+            "Table 10. Income tax that must remain while the VAT phases in",
+            table_k,
+        ),
+        (
+            "Table 11. Cost of protecting low-income households",
+            table_protect,
+        ),
+        ("Key figures", crate::docs::key_figures),
+    ];
+    for (title, f) in sections {
+        writeln!(s, "## {title}\n\n{}", f()?)?;
+    }
+    Ok(s)
 }

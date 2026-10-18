@@ -23,16 +23,31 @@ jobs:
           components: rustfmt, clippy
       - name: fmt
         run: cargo fmt --check
-      - name: clippy
-        run: cargo clippy --all-targets -- -D warnings
-      - name: test
+      - name: clippy (pedantic, warnings are errors)
+        run: cargo clippy --all-targets -- -D warnings -W clippy::pedantic
+      - name: test (includes documents == fresh render, and the literal allowlist)
         run: cargo test
-      - name: committed tables match the model
+      - name: committed documents and tables match a fresh render
         run: |
-          cargo run --release > /tmp/revenue_tables.md
-          diff -u output/revenue_tables.md /tmp/revenue_tables.md
+          cargo run --release -- --write
+          git diff --exit-code -- ../tax-whitepaper.md ../README.md ../CLAIMS.md output/revenue_tables.md
       - uses: taiki-e/install-action@v2
         with:
-          tool: cargo-audit
-      - name: audit
+          tool: cargo-deny,cargo-audit
+      - name: cargo deny
+        run: cargo deny check
+      - name: cargo audit
         run: cargo audit
+
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: read rust-version from Cargo.toml
+        id: msrv
+        run: echo "version=$(sed -n 's/^rust-version = "\(.*\)"/\1/p' Cargo.toml)" >> "$GITHUB_OUTPUT"
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.msrv.outputs.version }}
+      - name: test on the minimum supported Rust version
+        run: cargo test

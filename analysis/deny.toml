@@ -1,0 +1,30 @@
+# cargo-deny configuration. The crate has no dependencies; these checks keep it that way
+# unless a new dependency passes advisories, licence, ban and source rules.
+
+[graph]
+all-features = true
+
+[advisories]
+version = 2
+yanked = "deny"
+
+[licenses]
+version = 2
+# Only the crate's own licence is allowed; any dependency must be reviewed and added here.
+allow = ["AGPL-3.0"]
+confidence-threshold = 0.9
+# With no dependencies, the allowance above is never matched; do not warn about that.
+unused-allowed-license = "allow"
+
+[licenses.private]
+# The crate is `publish = false`; cargo-deny then skips licence checks for it.
+ignore = true
+
+[bans]
+multiple-versions = "deny"
+wildcards = "deny"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

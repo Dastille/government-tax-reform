@@ -1,6 +1,6 @@
 use vat_revenue_model::data::*;
 use vat_revenue_model::model::*;
-use vat_revenue_model::report::{named_scenarios, render};
+use vat_revenue_model::report::named_scenarios;
 
 const A: Incidence = Incidence::RealBaseFixed;
 const B: Incidence = Incidence::NominalSpendingFixed;
@@ -106,10 +106,7 @@ fn partial_replacement_balances() {
 #[test]
 fn higher_revenue_implies_lower_or_equal_required_rate() {
     for inc in [A, B] {
-        let mut all: Vec<(String, Scenario)> = named_scenarios(inc)
-            .into_iter()
-            .map(|(k, s)| (k.to_string(), s))
-            .collect();
+        let mut all: Vec<(String, Scenario)> = named_scenarios(inc).into_iter().collect();
         let d = Scenario::dynamic(inc);
         for m in [0.0, 0.25, 0.5, 0.75, 0.95, 1.0] {
             for share in [taxable_share_central(), 1.0] {
@@ -149,14 +146,4 @@ fn lvt_land_requirement() {
         64_000.0,
         1e-6
     ));
-}
-
-#[test]
-fn committed_output_is_current() {
-    let committed = include_str!("../output/revenue_tables.md");
-    assert_eq!(
-        committed,
-        render(),
-        "run `cargo run --release > output/revenue_tables.md`"
-    );
 }

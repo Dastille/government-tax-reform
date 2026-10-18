@@ -1,29 +1,39 @@
-//! Revenue arithmetic. All money in $ millions; rates in per cent unless a name says `frac`.
+//! Revenue arithmetic. All money in $ millions; rates in per cent unless stated.
 
-use crate::data::*;
+use crate::data::{
+    TaxExpenditure, CIT, EI_PREMIUMS, END_RATE, GST_NET, GST_RATE, HFCE_PCT_GDP,
+    LAND_VALUE_UNVERIFIED, LVT_RATES, LVT_TAXABLE_SHARE_SCENARIO, MULTIPLIER_CIT, MULTIPLIER_PIT,
+    NON_RESIDENT, PATH_YEARS, PIT, POPULATION_2024, PROPERTY_TAX_PER_CAPITA_2024, REVENUE_PCT_GDP,
+    SAVING_RATE_Q2_2025, START_RATE, TOTAL_REVENUE, VRR_CANADA,
+};
 
 /// Nominal GDP implied by the AFR revenue ratio (revenues / (revenues as % of GDP)).
+#[must_use]
 pub fn gdp() -> f64 {
     TOTAL_REVENUE / (REVENUE_PCT_GDP / 100.0)
 }
 
 /// PIT + CIT: the income taxes the proposal abolishes first.
+#[must_use]
 pub fn income_taxes() -> f64 {
     PIT + CIT
 }
 
 /// Revenue a VAT that absorbs the GST must raise to keep federal revenue unchanged
 /// when PIT and CIT are abolished: PIT + CIT + today's net GST.
+#[must_use]
 pub fn need_core() -> f64 {
     PIT + CIT + GST_NET
 }
 
 /// Full federal scope of the original design: also non-resident income tax and EI premiums.
+#[must_use]
 pub fn need_full() -> f64 {
     need_core() + NON_RESIDENT + EI_PREMIUMS
 }
 
 /// Sum of a list of tax expenditures.
+#[must_use]
 pub fn te_sum(items: &[TaxExpenditure]) -> f64 {
     items.iter().map(|(_, v)| v).sum()
 }
@@ -32,45 +42,53 @@ pub fn te_sum(items: &[TaxExpenditure]) -> f64 {
 
 /// Static revenue at `rate` on today's net base plus `extra_at_5` of broadening (valued at 5%).
 /// Scaling the net figure keeps the GST credit at the same share of revenue.
+#[must_use]
 pub fn static_revenue(rate: f64, extra_at_5: f64) -> f64 {
     (GST_NET + extra_at_5) * rate / GST_RATE
 }
 
 /// Base factor for broadening the base by `extra_at_5` (valued at today's 5% rate).
+#[must_use]
 pub fn broadening_factor(extra_at_5: f64) -> f64 {
     (GST_NET + extra_at_5) / GST_NET
 }
 
 /// Base factor for collecting like a VAT with revenue ratio `vrr` instead of Canada's.
+#[must_use]
 pub fn vrr_factor(vrr: f64) -> f64 {
     vrr / VRR_CANADA
 }
 
 // --------------------------------------------------------------------------- dynamic
 
-/// Effective tax-exclusive base implied by today's net GST: GST_NET / 5%.
+/// Effective tax-exclusive base implied by today's net GST: `GST_NET` / 5%.
+#[must_use]
 pub fn base0() -> f64 {
     GST_NET / (GST_RATE / 100.0)
 }
 
 /// Taxable spending including today's 5% tax.
+#[must_use]
 pub fn spending0() -> f64 {
     base0() * (1.0 + GST_RATE / 100.0)
 }
 
 /// Household (and NPISH) final consumption, $M: HFCE share x GDP.
+#[must_use]
 pub fn hfce() -> f64 {
     HFCE_PCT_GDP / 100.0 * gdp()
 }
 
 /// Share of household consumption that lands in the effective GST base today:
 /// base0 / (HFCE share x GDP). Used as the central "taxable share" of new spending.
+#[must_use]
 pub fn taxable_share_central() -> f64 {
     base0() / hfce()
 }
 
 /// Average propensity to consume implied by a saving rate. An upper bound for the
 /// marginal propensity to consume out of a tax cut.
+#[must_use]
 pub fn apc(saving_rate: f64) -> f64 {
     1.0 - saving_rate
 }
@@ -91,6 +109,8 @@ pub enum Incidence {
 }
 
 impl Incidence {
+    /// Short label used in tables.
+    #[must_use]
     pub fn label(self) -> &'static str {
         match self {
             Incidence::RealBaseFixed => "A: real base fixed (central)",
@@ -102,6 +122,7 @@ impl Incidence {
 /// One revenue scenario. Static is `mpc = 0`, no multiplier.
 #[derive(Clone, Copy, Debug)]
 pub struct Scenario {
+    /// Price and nominal-spending assumption applied to every part of the base.
     pub incidence: Incidence,
     /// Marginal propensity to consume out of the income tax people keep (0 = static).
     pub mpc: f64,
@@ -116,6 +137,8 @@ pub struct Scenario {
 }
 
 impl Scenario {
+    /// Static scenario: today's base, no spending effect, under `incidence`.
+    #[must_use]
     pub fn static_case(incidence: Incidence) -> Self {
         Scenario {
             incidence,
@@ -129,6 +152,7 @@ impl Scenario {
 
     /// Ashlynn's mechanism with central, sourced values: MPC = 1 - saving rate (Q2 2025),
     /// taxable share calibrated to today's GST base, no multiplier, no growth.
+    #[must_use]
     pub fn dynamic(incidence: Incidence) -> Self {
         Scenario {
             mpc: apc(SAVING_RATE_Q2_2025),
@@ -137,11 +161,13 @@ impl Scenario {
     }
 
     /// Central case used for headline figures: dynamic, incidence A.
+    #[must_use]
     pub fn central() -> Self {
         Self::dynamic(Incidence::RealBaseFixed)
     }
 
     /// Extra nominal taxable spending when `removed` (0..1) of PIT + CIT is removed.
+    #[must_use]
     pub fn extra_spending(&self, removed: f64) -> f64 {
         let first_round = self.mpc * self.taxable_share * income_taxes();
         let demand = if self.multiplier {
@@ -153,6 +179,7 @@ impl Scenario {
     }
 
     /// Real (tax-exclusive) taxable base at `rate` (%) with `removed` of PIT + CIT gone.
+    #[must_use]
     pub fn real_base_at(&self, rate: f64, removed: f64) -> f64 {
         let t = rate / 100.0;
         let new = self.extra_spending(removed) / (1.0 + t);
@@ -164,6 +191,7 @@ impl Scenario {
     }
 
     /// VAT revenue at `rate` (%) with `removed` share of PIT + CIT abolished.
+    #[must_use]
     pub fn vat_at(&self, rate: f64, removed: f64) -> f64 {
         let gross = rate / 100.0 * self.real_base_at(rate, removed);
         if self.leak == 0.0 {
@@ -174,31 +202,35 @@ impl Scenario {
     }
 
     /// VAT revenue at `rate` with all of PIT + CIT abolished.
+    #[must_use]
     pub fn revenue(&self, rate: f64) -> f64 {
         self.vat_at(rate, 1.0)
     }
 
     /// Real taxable base at `rate`, all of PIT + CIT abolished.
+    #[must_use]
     pub fn real_base(&self, rate: f64) -> f64 {
         self.real_base_at(rate, 1.0)
     }
 
     /// Rate (%) at which revenue (all income tax abolished) equals `need`. Bisection;
     /// revenue is increasing in the rate under both incidence assumptions.
+    #[must_use]
     pub fn required_rate(&self, need: f64) -> f64 {
         let (mut lo, mut hi) = (0.0_f64, 1000.0_f64);
         for _ in 0..200 {
-            let mid = 0.5 * (lo + hi);
+            let mid = (lo + hi) / 2.0;
             if self.revenue(mid) < need {
                 lo = mid;
             } else {
                 hi = mid;
             }
         }
-        0.5 * (lo + hi)
+        (lo + hi) / 2.0
     }
 
     /// MPC that closes the gap at `rate` (revenue is linear in MPC). Can exceed 1.
+    #[must_use]
     pub fn breakeven_mpc(&self, rate: f64, need: f64) -> f64 {
         let r0 = Scenario { mpc: 0.0, ..*self }.revenue(rate);
         let r1 = Scenario { mpc: 1.0, ..*self }.revenue(rate);
@@ -207,12 +239,14 @@ impl Scenario {
 
     /// Cumulative base factor that closes the gap at `rate` (revenue is linear in it
     /// when there is no leakage).
+    #[must_use]
     pub fn breakeven_growth_factor(&self, rate: f64, need: f64) -> f64 {
         need / self.revenue(rate) * self.base_factor
     }
 
     /// Share k of today's PIT + CIT that must remain so that VAT at `rate` plus k x
     /// (PIT + CIT) equals `need`. VAT is linear in the removed share (1 - k).
+    #[must_use]
     pub fn income_tax_kept(&self, rate: f64, need: f64) -> f64 {
         let all = self.vat_at(rate, 1.0);
         let none = self.vat_at(rate, 0.0);
@@ -221,6 +255,7 @@ impl Scenario {
 }
 
 /// Compound annual rate that produces cumulative factor `f` over `years`.
+#[must_use]
 pub fn annualised(f: f64, years: u32) -> f64 {
     f.powf(1.0 / f64::from(years)) - 1.0
 }
@@ -229,11 +264,13 @@ pub fn annualised(f: f64, years: u32) -> f64 {
 
 /// Ashlynn's path, made internally consistent: 20% at launch (t = 0), falling
 /// 1.2 points a year to 8% at t = 10.
+#[must_use]
 pub fn path_rate(t: u32) -> f64 {
     START_RATE - (START_RATE - END_RATE) / f64::from(PATH_YEARS) * f64::from(t)
 }
 
 /// The formula committed in v1.1 (`20 - 1.2 x (year - 1)`), kept to document the bug.
+#[must_use]
 pub fn v11_path_rate(year: u32) -> f64 {
     20.0 - 1.2 * (f64::from(year) - 1.0)
 }
@@ -241,11 +278,36 @@ pub fn v11_path_rate(year: u32) -> f64 {
 // --------------------------------------------------------------------------- land
 
 /// Annual LVT revenue at `rate_pct` on `taxable_land` ($M).
+#[must_use]
 pub fn lvt_revenue(rate_pct: f64, taxable_land: f64) -> f64 {
     rate_pct / 100.0 * taxable_land
 }
 
 /// Taxable land value needed to raise `revenue` at `rate_pct`.
+#[must_use]
 pub fn lvt_land_needed(revenue: f64, rate_pct: f64) -> f64 {
     revenue / (rate_pct / 100.0)
+}
+
+/// The LVT scenario used in stacks: the top of the design's rate range on the scenario
+/// taxable share of the (unverified) land value, $M.
+#[must_use]
+pub fn lvt_scenario() -> f64 {
+    lvt_revenue(
+        LVT_RATES[1],
+        LAND_VALUE_UNVERIFIED * LVT_TAXABLE_SHARE_SCENARIO,
+    )
+}
+
+/// Recurrent property tax revenue (consolidated provincial-local, 2024), $M:
+/// per-capita revenue x population.
+#[must_use]
+pub fn property_tax_total() -> f64 {
+    PROPERTY_TAX_PER_CAPITA_2024 * POPULATION_2024 / 1_000_000.0
+}
+
+/// LVT rate (%) needed on `taxable_land` to replace recurrent property tax revenue.
+#[must_use]
+pub fn lvt_rate_to_replace_property_tax(taxable_land: f64) -> f64 {
+    100.0 * property_tax_total() / taxable_land
 }

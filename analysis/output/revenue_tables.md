@@ -7,37 +7,22 @@ All amounts are $ billions, federal government, fiscal year April 2024 to March 
 
 ## Table 0. First-principles derivation (incidence A)
 
-<!-- first-principles:begin -->
 | Step | Quantity | Value | From |
 |---:|---|---:|---|
 | 1 | GDP, $B | 3078.0 | total revenue 511.0 / revenue share of GDP 16.6% (AFR 2024-25) |
 | 2 | Household final consumption (HFCE), $B | 1711.4 | 55.6% x GDP (World Bank WDI 4.8) |
-| 3 | Effective taxed base, $B | 1050.1 | net GST 52.5 / statutory rate 5% (Public Accounts 2025, Table 3.3) |
-| 4 | Coverage-and-compliance ratio | 0.614 | step 3 / step 2 (measured, not assumed; OECD VRR for Canada, on a wider denominator: 0.50) |
+| 3 | Effective taxed base, $B | 1050.1 | net GST 52.5 / statutory rate 5% (PA 2025, Table 3.3) |
+| 4 | Coverage-and-compliance ratio | 0.614 | step 3 / step 2 (measured; OECD VRR for Canada, on a wider denominator: 0.50) |
 | 5 | Static VAT revenue at 20%, $B | 210.0 | step 2 x step 4 x 20% (prices rise by the tax; same real basket) |
-| 6 | Income tax kept by households and firms, $B | 331.3 | PIT 234.3 + CIT 97.0 (Public Accounts 2025, Table 3.2) |
+| 6 | Income tax kept by households and firms, $B | 331.3 | PIT 234.3 + CIT 97.0 (PA 2025, Table 3.2) |
 | 7 | New taxable spending, $B | 193.1 | MPC 0.95 (1 - saving rate 5.0%, StatCan) x step 4 x step 6 |
 | 8 | Extra real base at 20%, $B | 160.9 | step 7 / 1.20 (new spending pays the VAT-inclusive price) |
 | 9 | Dynamic VAT revenue at 20%, $B | 242.2 | 20% x (step 3 + step 8) |
 | 10 | Core need, $B | 383.8 | PIT + CIT + net GST |
 | 11 | Rate that meets the core need | 32.1% | solves rate x (step 3 + step 7 / (1 + rate)) = step 10 |
 | 12 | Share of income tax still needed at 20% (k) | 47.3% | solves VAT(20%, 1-k) + k x step 6 = step 10 |
-| 13 | LVT scenario, $B | 32.0 | land 6,400 (unverified) x 50% taxable x 1% |
-<!-- first-principles:end -->
-
-<!-- key-figures:begin -->
-| Key figure (Canada FY2024-25, federal; incidence A unless stated) | Value |
-|---|---:|
-| Core need (PIT + CIT + net GST), $B | 383.8 |
-| VAT revenue at 20%: static / dynamic central (MPC 0.95) / dynamic + multiplier, $B | 210.0 / 242.2 / 257.9 |
-| Rate for core need: static / dynamic central / dynamic + multiplier | 36.5% / 32.1% / 30.2% |
-| Income tax still needed at 20%, dynamic central (k) | 47.3% |
-| MPC needed to close the gap at 20% (maximum possible 1.0) | 5.13 |
-| Base growth beyond needs to abolish income tax at 20% / at 8% | x1.58 / x3.90 |
-| Rate for core need with a New Zealand-level base (VRR 0.96), static | 19.0% |
-| Sensitivity B: revenue at 20% static / dynamic, $B | 183.8 / 215.9 |
-| Sensitivity B: rate for core need static / dynamic; k at 20% | 53.4% / 42.1%; 56.1% |
-<!-- key-figures:end -->
+| 13 | LVT scenario, $B | 32.0 | land 6400.0 (unverified) x 50% taxable x 1% |
+| 14 | Recurrent property tax to replace first, $B | 92.6 | $2,242 per person x 41,288,599 people (StatCan) |
 
 ## Table 1. Baseline (sourced)
 
@@ -52,13 +37,11 @@ All amounts are $ billions, federal government, fiscal year April 2024 to March 
 | Less remission order (ministries) | 3.6 | PA 2025 Vol I Table 3.3 |
 | Gross GST from outside parties | 58.8 | PA 2025 Vol I Table 3.3 |
 | Less quarterly GST credits | 6.3 | PA 2025 Vol I Table 3.3 |
-| Net GST (federal 5%, incl. federal part of HST) | 52.5 | PA 2025 Vol I Table 3.3 |
+| Net GST from outside parties | 52.5 | PA 2025 Vol I Table 3.3 |
 | Total federal revenues | 511.0 | AFR 2024-25 Table 4 |
-| Nominal GDP implied by revenue ratio 16.6% | 3078.0 | AFR 2024-25 Table 2 (derived) |
+| Nominal GDP | 3078.0 | total revenue / 16.6% of GDP (AFR 2024-25, derived) |
 
-Effective (net) base = net GST / 5% = 1050.1. Gross base = gross GST from outside parties / 5% = 1175.4. PIT + CIT = 10.8% of GDP.
-
-Revenue to replace if PIT and CIT go and a VAT absorbs the GST ("core need"): **383.8**. Adding non-resident tax and EI premiums ("full federal scope"): **428.8**.
+Effective (net) base = net GST / 5% = 1050.1. Gross base = gross GST / 5% = 1175.4. PIT + CIT = 10.8% of GDP. Core need (PIT + CIT + net GST) = **383.8**; full federal scope (adds non-resident tax and EI premiums) = **428.8**.
 
 ## Table 2. Static: today's GST base, no spending effect
 
@@ -98,9 +81,9 @@ Leakage = share of revenue above today's net GST lost to evasion or avoidance at
 
 ## Table 5. Dynamic scenario: households keep the income tax and spend it
 
-All 331.3 of PIT + CIT stays with households and firms. A share (MPC) is spent; a share of that spending (taxable share) lands in the VAT base and buys goods at rate-inclusive prices. Central taxable share = today's effective GST base / household consumption = **0.61**. Imports (32.7% of GDP, World Bank WDI 4.8) do not leak from the base (GST/VAT applies at the border); they matter only for the multiplier. "+mult" adds Finance Canada's short-run multipliers (PIT 1.0, CIT 0.3). MPC 0.000 is the static case.
+All 331.3 of PIT + CIT stays with households and firms. A share (MPC) is spent; a share of that spending (taxable share = 0.61) lands in the VAT base and pays rate-inclusive prices. Imports (32.7% of GDP) do not leak from a destination-based base; they matter only for the multiplier. "+ mult" adds Finance Canada's short-run multipliers (PIT 1.0, CIT 0.3). MPC 0.000 is the static case.
 
-| MPC | Rev. at 20% (A) | Rate for core need (A) | Rev. at 20%, share = 1 (A) | Rate (A) | Rev. at 20%, + mult (A) | Rate (A) | Rev. at 20% (B) | Rate for core need (B) |
+| MPC | Rev. at 20% (A) | Rate for core need (A) | Rev., share = 1 (A) | Rate (A) | Rev., + mult (A) | Rate (A) | Rev. at 20% (B) | Rate for core need (B) |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | 0.000 | 210.0 | 36.5% | 210.0 | 36.5% | 225.7 | 34.3% | 183.8 | 53.4% |
 | 0.500 | 227.0 | 34.1% | 237.6 | 32.7% | 242.7 | 32.0% | 200.7 | 46.8% |
@@ -111,13 +94,11 @@ All 331.3 of PIT + CIT stays with households and firms. A share (MPC) is spent; 
 | 0.928 | 241.4 | 32.2% | 261.2 | 29.8% | 257.2 | 30.3% | 215.2 | 42.3% |
 | 0.950 | 242.2 | 32.1% | 262.5 | 29.7% | 257.9 | 30.2% | 215.9 | 42.1% |
 
-Real taxable consumption at 20%, central MPC: 1211.0 under A, 1079.7 under B, versus 1050.1 today.
-
-MPC rows 0.928 and 0.950 are 1 minus the household saving rate in Q2 2024 (7.2%) and Q2 2025 (5.0%); an average propensity is an upper bound for spending out of a tax cut.
+MPC rows 0.928 and 0.950 are 1 minus the household saving rate in Q2 2024 (7.2%) and Q2 2025 (5.0%); an average propensity is an upper bound for spending out of a tax cut. Real taxable consumption at 20%, central MPC: 1211.0 (A), 1079.7 (B), versus 1050.1 today.
 
 ## Table 5b. Incidence sensitivity for every scenario
 
-Within each assumption, higher revenue at 20% always means a lower or equal required rate (tested). Comparisons across A and B are not like-for-like: B's revenue curve flattens as the rate rises.
+Within each assumption, higher revenue at a given rate always means a lower or equal required rate (tested). Comparisons across A and B are not like-for-like: B's revenue curve flattens as the rate rises.
 
 | Scenario | Rev. at 20% (A) | Rate for core need (A) | Rev. at 20% (B) | Rate for core need (B) |
 |---|---:|---:|---:|---:|
@@ -143,12 +124,12 @@ Within each assumption, higher revenue at 20% always means a lower or equal requ
 | ... same, per year over 10 years | 4.1% | 13.8% |
 | Base growth beyond needs, central (B): cumulative | x1.78 | x4.00 |
 | ... same, per year over 10 years | 5.9% | 14.9% |
-| The paper's growth addition 1.5 pp/yr gives, after 10 years | x1.16 | x1.16 |
-| The paper's growth addition 2.5 pp/yr gives, after 10 years | x1.28 | x1.28 |
+| What-if growth addition 1.5 pp/yr (unsourced) gives, after 10 years | x1.16 | x1.16 |
+| What-if growth addition 2.5 pp/yr (unsourced) gives, after 10 years | x1.28 | x1.28 |
 
-## Table 7. The 20% to 8% path, made consistent
+## Table 7. The rate path, made consistent
 
-rate(t) = 20 - 1.2 t, t = years since launch (0..10). The v1.1 formula `20 - 1.2 x (year - 1)` for years 1-10 reaches 9.2% in year 10, not 8%. Coverage = VAT revenue / core need, all income tax abolished, dynamic central. Growth columns assume the base grows that much faster than the revenue requirement every year (generous).
+rate(t) = 20 - 1.2 t, t = years since launch (0..10). The v1.1 formula `20 - 1.2 x (year - 1)` for years 1-10 reaches 9.2% in year 10. Coverage = VAT revenue / core need, all income tax abolished, dynamic central. Growth columns are what-ifs (unsourced): the base grows that much faster than the revenue requirement every year.
 
 | t | Rate | Revenue, no growth (A) | Coverage (A) | Coverage, +1.5 pp/yr (A) | Coverage, +2.5 pp/yr (A) | Coverage (B) |
 |---:|---:|---:|---:|---:|---:|---:|
@@ -166,16 +147,14 @@ rate(t) = 20 - 1.2 t, t = years since launch (0..10). The v1.1 formula `20 - 1.2
 
 ## Table 8. Land value tax
 
-Taxable (unimproved) land value needed for the paper's $50-100B:
+Taxable (unimproved) land value needed for the original $50.0-100.0B a year ($B of land):
 
-| LVT rate | For $50B | For $100B |
+| LVT rate | For $50.0B | For $100.0B |
 |---:|---:|---:|
-| 0.5% | 10000.0 | 20000.0 |
-| 1% | 5000.0 | 10000.0 |
+| 0.5% | 10,000.0 | 20,000.0 |
+| 1% | 5,000.0 | 10,000.0 |
 
-For scale (verified): national wealth, all non-financial assets, Q2 2025 = 17267.4; household residential real estate, land plus buildings, Q2 2025 = 8375.9.
-
-Revenue if total land value is 6400.0 (**unverified**, see data.rs) and only part of it is taxable:
+For scale (verified): national wealth, all non-financial assets, Q2 2025 = $17,267.4B; household residential real estate, land plus buildings, Q2 2025 = $8,375.9B. Revenue ($B a year) if total land value is $6,400.0B (**unverified**) and only part of it is taxable:
 
 | Taxable share of land | At 0.5% | At 1% |
 |---:|---:|---:|
@@ -184,9 +163,20 @@ Revenue if total land value is 6400.0 (**unverified**, see data.rs) and only par
 | 50% | 16.0 | 32.0 |
 | 100% | 32.0 | 64.0 |
 
-## Table 9. What would make 8% in year 10 reach the core need
+## Table 8b. Recurrent property tax the LVT must replace first
 
-Each row stacks one more lever on the dynamic central case. The LVT row uses 1% on 50% of the unverified land value and assumes none of it is needed to replace municipal property taxes (optimistic).
+| Quantity | Value | From |
+|---|---:|---|
+| Property tax per person, provincial + local, 2024 | $2,,242 | StatCan CGFS Table 10-10-0147-01, via Nova Scotia Finance |
+| Population, 1 July 2024 | 41,288,599 | StatCan Daily 2024-09-25 |
+| Recurrent property tax revenue, $B | 92.6 | per person x population (derived) |
+| LVT scenario revenue, $B | 32.0 | 1% on 50% of land (land value unverified) |
+| LVT rate needed to replace property tax, scenario land | 2.9% | property tax / (50% of land) |
+| LVT rate needed to replace property tax, all land | 1.4% | property tax / all land |
+
+## Table 9. What would make the end rate reach the core need
+
+Each row stacks one more lever on the dynamic central case. The LVT row assumes none of the LVT is needed to replace property taxes (optimistic; see Table 8b).
 
 | Stack | Revenue at 8%, no growth (A) | LVT | Base growth beyond needs over 10 yrs (A) | Per year (A) | Over 10 yrs (B) | Per year (B) |
 |---|---:|---:|---:|---:|---:|---:|
@@ -196,9 +186,9 @@ Each row stacks one more lever on the dynamic central case. The LVT row uses 1% 
 | + tax every exemption and rebate in Table 3 | 153.1 | 32.0 | x2.30 | 8.7% | x2.35 | 8.9% |
 | + New Zealand-level base and compliance instead | 202.2 | 32.0 | x1.74 | 5.7% | x1.78 | 5.9% |
 
-## Table 10. Policy v2: income tax that must remain while the VAT phases in
+## Table 10. Income tax that must remain while the VAT phases in
 
-Dynamic central case, no growth, no LVT. "Kept" (k) = share of today's PIT + CIT still needed; the removed share (1 - k) drives the extra spending. Bracket rates scale the 2023 federal schedule (15/20.5/26/29/33%) by k.
+Dynamic central case, no growth, no LVT. k = share of today's PIT + CIT still needed; the removed share (1 - k) drives the extra spending. Bracket rates scale the 2023 federal schedule (15/20.5/26/29/33%) by k.
 
 | VAT rate | VAT revenue (A) | k (A) | Kept, $B (A) | Federal bracket rates (A) | k (B) |
 |---:|---:|---:|---:|---|---:|
@@ -208,7 +198,7 @@ Dynamic central case, no growth, no LVT. "Kept" (k) = share of today's PIT + CIT
 | 25% | 290.2 | 28.2% | 93.5 | 4.2 / 5.8 / 7.3 / 8.2 / 9.3 | 42.6% |
 | 30% | 355.8 | 8.4% | 28.0 | 1.3 / 1.7 / 2.2 / 2.4 / 2.8 | 29.6% |
 
-## Table 11. Cost of protecting low-income households at each VAT rate
+## Table 11. Cost of protecting low-income households
 
 Static scaling (A) of two existing measures: the GST credit (PA 2025 Table 3.3) and zero-rating of basic groceries (Tax Expenditures 2026).
 
@@ -219,3 +209,19 @@ Static scaling (A) of two existing measures: the GST credit (PA 2025 Table 3.3) 
 | 15% | 18.8 | 19.9 |
 | 20% | 25.1 | 26.5 |
 | 25% | 31.3 | 33.1 |
+
+## Key figures
+
+| Key figure (Canada FY2024-25, federal; incidence A unless stated) | Value |
+|---|---:|
+| Core need (PIT + CIT + net GST), $B | 383.8 |
+| VAT revenue at 20%: static / dynamic central (MPC 0.95) / dynamic + multiplier, $B | 210.0 / 242.2 / 257.9 |
+| Rate for core need: static / dynamic central / dynamic + multiplier | 36.5% / 32.1% / 30.2% |
+| Income tax still needed at 20%, dynamic central (k) | 47.3% |
+| MPC needed to close the gap at 20% (maximum possible 1.0) | 5.13 |
+| Base growth beyond needs to abolish income tax at 20% / at 8% | x1.58 / x3.90 |
+| Rate for core need with a New Zealand-level base (VRR 0.96), static | 19.0% |
+| Sensitivity B: revenue at 20% static / dynamic, $B | 183.8 / 215.9 |
+| Sensitivity B: rate for core need static / dynamic; k at 20% | 53.4% / 42.1%; 56.1% |
+| Recurrent property tax the LVT must replace first, $B | 92.6 |
+

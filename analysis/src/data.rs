@@ -30,8 +30,10 @@ pub const GST_REMISSION: f64 = 3_565.0;
 pub const GST_GROSS_EXTERNAL: f64 = 58_769.0;
 /// Quarterly GST credit payments deducted from GST revenue (PA 2025 Table 3.3).
 pub const GST_CREDIT: f64 = 6_266.0;
-/// Net GST from outside parties = the $52.5B headline (PA 2025 Table 3.3).
-/// Federal 5% GST plus the federal 5-point portion of HST; provincial HST portions excluded.
+/// Net GST from outside parties = the $52.5B headline (PA 2025 Table 3.3): GST after the
+/// ministries' remission order and after quarterly GST credits. PA does not split GST from
+/// the federal part of HST; HST = GST rate + a provincial component, and "GST" means the
+/// federal portion only (Report on Federal Tax Expenditures, Part 1, benchmark note).
 pub const GST_NET: f64 = 52_503.0;
 /// Statutory federal GST rate, per cent.
 pub const GST_RATE: f64 = 5.0;
@@ -71,7 +73,7 @@ pub const TE_PUBLIC_AND_THRESHOLD: [TaxExpenditure; 6] = [
 ];
 
 /// Targeted Temporary GST/HST Relief (Dec 14, 2024 to Feb 15, 2025): 445 (2024) + 840 (2025).
-/// The whole holiday fell inside FY2024-25, so it depressed the GST_NET figure.
+/// The whole holiday fell inside FY2024-25, so it depressed the `GST_NET` figure.
 pub const GST_HOLIDAY_COST: f64 = 445.0 + 840.0;
 
 // ---------------------------------------------------------------------------
@@ -89,20 +91,21 @@ pub const VRR_OECD_AVERAGE: f64 = 0.58;
 // Behaviour and macro parameters.
 // ---------------------------------------------------------------------------
 /// Household saving rate, Q2 2025 (Statistics Canada, The Daily, 2025-09-11): 5.0%.
-/// https://www150.statcan.gc.ca/n1/daily-quotidien/250911/dq250911a-eng.htm
+/// <https://www150.statcan.gc.ca/n1/daily-quotidien/250911/dq250911a-eng.htm>
 pub const SAVING_RATE_Q2_2025: f64 = 0.050;
 /// Household saving rate, Q2 2024 (Statistics Canada, The Daily, 2024-09-12): 7.2%.
-/// https://www150.statcan.gc.ca/n1/daily-quotidien/240912/dq240912a-eng.htm
+/// <https://www150.statcan.gc.ca/n1/daily-quotidien/240912/dq240912a-eng.htm>
 pub const SAVING_RATE_Q2_2024: f64 = 0.072;
 /// Household + NPISH final consumption, % of GDP, Canada 2024 (World Bank WDI table 4.8).
-/// https://wdi.worldbank.org/table/4.8
+/// <https://wdi.worldbank.org/table/4.8>
 pub const HFCE_PCT_GDP: f64 = 55.6;
 /// Imports of goods and services, % of GDP, Canada 2024 (World Bank WDI table 4.8).
 pub const IMPORTS_PCT_GDP: f64 = 32.7;
 /// Finance Canada short-run multipliers, Budget 2009 Annex 1, Table A1.1, "2010Q4" column:
 /// personal income tax measures 1.0, corporate income tax measures 0.3.
-/// https://budget.canada.ca/2009/plan/bpa1-eng.html
+/// <https://budget.canada.ca/2009/plan/bpa1-eng.html>
 pub const MULTIPLIER_PIT: f64 = 1.0;
+/// Finance Canada short-run multiplier for corporate income tax measures (same table).
 pub const MULTIPLIER_CIT: f64 = 0.3;
 
 // ---------------------------------------------------------------------------
@@ -113,17 +116,94 @@ pub const MULTIPLIER_CIT: f64 = 0.3;
 // Table 36-10-0580-01; we could not download the table to confirm it. It is used only
 // as a labelled scenario.
 // ---------------------------------------------------------------------------
+/// National wealth (all non-financial assets), Q2 2025, $M (`StatCan` Daily 2025-09-11).
 pub const NATIONAL_WEALTH_Q2_2025: f64 = 17_267_400.0;
+/// Household residential real estate (land plus buildings), Q2 2025, $M (same source).
 pub const RESIDENTIAL_REAL_ESTATE_Q2_2025: f64 = 8_375_900.0;
+/// Land-only value, $M. **UNVERIFIED** (secondary source; see above).
 pub const LAND_VALUE_UNVERIFIED: f64 = 6_400_000.0;
+/// Share of land value assumed taxable after the design's exemptions (scenario, not data).
+pub const LVT_TAXABLE_SHARE_SCENARIO: f64 = 0.5;
 
 // ---------------------------------------------------------------------------
-// Ashlynn's design parameters (ab193f4).
+// Recurrent property taxes that the design abolishes.
+// Consolidated provincial-local property tax revenue per capita, Canada 2024: $2,242.
+// Nova Scotia Department of Finance, "Government Financial Statistics, 2024" (2025-11-21),
+// computed from Statistics Canada Table 10-10-0147-01 (CGFS) and Table 17-10-0009-01.
+// https://novascotia.ca/finance/statistics/archive_news.asp?df=&dg=&dti=3&dto=0&id=21517
+// Population of Canada, 1 July 2024: 41,288,599 (StatCan Daily 2024-09-25).
+// https://www150.statcan.gc.ca/n1/daily-quotidien/240925/dq240925d-eng.htm
 // ---------------------------------------------------------------------------
+/// Consolidated provincial-local property tax revenue per capita, Canada 2024, dollars.
+pub const PROPERTY_TAX_PER_CAPITA_2024: f64 = 2_242.0;
+/// Population of Canada, 1 July 2024 (preliminary estimate).
+pub const POPULATION_2024: f64 = 41_288_599.0;
+
+// ---------------------------------------------------------------------------
+// Ashlynn's design parameters (ab193f4). These are policy choices, not data.
+// ---------------------------------------------------------------------------
+/// VAT rate at launch, per cent.
 pub const START_RATE: f64 = 20.0;
+/// VAT rate at the end of the path, per cent.
 pub const END_RATE: f64 = 8.0;
+/// Length of the rate path, years.
 pub const PATH_YEARS: u32 = 10;
+/// LVT rate range, per cent of unimproved land value.
 pub const LVT_RATES: [f64; 2] = [0.5, 1.0];
+/// Original LVT revenue claim, low end, $M.
 pub const LVT_CLAIM_LOW: f64 = 50_000.0;
+/// Original LVT revenue claim, high end, $M.
 pub const LVT_CLAIM_HIGH: f64 = 100_000.0;
+/// Original growth addition, percentage points a year. **UNVERIFIED**: no source was given
+/// in ab193f4 and none was found; used only as a what-if.
 pub const GROWTH_ADDITION_PP: [f64; 2] = [1.5, 2.5];
+/// Share of households (bottom, per cent) whose VAT burden the dividend should fully offset.
+pub const DIVIDEND_BOTTOM_SHARE: [f64; 2] = [40.0, 50.0];
+/// Share of incremental revenue committed to high-multiplier infrastructure, per cent.
+pub const INVESTMENT_SHARE: [f64; 2] = [60.0, 70.0];
+
+// ---------------------------------------------------------------------------
+// Facts cited in the precedents and prior-work sections.
+// ---------------------------------------------------------------------------
+/// VAT / GST standard rates and dates cited in Section 8. Each entry: (key, value, source).
+/// Sources:
+/// - NZ: Inland Revenue, "GST rate increase" (Taxation (Budget Measures) Act 2010): 12.5% to
+///   15% from 1 October 2010.
+///   <https://www.taxtechnical.ird.govt.nz/new-legislation/act-articles/taxation-budget-measures-act-2010/gst-rate-increase>
+/// - DK, HU standard rates 2022: OECD CTT 2024 Annex Table 2.A.7.
+/// - VAT % of GDP / % of total taxation 2022: OECD CTT 2024 Annex Table 1.A.4 (p. 32 of the PDF).
+/// - Saudi Arabia: ZATCA "About VAT" (5% from 1 January 2018); Saudi Ministry of Finance,
+///   11 May 2020, "VAT shall increase from 5% to 15% as of July 2020".
+///   <https://www.mof.gov.sa/en/MediaCenter/news/Pages/News_11052020.aspx>
+/// - Singapore: IRAS (top resident PIT rate 24% from YA2024; GST 9% from 1 January 2024).
+/// - Canada 1991: TE 2017 Part 10 (FST 13.5%); Library of Parliament PRB 00-03E (GST 7% from
+///   1 January 1991).
+/// - 175 countries and territories with a VAT on 1 July 2024: OECD CTT 2024.
+/// - CGEB +25% for 2026-2031: CRA CGEB page.
+/// - `FairTax`: H.R. 25 (119th Congress), proposed sec. 101(b): 23% of gross payments in 2027.
+/// - Federal debt 41.2% of GDP: AFR 2024-25.
+pub const FACTS: &[(&str, &str)] = &[
+    ("nz_rate", "15"),
+    ("nz_prev_rate", "12.5"),
+    ("nz_rate_date", "1 October 2010"),
+    ("nz_vat_gdp", "10.0"),
+    ("nz_vat_taxes", "30.3"),
+    ("dk_rate", "25"),
+    ("dk_vat_gdp", "9.2"),
+    ("dk_vat_taxes", "22.0"),
+    ("hu_rate", "27"),
+    ("hu_vat_gdp", "10.1"),
+    ("hu_vat_taxes", "28.9"),
+    ("sa_rate_2018", "5"),
+    ("sa_rate_2020", "15"),
+    ("sa_date_2018", "1 January 2018"),
+    ("sa_date_2020", "July 2020"),
+    ("sg_pit_top", "24"),
+    ("sg_gst", "9"),
+    ("fst_rate", "13.5"),
+    ("gst_1991_rate", "7"),
+    ("vat_countries", "175"),
+    ("cgeb_increase", "25"),
+    ("fairtax_rate", "23"),
+    ("debt_pct_gdp", "41.2"),
+];

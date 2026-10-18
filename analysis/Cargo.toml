@@ -2,6 +2,7 @@
 name = "vat-revenue-model"
 version = "0.2.0"
 edition = "2021"
+rust-version = "1.78"
 description = "Reproducible revenue arithmetic for the consumption-tax whitepaper (Canada FY2024-25 worked example)"
 license = "AGPL-3.0-only"
 publish = false
