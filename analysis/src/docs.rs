@@ -10,14 +10,13 @@ use crate::data::{
     LVT_TAXABLE_SHARE_SCENARIO, MULTIPLIER_CIT, MULTIPLIER_PIT, NATIONAL_WEALTH_Q2_2025,
     NON_RESIDENT, PATH_YEARS, PIT, POPULATION_2024, PROPERTY_TAX_PER_CAPITA_2024,
     RESIDENTIAL_REAL_ESTATE_Q2_2025, REVENUE_PCT_GDP, SAVING_RATE_Q2_2024, SAVING_RATE_Q2_2025,
-    START_RATE, TE_HOUSEHOLD, TE_PUBLIC_AND_THRESHOLD, TOTAL_REVENUE, VRR_CANADA, VRR_NEW_ZEALAND,
-    VRR_OECD_AVERAGE,
+    START_RATE, TE_HOUSEHOLD, TOTAL_REVENUE, VRR_CANADA, VRR_NEW_ZEALAND, VRR_OECD_AVERAGE,
 };
 use crate::error::{Error, Result};
 use crate::model::{
     apc, base0, gdp, income_taxes, lvt_land_needed, lvt_rate_to_replace_property_tax, lvt_revenue,
     lvt_scenario, need_core, need_full, path_rate, property_tax_total, taxable_share_central,
-    te_sum, v11_path_rate, vrr_factor, Incidence, Scenario,
+    v11_path_rate, vrr_factor, Incidence, Scenario,
 };
 use crate::report::{self, b, num, pct, BRACKETS_2023};
 use std::collections::BTreeMap;
@@ -139,8 +138,6 @@ pub fn values() -> Result<BTreeMap<String, String>> {
     let k_b = cb.income_tax_kept(hi, core);
     let [g_lo, g_hi] = GROWTH_ADDITION_PP;
     let gf = |pp: f64| (1.0 + pp / 100.0f64).powf(f64::from(PATH_YEARS));
-    let hh = te_sum(&TE_HOUSEHOLD);
-    let pub_thr = te_sum(&TE_PUBLIC_AND_THRESHOLD);
     let groceries = TE_HOUSEHOLD[0].1;
     let path: Vec<String> = (0..=PATH_YEARS)
         .map(|t| format!("{:.1}", path_rate(t)))
@@ -178,8 +175,6 @@ pub fn values() -> Result<BTreeMap<String, String>> {
     put("growth_f_lo", format!("{:.2}", gf(g_lo)));
     put("growth_f_hi", format!("{:.2}", gf(g_hi)));
     // Baseline.
-    put("pit_b", b(PIT));
-    put("cit_b", b(CIT));
     put("pit_m", thousands(&num(PIT)));
     put("cit_m", thousands(&num(CIT)));
     put("gst_m", thousands(&num(GST_NET)));
@@ -201,7 +196,6 @@ pub fn values() -> Result<BTreeMap<String, String>> {
     put("ei_b", b(EI_PREMIUMS));
     put("credit_b", b(GST_CREDIT));
     put("holiday_b", b(GST_HOLIDAY_COST));
-    put("total_rev_b", b(TOTAL_REVENUE));
     put("rev_pct_gdp", num(REVENUE_PCT_GDP));
     put("gdp_b", thousands(&format!("{:.0}", gdp() / 1000.0)));
     put("base0_b", bc(base0()));
@@ -218,7 +212,6 @@ pub fn values() -> Result<BTreeMap<String, String>> {
     put("rate_static_a", pct(st.required_rate(core)));
     put("rate_static_b", pct(stb.required_rate(core)));
     put("rate_dyn_a", pct(cen.required_rate(core)));
-    put("rate_dyn_b", pct(cb.required_rate(core)));
     put("rate_mult_a", pct(mul.required_rate(core)));
     put("rate_static_full_a", pct(st.required_rate(need_full())));
     put("rate_static_a_round", pi(st.required_rate(core)));
@@ -308,9 +301,6 @@ pub fn values() -> Result<BTreeMap<String, String>> {
     put("vrr_oecd", format!("{VRR_OECD_AVERAGE:.2}"));
     put("vrr_nz", format!("{VRR_NEW_ZEALAND:.2}"));
     // Broadening and protection.
-    put("groceries_extra", b(groceries));
-    put("hh_extra", b(hh));
-    put("all_extra", b(hh + pub_thr));
     put("hh_count", TE_HOUSEHOLD.len().to_string());
     put("credit_hi", b(GST_CREDIT * hi / GST_RATE));
     put("groceries_hi", b(groceries * hi / GST_RATE));
@@ -340,10 +330,6 @@ pub fn values() -> Result<BTreeMap<String, String>> {
     put(
         "lvt_replace_scen",
         pct(lvt_rate_to_replace_property_tax(scen_land)),
-    );
-    put(
-        "lvt_replace_all",
-        pct(lvt_rate_to_replace_property_tax(LAND_VALUE_UNVERIFIED)),
     );
     for (k, val) in FACTS {
         put(k, (*val).to_string());
@@ -457,8 +443,8 @@ pub fn values() -> Result<BTreeMap<String, String>> {
         ("table:stack", report::table_stack),
         ("table:k", report::table_k),
         ("table:protect", report::table_protect),
-        ("table:key_figures", key_figures),
-        ("table:readme", readme_table),
+        ("table:key_figures", report::key_figures),
+        ("table:readme", report::readme_table),
     ];
     for (k, f) in tables {
         let t = f()?;
@@ -487,159 +473,6 @@ pub fn claims_inputs_table(vals: &BTreeMap<String, String>) -> Result<String> {
         ));
     }
     Ok(rows.join("\n"))
-}
-
-/// Headline numbers block.
-///
-/// # Errors
-/// Only if formatting into a `String` fails.
-pub fn key_figures() -> Result<String> {
-    use std::fmt::Write;
-    let a = Incidence::RealBaseFixed;
-    let bb = Incidence::NominalSpendingFixed;
-    let st = Scenario::static_case(a);
-    let c = Scenario::central();
-    let m = Scenario {
-        multiplier: true,
-        ..c
-    };
-    let stb = Scenario::static_case(bb);
-    let cb = Scenario::dynamic(bb);
-    let nz = Scenario {
-        base_factor: vrr_factor(VRR_NEW_ZEALAND),
-        ..st
-    };
-    let core = need_core();
-    let (hi, lo) = (START_RATE, END_RATE);
-    let mut w = String::new();
-    writeln!(
-        w,
-        "| Key figure (Canada FY2024-25, federal; incidence A unless stated) | Value |\n|---|---:|"
-    )?;
-    writeln!(w, "| Core need (PIT + CIT + net GST), $B | {} |", b(core))?;
-    writeln!(w, "| VAT revenue at {}%: static / dynamic central (MPC {:.2}) / dynamic + multiplier, $B | {} / {} / {} |", num(hi), c.mpc, b(st.revenue(hi)), b(c.revenue(hi)), b(m.revenue(hi)))?;
-    writeln!(
-        w,
-        "| Rate for core need: static / dynamic central / dynamic + multiplier | {} / {} / {} |",
-        pct(st.required_rate(core)),
-        pct(c.required_rate(core)),
-        pct(m.required_rate(core))
-    )?;
-    writeln!(
-        w,
-        "| Income tax still needed at {}%, dynamic central (k) | {} |",
-        num(hi),
-        pct(100.0 * c.income_tax_kept(hi, core))
-    )?;
-    writeln!(
-        w,
-        "| MPC needed to close the gap at {}% (maximum possible 1.0) | {:.2} |",
-        num(hi),
-        c.breakeven_mpc(hi, core)
-    )?;
-    writeln!(
-        w,
-        "| Base growth beyond needs to abolish income tax at {}% / at {}% | x{:.2} / x{:.2} |",
-        num(hi),
-        num(lo),
-        c.breakeven_growth_factor(hi, core),
-        c.breakeven_growth_factor(lo, core)
-    )?;
-    writeln!(w, "| Rate for core need with a New Zealand-level base (VRR {VRR_NEW_ZEALAND:.2}), static | {} |", pct(nz.required_rate(core)))?;
-    writeln!(
-        w,
-        "| Sensitivity B: revenue at {}% static / dynamic, $B | {} / {} |",
-        num(hi),
-        b(stb.revenue(hi)),
-        b(cb.revenue(hi))
-    )?;
-    writeln!(
-        w,
-        "| Sensitivity B: rate for core need static / dynamic; k at {}% | {} / {}; {} |",
-        num(hi),
-        pct(stb.required_rate(core)),
-        pct(cb.required_rate(core)),
-        pct(100.0 * cb.income_tax_kept(hi, core))
-    )?;
-    writeln!(
-        w,
-        "| Recurrent property tax the LVT must replace first, $B | {} |",
-        b(property_tax_total())
-    )?;
-    Ok(w)
-}
-
-/// README summary table.
-///
-/// # Errors
-/// Only if formatting into a `String` fails.
-pub fn readme_table() -> Result<String> {
-    use std::fmt::Write;
-    let a = Incidence::RealBaseFixed;
-    let bb = Incidence::NominalSpendingFixed;
-    let (st, stb) = (Scenario::static_case(a), Scenario::static_case(bb));
-    let (c, cb) = (Scenario::central(), Scenario::dynamic(bb));
-    let core = need_core();
-    let hi = START_RATE;
-    let mut w = String::new();
-    writeln!(w, "| | A | B | Source |\n|---|---:|---:|---|")?;
-    writeln!(
-        w,
-        "| Personal income tax | {} | | Public Accounts 2025, Vol I, Table 3.2 |",
-        b(PIT)
-    )?;
-    writeln!(
-        w,
-        "| Corporate income tax | {} | | Public Accounts 2025, Vol I, Table 3.2 |",
-        b(CIT)
-    )?;
-    writeln!(
-        w,
-        "| Net GST ({}%) | {} | | Public Accounts 2025, Vol I, Table 3.3 |",
-        num(GST_RATE),
-        b(GST_NET)
-    )?;
-    writeln!(
-        w,
-        "| **Core need** (PIT + CIT + GST) | **{}** | | sum |",
-        b(core)
-    )?;
-    writeln!(
-        w,
-        "| VAT at {}%, static | {} | {} | model |",
-        num(hi),
-        b(st.revenue(hi)),
-        b(stb.revenue(hi))
-    )?;
-    writeln!(
-        w,
-        "| VAT at {}%, households spend the income tax they keep (MPC {:.2}) | {} | {} | model |",
-        num(hi),
-        c.mpc,
-        b(c.revenue(hi)),
-        b(cb.revenue(hi))
-    )?;
-    writeln!(
-        w,
-        "| Rate needed for the core need, static / dynamic | {} / {} | {} / {} | model |",
-        pct(st.required_rate(core)),
-        pct(c.required_rate(core)),
-        pct(stb.required_rate(core)),
-        pct(cb.required_rate(core))
-    )?;
-    writeln!(
-        w,
-        "| Share of income tax that must remain at {}% (k) | {} | {} | model |",
-        num(hi),
-        pct(100.0 * c.income_tax_kept(hi, core)),
-        pct(100.0 * cb.income_tax_kept(hi, core))
-    )?;
-    writeln!(
-        w,
-        "| Recurrent property tax the LVT must replace first | {} | | StatCan CGFS (derived) |",
-        b(property_tax_total())
-    )?;
-    Ok(w)
 }
 
 /// Replace every `{{name}}` in `template` with its value.

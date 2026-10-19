@@ -804,10 +804,161 @@ pub fn render() -> Result<String> {
             "Table 11. Cost of protecting low-income households",
             table_protect,
         ),
-        ("Key figures", crate::docs::key_figures),
+        ("Key figures", key_figures),
     ];
     for (title, f) in sections {
         writeln!(s, "## {title}\n\n{}", f()?)?;
     }
     Ok(s)
+}
+
+/// Headline numbers block.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn key_figures() -> Result<String> {
+    let a = Incidence::RealBaseFixed;
+    let bb = Incidence::NominalSpendingFixed;
+    let st = Scenario::static_case(a);
+    let c = Scenario::central();
+    let m = Scenario {
+        multiplier: true,
+        ..c
+    };
+    let stb = Scenario::static_case(bb);
+    let cb = Scenario::dynamic(bb);
+    let nz = Scenario {
+        base_factor: vrr_factor(VRR_NEW_ZEALAND),
+        ..st
+    };
+    let core = need_core();
+    let (hi, lo) = (START_RATE, END_RATE);
+    let mut w = String::new();
+    writeln!(
+        w,
+        "| Key figure (Canada FY2024-25, federal; incidence A unless stated) | Value |\n|---|---:|"
+    )?;
+    writeln!(w, "| Core need (PIT + CIT + net GST), $B | {} |", b(core))?;
+    writeln!(w, "| VAT revenue at {}%: static / dynamic central (MPC {:.2}) / dynamic + multiplier, $B | {} / {} / {} |", num(hi), c.mpc, b(st.revenue(hi)), b(c.revenue(hi)), b(m.revenue(hi)))?;
+    writeln!(
+        w,
+        "| Rate for core need: static / dynamic central / dynamic + multiplier | {} / {} / {} |",
+        pct(st.required_rate(core)),
+        pct(c.required_rate(core)),
+        pct(m.required_rate(core))
+    )?;
+    writeln!(
+        w,
+        "| Income tax still needed at {}%, dynamic central (k) | {} |",
+        num(hi),
+        pct(100.0 * c.income_tax_kept(hi, core))
+    )?;
+    writeln!(
+        w,
+        "| MPC needed to close the gap at {}% (maximum possible 1.0) | {:.2} |",
+        num(hi),
+        c.breakeven_mpc(hi, core)
+    )?;
+    writeln!(
+        w,
+        "| Base growth beyond needs to abolish income tax at {}% / at {}% | x{:.2} / x{:.2} |",
+        num(hi),
+        num(lo),
+        c.breakeven_growth_factor(hi, core),
+        c.breakeven_growth_factor(lo, core)
+    )?;
+    writeln!(w, "| Rate for core need with a New Zealand-level base (VRR {VRR_NEW_ZEALAND:.2}), static | {} |", pct(nz.required_rate(core)))?;
+    writeln!(
+        w,
+        "| Sensitivity B: revenue at {}% static / dynamic, $B | {} / {} |",
+        num(hi),
+        b(stb.revenue(hi)),
+        b(cb.revenue(hi))
+    )?;
+    writeln!(
+        w,
+        "| Sensitivity B: rate for core need static / dynamic; k at {}% | {} / {}; {} |",
+        num(hi),
+        pct(stb.required_rate(core)),
+        pct(cb.required_rate(core)),
+        pct(100.0 * cb.income_tax_kept(hi, core))
+    )?;
+    writeln!(
+        w,
+        "| Recurrent property tax the LVT must replace first, $B | {} |",
+        b(property_tax_total())
+    )?;
+    Ok(w)
+}
+
+/// README summary table.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn readme_table() -> Result<String> {
+    let a = Incidence::RealBaseFixed;
+    let bb = Incidence::NominalSpendingFixed;
+    let (st, stb) = (Scenario::static_case(a), Scenario::static_case(bb));
+    let (c, cb) = (Scenario::central(), Scenario::dynamic(bb));
+    let core = need_core();
+    let hi = START_RATE;
+    let mut w = String::new();
+    writeln!(w, "| | A | B | Source |\n|---|---:|---:|---|")?;
+    writeln!(
+        w,
+        "| Personal income tax | {} | | Public Accounts 2025, Vol I, Table 3.2 |",
+        b(PIT)
+    )?;
+    writeln!(
+        w,
+        "| Corporate income tax | {} | | Public Accounts 2025, Vol I, Table 3.2 |",
+        b(CIT)
+    )?;
+    writeln!(
+        w,
+        "| Net GST ({}%) | {} | | Public Accounts 2025, Vol I, Table 3.3 |",
+        num(GST_RATE),
+        b(GST_NET)
+    )?;
+    writeln!(
+        w,
+        "| **Core need** (PIT + CIT + GST) | **{}** | | sum |",
+        b(core)
+    )?;
+    writeln!(
+        w,
+        "| VAT at {}%, static | {} | {} | model |",
+        num(hi),
+        b(st.revenue(hi)),
+        b(stb.revenue(hi))
+    )?;
+    writeln!(
+        w,
+        "| VAT at {}%, households spend the income tax they keep (MPC {:.2}) | {} | {} | model |",
+        num(hi),
+        c.mpc,
+        b(c.revenue(hi)),
+        b(cb.revenue(hi))
+    )?;
+    writeln!(
+        w,
+        "| Rate needed for the core need, static / dynamic | {} / {} | {} / {} | model |",
+        pct(st.required_rate(core)),
+        pct(c.required_rate(core)),
+        pct(stb.required_rate(core)),
+        pct(cb.required_rate(core))
+    )?;
+    writeln!(
+        w,
+        "| Share of income tax that must remain at {}% (k) | {} | {} | model |",
+        num(hi),
+        pct(100.0 * c.income_tax_kept(hi, core)),
+        pct(100.0 * cb.income_tax_kept(hi, core))
+    )?;
+    writeln!(
+        w,
+        "| Recurrent property tax the LVT must replace first | {} | | StatCan CGFS (derived) |",
+        b(property_tax_total())
+    )?;
+    Ok(w)
 }
