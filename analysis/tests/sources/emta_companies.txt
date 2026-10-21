@@ -1,0 +1,7 @@
+URL: https://www.emta.ee/en/business-client/registration-business/non-residents-e-residents/tax-liabilities-companies
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+profits are subject to income tax at the time that profits are distributed (e.g. via dividend payment) and not when income is earned
+normal rate of 22/78

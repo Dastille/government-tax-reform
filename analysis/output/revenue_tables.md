@@ -210,6 +210,82 @@ Static scaling (A) of two existing measures: the GST credit (PA 2025 Table 3.3) 
 | 20% | 25.1 | 26.5 |
 | 25% | 31.3 | 33.1 |
 
+## Table 12. Debt-neutral transition: three spin-up cases
+
+| Case | Spending effect | Capital per point of METR cut | METR cut, points | Speed per year | k at launch | k after 10 years | k settles at | Capital stock, long run | Years to k = 0 (within 100) | Gap left with k = 0, $B |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---|---:|
+| Low | MPC 0.50 | 0.1% | 5 | 0.1 | 49.9% | 49.8% | 49.8% | +0.3% | never | 156.4 |
+| Central | MPC 0.95 | 0.2% | 8 | 0.2 | 47.3% | 46.9% | 46.9% | +0.8% | never | 140.0 |
+| High | MPC 0.95 + multipliers | 0.4% | 13.2 | 0.3 | 44.4% | 42.8% | 42.7% | +3.0% | never | 120.2 |
+
+## Table 13. Central case under the rule, year by year
+
+| Year | k | Capital stock vs launch | Build-out investment, $B | Revenue, $B | Structural revenue, $B | Deficit change vs baseline, $B |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 47.34% | +0.00% | 0.0 | 383.8 | 383.8 | 0.0 |
+| 1 | 47.34% | +0.17% | 15.0 | 385.6 | 384.0 | -1.8 |
+| 2 | 47.26% | +0.30% | 12.0 | 385.3 | 384.0 | -1.5 |
+| 3 | 47.18% | +0.41% | 9.6 | 385.0 | 384.0 | -1.2 |
+| 5 | 47.08% | +0.57% | 6.2 | 384.5 | 383.9 | -0.8 |
+| 10 | 46.95% | +0.76% | 2.1 | 384.0 | 383.8 | -0.3 |
+| 20 | 46.89% | +0.84% | 0.2 | 383.8 | 383.8 | 0.0 |
+| 50 | 46.88% | +0.85% | 0.0 | 383.8 | 383.8 | 0.0 |
+
+## Table 14. Recession stress test (central case)
+
+| Year | k | Revenue, $B | Deficit change vs baseline, $B | Compensation account owed, $B | Rule action for next year |
+|---:|---:|---:|---:|---:|---|
+| 4 | 47.12% | 384.7 | -1.0 | 0.0 | cut k |
+| 5 | 47.08% | 373.0 | 10.8 | 10.8 | reverse: raise k |
+| 6 | 48.16% | 387.7 | -3.9 | 6.8 | reverse: raise k |
+| 7 | 48.84% | 389.7 | -5.9 | 0.9 | reverse: raise k |
+| 8 | 48.93% | 390.0 | -6.2 | 0.0 | cut k |
+| 9 | 47.34% | 385.2 | -1.4 | 0.0 | cut k |
+
+## Table 15. Industry spin-up inputs and build-out
+
+| Input | Value | Source |
+|---|---:|---|
+| Output per $ of final demand | 1.560 | StatCan Table 36-10-0013-01, simple multiplier, total industries, 2022 (**unverified**: search-index copy) |
+| GDP at market prices per $ of final demand | 0.833 | StatCan Table 36-10-0013-01, simple multiplier, total industries, 2022 (**unverified**: search-index copy) |
+| Gross operating surplus per $ of final demand | 0.348 | StatCan Table 36-10-0013-01, simple multiplier, total industries, 2022 (**unverified**: search-index copy) |
+| International imports per $ of final demand | 0.167 | StatCan Table 36-10-0013-01, simple multiplier, total industries, 2022 (**unverified**: search-index copy) |
+| Jobs per $1M of final demand | 6.199 | StatCan Table 36-10-0013-01, simple multiplier, total industries, 2022 (**unverified**: search-index copy) |
+| Capital share of GDP (surplus / GDP) | 0.418 | derived from the two rows above (**unverified**) |
+| Capital proxy (national wealth less residential real estate), $T | 8.9 | StatCan national balance sheet (derived) |
+
+| Case | Peak build-out investment, $B/yr | GDP from it, $B | Imports, $B | Jobs supported (thousands) | Long-run base gain with k = 0 | Revenue gain with k = 0, $B/yr | Share of the cost of abolition it covers |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Low | 2.2 | 1.9 | 0.4 | 14 | +0.21% | 0.5 | 0.3% |
+| Central | 15.0 | 12.5 | 2.5 | 93 | +0.67% | 1.6 | 1.1% |
+| High | 78.3 | 65.2 | 13.1 | 485 | +2.21% | 5.7 | 4.5% |
+
+## Table 16. Levers for the gap left with k = 0
+
+| Case | Gap, $B | VAT rate that closes it alone | Tax household GST exemptions at the rule rate, $B | Program-Review-sized spending cut, $B | LVT scenario, $B (land value unverified) | VAT rate needed with all three |
+|---|---:|---:|---:|---:|---:|---:|
+| Low | 156.4 | 34.0% | 66.7 | 44.9 | 32.0 | 20.5% |
+| Central | 140.0 | 31.9% | 67.0 | 44.9 | 32.0 | 19.1% |
+| High | 120.2 | 29.5% | 68.1 | 44.9 | 32.0 | 17.6% |
+
+| Case, with all three levers | k at launch | Years to k = 0 under the rule (within 100) | VAT rate that then meets the need |
+|---|---:|---|---:|
+| Low | 2.6% | never | 20.5% |
+| Central | 0.0% | 0 | 19.1% |
+| High | 0.0% | 0 | 17.6% |
+
+## Table 17. Counter-arguments, measured
+
+| Risk | Measure | Value | Who bears it |
+|---|---|---:|---|
+| Regressivity | GST credit scaled to 20%, $B/yr (already netted out of the model's base) | 25.1 | low-income households if the credit is not scaled |
+| Regressivity | Same, share of VAT revenue at 20% | 10.3% | |
+| Evasion | k at launch if the net GST/HST gap (5.8%) applies to new VAT revenue | 50.7% | compliant firms and buyers |
+| Evasion | k at launch if the gross GST/HST gap (13.5%) applies to new VAT revenue | 55.1% | compliant firms and buyers |
+| Recession | Deficit change in a year the base falls 3%, $B | 10.8 | taxpayers, through the reversal |
+| Recession | Years to repay it under the rule | 3 | |
+| Profit shifting | Ireland 2024: GNI* / GDP | 57.1% | measured GDP overstates domestic income |
+
 ## Key figures
 
 | Key figure (Canada FY2024-25, federal; incidence A unless stated) | Value |

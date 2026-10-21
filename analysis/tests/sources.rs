@@ -12,7 +12,11 @@ use std::path::Path;
 use vat_revenue_model::data::*;
 use vat_revenue_model::ledger::{Status, INPUTS};
 
-const ACCESSED: &str = "Accessed: 2026-10-18 (America/New_York)";
+/// Access dates of the excerpt sets: v2.0 (2026-10-18) and v3.0 additions (2026-10-21).
+const ACCESSED: [&str; 2] = [
+    "Accessed: 2026-10-18 (America/New_York)",
+    "Accessed: 2026-10-21 (America/New_York)",
+];
 
 fn root() -> &'static Path {
     Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -602,6 +606,212 @@ fn checks() -> Vec<Check> {
         v.push(cell(input, te, verbatim, 1, "GST".to_string()));
         v.push(cell(input, te, verbatim, TE_2024, thousands(*cost)));
     }
+    // v3 inputs.
+    let b25 = "budget2025_ch1";
+    v.push(contains(
+        "METR_2025",
+        b25,
+        format!("reduced from {} per cent", plain(METR_2025)),
+    ));
+    v.push(contains(
+        "METR_2025_SUPER",
+        b25,
+        format!("to {} per cent", plain(METR_2025_SUPER)),
+    ));
+    let gap = "cra_tax_gap_2026";
+    v.push(cell(
+        "GST_GAP_GROSS_2022",
+        gap,
+        "Gross GST/HST gap",
+        2,
+        format!("{}% of GST/HST revenue", plain(GST_GAP_GROSS_2022)),
+    ));
+    v.push(cell(
+        "GST_GAP_NET_2022",
+        gap,
+        "Net GST/HST gap",
+        2,
+        format!("{}% of GST/HST revenue", plain(GST_GAP_NET_2022)),
+    ));
+    let afx = "afr2024_25_expenses";
+    v.push(cell(
+        "DIRECT_PROGRAM_EXPENSES",
+        afx,
+        "Total direct program expenses",
+        1,
+        thousands(DIRECT_PROGRAM_EXPENSES),
+    ));
+    v.push(cell(
+        "PUBLIC_DEBT_CHARGES",
+        afx,
+        "Public debt charges",
+        1,
+        thousands(PUBLIC_DEBT_CHARGES),
+    ));
+    v.push(cell(
+        "UNMATURED_DEBT",
+        afx,
+        "Unmatured debt",
+        1,
+        thousands(UNMATURED_DEBT),
+    ));
+    v.push(cell(
+        "OPERATING_DEFICIT",
+        afx,
+        "Annual operating deficit",
+        1,
+        format!("({})", thousands(OPERATING_DEFICIT)),
+    ));
+    let b95 = "budget1995";
+    v.push(contains(
+        "PROGRAM_REVIEW_SCOPE",
+        b95,
+        format!(
+            "about ${} billion worth of spending",
+            plain(PROGRAM_REVIEW_SCOPE / 1000.0)
+        ),
+    ));
+    v.push(arithmetic(
+        "pr_scope_b",
+        b95,
+        fact("pr_scope_b") == plain(PROGRAM_REVIEW_SCOPE / 1000.0),
+        "pr_scope_b equals PROGRAM_REVIEW_SCOPE in $B",
+    ));
+    v.push(contains(
+        "PROGRAM_REVIEW_DECLINE_PCT",
+        b95,
+        format!("declined {} per cent", plain(PROGRAM_REVIEW_DECLINE_PCT)),
+    ));
+    v.push(contains(
+        "pr_base_year",
+        b95,
+        format!("relative to three years {}", fact("pr_base_year")),
+    ));
+    v.push(contains(
+        "pr_cuts_b",
+        b95,
+        format!(
+            "${} billion of cumulative spending reductions",
+            fact("pr_cuts_b")
+        ),
+    ));
+    v.push(contains("pr_ratio", b95, fact("pr_ratio").to_string()));
+    v.push(contains(
+        "pr_deficit_target",
+        b95,
+        format!("{} per cent of GDP or $", fact("pr_deficit_target")),
+    ));
+    v.push(contains(
+        "pr_deficit_target_b",
+        b95,
+        format!(
+            "{} per cent of GDP or ${} billion",
+            fact("pr_deficit_target"),
+            fact("pr_deficit_target_b")
+        ),
+    ));
+    let ch = "efv_debt_brake";
+    v.push(contains(
+        "ch_yes_vote",
+        ch,
+        format!("vote of {}%", fact("ch_yes_vote")),
+    ));
+    v.push(contains(
+        "ch_vote_date",
+        ch,
+        format!("referendum of {}", fact("ch_vote_date")),
+    ));
+    v.push(contains(
+        "ch_debt_2003",
+        ch,
+        format!("from {} to", fact("ch_debt_2003")),
+    ));
+    v.push(contains(
+        "ch_debt_2019",
+        ch,
+        format!("to {}.", fact("ch_debt_2019")),
+    ));
+    let de = "bmf_art115";
+    v.push(contains(
+        "de_structural",
+        de,
+        format!(
+            "up to {} percent in relation to nominal gross domestic product",
+            fact("de_structural")
+        ),
+    ));
+    v.push(contains(
+        "de_control",
+        de,
+        format!("threshold of {} percent", fact("de_control")),
+    ));
+    let se = "gov_se_framework";
+    v.push(contains(
+        "se_debt_anchor",
+        se,
+        format!("debt anchor of {}% of GDP", fact("se_debt_anchor")),
+    ));
+    v.push(contains(
+        "se_origin",
+        se,
+        format!("underwent in {}", fact("se_origin")),
+    ));
+    v.push(contains(
+        "nz_gst_1986",
+        "ird_gst_bill_1985",
+        format!("single rate - {}%", fact("nz_gst_1986")),
+    ));
+    v.push(contains(
+        "nz_date",
+        "ird_gst_bill_1985",
+        format!("(GST) from {}", fact("nz_date")),
+    ));
+    v.push(contains(
+        "nz_date",
+        "ird_ita2_1986",
+        format!(
+            "with effect from {} to coincide with the introduction of GST",
+            fact("nz_date")
+        ),
+    ));
+    v.push(cell(
+        "nz_top_1986",
+        "ird_ita2_1986",
+        "Over $30,000",
+        1,
+        format!("{}c", fact("nz_top_1986")),
+    ));
+    let ie = "cso_ana2024_gni";
+    v.push(cell(
+        "IE_GDP_2024",
+        ie,
+        "1. Gross domestic product at current market prices",
+        7,
+        thousands(IE_GDP_2024),
+    ));
+    v.push(cell(
+        "IE_GNI_STAR_2024",
+        ie,
+        "10. Modified gross national income at current market prices",
+        7,
+        thousands(IE_GNI_STAR_2024),
+    ));
+    v.push(contains(
+        "ie_gni_share",
+        ie,
+        format!("to {}%", fact("ie_gni_share")),
+    ));
+    v.push(arithmetic(
+        "ie_gni_share",
+        ie,
+        format!("{:.1}", 100.0 * IE_GNI_STAR_2024 / IE_GDP_2024) == fact("ie_gni_share"),
+        "GNI* / GDP rounds to ie_gni_share",
+    ));
+    v.push(contains(
+        "ee_rate",
+        "emta_companies",
+        format!("normal rate of {}", fact("ee_rate")),
+    ));
     v
 }
 
@@ -615,6 +825,46 @@ fn us_date(d: &str) -> String {
 /// Phrases the paper states as text (dates, mechanisms), each with its verbatim support.
 /// `(stem, excerpt phrase, paper phrase)`.
 const TEXT_CHECKS: &[(&str, &str, &str)] = &[
+    (
+        "afr2024_25_expenses",
+        "distinguishes its day-to-day operational spending from expenditure that stimulates public and private sector capital formation",
+        "distinguishes its day-to-day operational spending from expenditure that stimulates public and private sector capital formation",
+    ),
+    (
+        "efv_debt_brake",
+        "a tax reduction has to be accompanied by expenditure cuts",
+        "a tax cut must be matched by spending cuts",
+    ),
+    (
+        "efv_debt_brake",
+        "Any deficit in the compensation account has to be eliminated in subsequent years",
+        "shortfalls go to a compensation account that must be cleared in later years",
+    ),
+    (
+        "efv_debt_brake",
+        "ratio of trend gross domestic product (trend GDP) to current GDP",
+        "the ratio of trend GDP to current GDP",
+    ),
+    (
+        "cso_ana2024_gni",
+        "designed to exclude globalisation effects",
+        "because globalisation effects distort GDP",
+    ),
+    (
+        "emta_companies",
+        "profits are subject to income tax at the time that profits are distributed",
+        "taxes company profits only when distributed",
+    ),
+    (
+        "ird_ita2_1986",
+        "Reduce personal income tax rates with effect from 1 October 1986",
+        "personal income tax rates cut on the same date",
+    ),
+    (
+        "budget1995",
+        "excluding only major statu- tory transfers",
+        "excluding major statutory transfers",
+    ),
     (
         "lop_prb0003",
         "introduced on 1 January 1991",
@@ -700,8 +950,9 @@ fn excerpt_files_have_url_and_access_date() {
             "{stem}: no `URL: http…` line"
         );
         assert!(
-            h.lines().any(|l| l == ACCESSED),
-            "{stem}: no `{ACCESSED}` line"
+            h.lines().any(|l| ACCESSED.contains(&l)),
+            "{stem}: no `{}` line",
+            ACCESSED.join("` or `")
         );
         assert!(
             h.lines().any(|l| l.starts_with("Retrieved: ")),
@@ -787,7 +1038,16 @@ fn verified_rows_have_excerpt_checks() {
 
 #[test]
 fn unverified_inputs_are_not_marked_verified() {
-    for name in ["LAND_VALUE_UNVERIFIED", "GROWTH_ADDITION_PP"] {
+    for name in [
+        "LAND_VALUE_UNVERIFIED",
+        "GROWTH_ADDITION_PP",
+        "USER_COST_SEMI_ELASTICITY_UNVERIFIED",
+        "IO_OUTPUT_2022",
+        "IO_GDP_2022",
+        "IO_GOS_2022",
+        "IO_IMPORTS_2022",
+        "IO_JOBS_2022",
+    ] {
         let rows: Vec<_> = INPUTS.iter().filter(|c| c.inputs.contains(&name)).collect();
         assert!(!rows.is_empty(), "{name} has no ledger row");
         for r in rows {

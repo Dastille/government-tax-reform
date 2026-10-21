@@ -5,7 +5,7 @@ A proposal for **fundamental tax reform in mid-sized advanced economies**: repla
 
 This is independent analysis. It is not a bill, not advice, and not affiliated with any government.
 
-Paper: **[tax-whitepaper.md](tax-whitepaper.md)** (v2.0). Model output: [analysis/output/revenue_tables.md](analysis/output/revenue_tables.md).
+Paper: **[tax-whitepaper.md](tax-whitepaper.md)** (v3.0). Model output: [analysis/output/revenue_tables.md](analysis/output/revenue_tables.md).
 
 ## The proposal
 
@@ -38,6 +38,14 @@ Every scenario uses one stated price assumption. **A (central):** the VAT is pas
 - **Full abolition** at 20% needs a taxable base about 1.58× larger than today's relative to spending needs. A New Zealand-style broad base is enough: with it, the static rate needed is 19.0%.
 - **The 8% endpoint** needs about 3.90× the base.
 - **Property tax** (about $92.6B) stays until LVT revenue replaces it.
+
+## Debt-neutral transition (v3.0)
+
+The paper's §10, §11 and §12 add a rule under which income tax is cut only by revenue already realised above the need, with a pause and a reversal when revenue falls short. Without a shock, the deficit never rises above the baseline.
+
+- **Does it close the gap without debt?** An industry spin-up from lower income tax (a scenario, not a forecast) does not close the gap in any case. k settles at 49.8% / 46.9% / 42.7% (low / central / high); years to full abolition: never / never / never.
+- **What would close it.** Base broadening, a cut the size of Canada's Program Review ($44.9B) and the LVT together; with them, the central case can abolish the income tax, and the VAT it then needs is 19.1%. The LVT's land value is unverified.
+- **Infrastructure test.** Borrowing to abolish income tax at once fails it: the spin-up revenue covers 1.1% of the cost in the central case.
 - Within each assumption, more revenue always means a lower required rate, and a test enforces this.
 - The paper's §9 lists every original requirement, who it came from, and whether it was kept, reframed or deleted. [CLAIMS.md](CLAIMS.md) maps every claim to its test or source.
 

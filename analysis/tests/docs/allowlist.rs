@@ -25,7 +25,7 @@ const fn e(
 }
 
 pub const ALLOWLIST: &[Entry] = &[
-    e("tax-whitepaper.md", "**Whitepaper · v2.0 (sou", "2026", "revision date (this revision, October 2026)"),
+    e("tax-whitepaper.md", "**Whitepaper · v3.0 (deb", "2026", "revision date (this revision, October 2026)"),
     e("tax-whitepaper.md", "**Author:** Ashlynn (ori", "2026", "date of the original design, commit ab193f4 (January 2026)"),
     e("tax-whitepaper.md", "**Scope.** The design is", "2024-25", "fiscal-year definition, April 2024 to March 2025 [R1, R2]: \"its federal accounts for fiscal year 2024-25 (April 2024 to March 2025,\""),
     e("tax-whitepaper.md", "**Scope.** The design is", "2024", "fiscal year April 2024 to March 2025 [R1, R2]"),
@@ -212,4 +212,20 @@ pub const ALLOWLIST: &[Entry] = &[
     e("ledger.rs", "FairTax rate {{fairtax_r", "25", "locator, edition or data year of the cited source: \"{{fairtax_rate}}% of gross payments (2027) | H.R. 25 (119th Congress), introduced\""),
     e("ledger.rs", "FairTax rate {{fairtax_r", "119th", "locator, edition or data year of the cited source: \"of gross payments (2027) | H.R. 25 (119th Congress), introduced text\""),
     e("ledger.rs", "Federal debt {{debt_pct_", "2024-25", "locator, edition or data year of the cited source: \"{{debt_pct_gdp}}% of GDP | Annual Financial Report 2024-25 [R2]; `afr2024_25`\""),
+    // v3.0 additions (debt-neutral transition, sections 10-12).
+    e("tax-whitepaper.md", "| Canada, Program Review |", "1995", "Budget 1995 [R23] (title of the budget document)"),
+    e("tax-whitepaper.md", "| Germany, Schuldenbremse |", "115", "Act to implement Article 115 of the Basic Law [R25] (title)"),
+    e("tax-whitepaper.md", "- **Cost of capital.** Canada's", "2025", "Budget 2025 [R29] (title of the budget document)"),
+    e("tax-whitepaper.md", "- **Build-out.** Investment", "$1M", "StatCan Table 36-10-0013-01 unit: jobs per $1M (\"per million dollars\") of output"),
+    e("tax-whitepaper.md", "- [R23] Department of Finance Canada, *Budget 1995*", "1995", "reference title: Budget 1995"),
+    e("tax-whitepaper.md", "- [R25] German Federal Ministry", "115", "reference title: Article 115 of the Basic Law"),
+    e("tax-whitepaper.md", "- [R27] Inland Revenue (New Zealand)", "1985", "reference title: Goods and Services Tax Bill 1985"),
+    e("tax-whitepaper.md", "- [R28] Inland Revenue (New Zealand)", "2", "reference title: Income Tax Amendment Act (No 2) 1986"),
+    e("tax-whitepaper.md", "- [R28] Inland Revenue (New Zealand)", "1986", "reference title: Income Tax Amendment Act (No 2) 1986"),
+    e("tax-whitepaper.md", "- [R29] Department of Finance Canada, *Budget 2025*", "2025", "reference title: Budget 2025, Chapter 1"),
+    e("tax-whitepaper.md", "- [R29] Department of Finance Canada, *Budget 2025*", "1", "reference title: Budget 2025, Chapter 1"),
+    e("tax-whitepaper.md", "- [R30] International Monetary Fund", "20/77", "reference id: Working Paper WP/20/77"),
+    e("tax-whitepaper.md", "- [R32] Central Statistics Office", "2024", "reference title: Annual National Accounts 2024"),
+    e("tax-whitepaper.md", "- [R34] Canada Revenue Agency", "2026", "reference title: Overall federal tax gap report 2026"),
+    e("CLAIMS.md", "- The excerpts were captured on", "2026-10-21", "access date of the v3.0 excerpts: Accessed: 2026-10-21"),
 ];

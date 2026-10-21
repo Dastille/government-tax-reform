@@ -1,0 +1,7 @@
+URL: https://www.taxtechnical.ird.govt.nz/pib-reviews/archived-legislative-commentary/income-tax/income-tax-amendment-act-no-2-1986
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+Reduce personal income tax rates with effect from 1 October 1986 to coincide with the introduction of GST.
+| Over $30,000 | 48c |

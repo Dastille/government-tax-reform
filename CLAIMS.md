@@ -47,7 +47,7 @@ The paper, README and this file are generated: `analysis/templates/*.md` plus va
 - "one" and ordinals ("second quarter", "third bracket") are not scanned: they are mostly not quantities, so a quantity written that way needs review by eye.
 - The scan checks that a literal sits on a known line; whether it is correct rests on its source. Literals that are model inputs are instead checked against source excerpts (above).
 - Text inside the Rust table code (`report.rs`, `docs.rs`) is not scanned. Tables are built from constants; a few labels hold fixed numbers that are definitions (for example "maximum possible 1.0" for the MPC).
-- The excerpts were captured on 2026-10-18 through the fetch tool's HTML-to-Markdown rendering, `curl` or `pdftotext`, with whitespace collapsed. They are verbatim from those renderings, not byte copies of the pages, and a test cannot show that a live page still says the same thing.
+- The excerpts were captured on 2026-10-18 (v3.0 additions on 2026-10-21) through the fetch tool's HTML-to-Markdown rendering, `curl` or `pdftotext`, with whitespace collapsed. They are verbatim from those renderings, not byte copies of the pages, and a test cannot show that a live page still says the same thing.
 
 ## Within the model
 
@@ -62,6 +62,11 @@ The paper, README and this file are generated: `analysis/templates/*.md` plus va
 | Required rates actually meet the need | Verified | `model.rs` `required_rate_actually_meets_need` |
 | VAT(k) + k × (PIT + CIT) = need | Verified | `model.rs` `partial_replacement_balances` |
 | Rate path 20 − 1.2t gives 20 / 14.0 / 8 at t = 0 / 5 / 10; v1.1's formula gave 9.2 | Verified | `model.rs` `rate_path_is_consistent` |
+| Debt-neutral rule: without a shock, the deficit change against the baseline is never positive, in any case, over 100 years | Verified | `transition.rs` `deficit_never_rises_without_a_shock` |
+| The rule cuts k only from realised, structural surplus, and the cut never exceeds it | Verified | `transition.rs` `cuts_never_exceed_the_structural_surplus` |
+| Pause and reversal: after a 3% base fall the rule raises k and repays the account in 3 years | Verified | `transition.rs` `recession_triggers_reversal_and_repayment` |
+| Spin-up does not close the gap in any case: k settles at 49.8% / 46.9% / 42.7% | Verified (arithmetic); semi-elasticity **UNVERIFIED** | `transition.rs` `no_case_reaches_full_abolition`, `simulation_converges_to_settled_k` |
+| With broadening, a Program-Review-sized cut and the LVT, the central case reaches full abolition at a VAT of 19.1% | Verified (arithmetic); LVT land value **UNVERIFIED** | `transition.rs` `package_closes_the_central_case` |
 | LVT arithmetic: $100B at 1% needs $5T of land | Verified (arithmetic); land value **UNVERIFIED** | `model.rs` `lvt_land_requirement` |
 
 ## Inputs
@@ -98,11 +103,27 @@ Generated from `analysis/src/ledger.rs`. Excerpt files are in `analysis/tests/so
 | Taxable share of land after exemptions 50% | Scenario parameter, not data | Chosen to illustrate the design's exemptions |
 | Growth addition +1.5–2.5 pp a year | **UNVERIFIED** | From the original paper; no source found; what-if only |
 | VAT 20% → 8% over 10 years; LVT 0.5–1% raising $50–100B; dividend for the bottom 40–50%; 60–70% of incremental revenue to infrastructure | Design choice (ab193f4), not data | Ashlynn's original design (ab193f4) |
+| METR on new business investment 15.6%, 13.2% with the super-deduction | Verified (source excerpt) | Federal budget, chapter on growth [R29]; excerpt `budget2025_ch1` |
+| Input-output multipliers (latest year): GDP 0.833 and 6.199 jobs per $M of final demand; capital share 0.418 | **UNVERIFIED** | StatCan Table 36-10-0013-01 [R31], read from a search index copy; the live site was down on the access date, so no excerpt |
+| Capital semi-elasticity 0.2% per point of METR | **UNVERIFIED** | IMF working paper [R30], abstract as summarised by a search index; the IMF pages refused the fetch |
+| GST/HST gap: net 5.8%, gross 13.5% of revenue | Verified (source excerpt) | CRA overall federal tax gap report [R34]; excerpt `cra_tax_gap_2026` |
+| Direct program expenses $237.6B; deficit $36.3B; average rate on unmatured debt 3.6% | Verified (source excerpt) | Annual Financial Report, expense and debt tables and statement of financial position [R2]; excerpt `afr2024_25_expenses` |
+| Program Review: about $52B covered; spending down 18.9% relative to 1994-95; $25.3B of cuts; interim target 3% of GDP ($24.3B) | Verified (source excerpt) | Program Review budget plan [R23]; excerpt `budget1995` |
+| Swiss debt brake: approved by 85% on 2 December 2001; debt ratio from 25.3% (2003) to 13.5% (2019) | Verified (source excerpt) | Swiss Federal Finance Administration [R24]; excerpt `efv_debt_brake` |
+| Germany: structural borrowing up to 0.35% of GDP; control account limit 1.5% | Verified (source excerpt) | Act implementing the German debt brake [R25]; excerpt `bmf_art115` |
+| Sweden: debt anchor 35% of GDP; framework from the early 1990s | Verified (source excerpt) | Government Offices of Sweden [R26]; excerpt `gov_se_framework` |
+| New Zealand: GST at 10% from 1 October 1986; top income tax rate 48c | Verified (source excerpt) | Inland Revenue [R27, R28]; excerpts `ird_gst_bill_1985`, `ird_ita2_1986` |
+| Ireland: GNI* 57.1% of GDP (latest year) | Verified (source excerpt) | CSO Annual National Accounts [R32]; excerpt `cso_ana2024_gni` |
+| Estonia: profits taxed when distributed, at 22/78 | Verified (source excerpt) | Estonian Tax and Customs Board [R33]; excerpt `emta_companies` |
+| Spin-up cases: semi-elasticity scale, METR cut and speed; recession of 3% in one year | Scenario parameter, not data | Chosen to span low, central and high cases; not estimates |
+| Rule: repay the compensation account over 3 years; simulate 100 years | Design choice (ab193f4), not data | Design choice of v3.0 (not in ab193f4); the Swiss rule [R24] sets no fixed repayment period |
 
 ## Source caveats
 
 - **Meade Report [R17].** The paper says the committee "favoured an expenditure-tax base, setting out universal (ch. 9) and two-tier (ch. 10) variants". The chapter titles come from the book's table of contents; the report's text was not read for this revision, so the characterisation is secondary.
 - **Hall-Rabushka [R18], Bradford [R19] and the Carter Commission [R21]** are described from publisher pages and a secondary summary; the primary texts were not opened. The paper dates the Carter report 1966, as The Canadian Encyclopedia does; the external audit notes it was dated December 1966 and tabled in February 1967, which was not checked against the report itself.
+- **Statistics Canada Table 36-10-0013-01 [R31].** The live site returned an outage page on the access date; the values were read from the search tool's index copy of the table page. No verbatim excerpt is committed, so these inputs are marked unverified.
+- **IMF working paper [R30].** The IMF pages refused the fetch; the semi-elasticity is from a search summary of the abstract and is unverified.
 - **Saudi Ministry of Finance [R15b].** The page URL encodes 11 May 2020 and its dateline reads 5/12/2020; the paper uses 11 May 2020. The quoted sentence is in the excerpt.
 
 ## Not quantified / UNVERIFIED
@@ -114,4 +135,7 @@ Generated from `analysis/src/ledger.rs`. Excerpt files are in `analysis/tests/so
 | Cost of zero-rating children's clothing | UNVERIFIED |
 | Compliance leakage at higher rates | Assumption sweep only |
 | Which incidence assumption (A or B) holds in practice | Not estimated; both are shown |
+| Capital semi-elasticity to the METR (0.2% per point, IMF working paper [R30]) | UNVERIFIED |
+| Federal share of the METR; the METR cut in the low and central spin-up cases | Scenario |
+| Cost of a universal VAT prebate; Estonian-style distributed-profit tax revenue for Canada | UNVERIFIED |
 | UAE, Bahrain and Oman VAT; Denmark and Australia LVT; constitutional route to entrenchment | UNVERIFIED |

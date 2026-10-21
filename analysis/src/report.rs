@@ -756,7 +756,7 @@ pub fn render() -> Result<String> {
         "All amounts are $ billions, federal government, fiscal year April 2024 to March 2025.\n"
     )?;
     writeln!(s, "{}", incidence_note()?)?;
-    let sections: [Section; 15] = [
+    let sections: [Section; 21] = [
         (
             "Table 0. First-principles derivation (incidence A)",
             table_first_principles,
@@ -804,6 +804,24 @@ pub fn render() -> Result<String> {
             "Table 11. Cost of protecting low-income households",
             table_protect,
         ),
+        (
+            "Table 12. Debt-neutral transition: three spin-up cases",
+            table_transition,
+        ),
+        (
+            "Table 13. Central case under the rule, year by year",
+            table_transition_path,
+        ),
+        (
+            "Table 14. Recession stress test (central case)",
+            table_recession,
+        ),
+        (
+            "Table 15. Industry spin-up inputs and build-out",
+            table_spinup,
+        ),
+        ("Table 16. Levers for the gap left with k = 0", table_levers),
+        ("Table 17. Counter-arguments, measured", table_counter_v3),
         ("Key figures", key_figures),
     ];
     for (title, f) in sections {
@@ -959,6 +977,302 @@ pub fn readme_table() -> Result<String> {
         w,
         "| Recurrent property tax the LVT must replace first | {} | | StatCan CGFS (derived) |",
         b(property_tax_total())
+    )?;
+    Ok(w)
+}
+
+// ---------------------------------------------------------------------------
+// v3: debt-neutral transition, industry spin-up, infrastructure (paper sections 10-12).
+// ---------------------------------------------------------------------------
+
+/// Like [`b`], but values that round to zero print as `0.0` (no `-0.0`).
+#[must_use]
+pub fn bz(x: f64) -> String {
+    if x.abs() < 50.0 {
+        "0.0".to_string()
+    } else {
+        b(x)
+    }
+}
+
+/// Per-cent value with two decimals and a % sign.
+#[must_use]
+pub fn p2(x: f64) -> String {
+    format!("{x:.2}%")
+}
+
+/// Years to `k = 0` under the rule within the horizon, or "never".
+#[must_use]
+pub fn years_text(case: &crate::transition::Case) -> String {
+    match crate::transition::years_to_abolition(case) {
+        Some(y) => format!("{y}"),
+        None => "never".to_string(),
+    }
+}
+
+/// "immediately once the levers are in force", "after N years", or "never".
+#[must_use]
+pub fn years_phrase(case: &crate::transition::Case) -> String {
+    match crate::transition::years_to_abolition(case) {
+        Some(0) => "immediately once the levers are in force".to_string(),
+        Some(y) => format!("after {y} years"),
+        None => "never".to_string(),
+    }
+}
+
+/// Table 12: the three spin-up cases under the debt-neutral rule.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_transition() -> Result<String> {
+    use crate::transition::{levers, simulate, Case};
+    let mut w = String::new();
+    writeln!(w, "| Case | Spending effect | Capital per point of METR cut | METR cut, points | Speed per year | k at launch | k after {} years | k settles at | Capital stock, long run | Years to k = 0 (within {}) | Gap left with k = 0, $B |\n|---|---|---:|---:|---:|---:|---:|---:|---:|---|---:|", PATH_YEARS, crate::data::HORIZON_YEARS)?;
+    for c in Case::all() {
+        let s = simulate(&c, crate::data::HORIZON_YEARS, None);
+        let spend = if c.spending.multiplier {
+            format!("MPC {:.2} + multipliers", c.spending.mpc)
+        } else {
+            format!("MPC {:.2}", c.spending.mpc)
+        };
+        writeln!(
+            w,
+            "| {} | {} | {}% | {} | {} | {} | {} | {} | +{} | {} | {} |",
+            c.name,
+            spend,
+            num(c.semi_elasticity),
+            num(c.metr_cut),
+            num(c.speed),
+            pct(100.0 * c.launch_k()),
+            pct(100.0 * s[PATH_YEARS as usize].k),
+            pct(100.0 * c.settled_k()),
+            pct(100.0 * c.capital_target(c.settled_k())),
+            years_text(&c),
+            b(levers(&c).gap)
+        )?;
+    }
+    Ok(w)
+}
+
+/// Table 13: central case, year by year.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_transition_path() -> Result<String> {
+    use crate::transition::{simulate, Case};
+    let c = Case::all()[1];
+    let s = simulate(&c, crate::data::HORIZON_YEARS, None);
+    let mut w = String::new();
+    writeln!(w, "| Year | k | Capital stock vs launch | Build-out investment, $B | Revenue, $B | Structural revenue, $B | Deficit change vs baseline, $B |\n|---:|---:|---:|---:|---:|---:|---:|")?;
+    for t in [0_usize, 1, 2, 3, 5, 10, 20, 50] {
+        let y = s[t];
+        writeln!(
+            w,
+            "| {} | {} | +{} | {} | {} | {} | {} |",
+            y.t,
+            p2(100.0 * y.k),
+            p2(100.0 * y.capital),
+            b(y.investment),
+            b(y.revenue),
+            b(y.structural_revenue),
+            bz(y.deficit_change)
+        )?;
+    }
+    Ok(w)
+}
+
+/// Table 14: recession stress test on the central case.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_recession() -> Result<String> {
+    use crate::data::{RECESSION_BASE_DROP_PCT, RECESSION_YEAR};
+    use crate::transition::{simulate, Case};
+    let c = Case::all()[1];
+    let s = simulate(
+        &c,
+        crate::data::HORIZON_YEARS,
+        Some((RECESSION_YEAR, RECESSION_BASE_DROP_PCT)),
+    );
+    let mut w = String::new();
+    writeln!(w, "| Year | k | Revenue, $B | Deficit change vs baseline, $B | Compensation account owed, $B | Rule action for next year |\n|---:|---:|---:|---:|---:|---|")?;
+    let first = RECESSION_YEAR as usize - 1;
+    for y in &s[first..first + 6] {
+        let next = s[y.t as usize + 1].k;
+        let action = if next > y.k + 1e-12 {
+            "reverse: raise k"
+        } else if next < y.k - 1e-12 {
+            "cut k"
+        } else {
+            "pause"
+        };
+        writeln!(
+            w,
+            "| {} | {} | {} | {} | {} | {} |",
+            y.t,
+            p2(100.0 * y.k),
+            b(y.revenue),
+            b(y.deficit_change),
+            b(y.owed),
+            action
+        )?;
+    }
+    Ok(w)
+}
+
+/// Table 15: input-output inputs and the build-out each case implies.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_spinup() -> Result<String> {
+    use crate::data::{IO_GDP_2022, IO_GOS_2022, IO_IMPORTS_2022, IO_JOBS_2022, IO_OUTPUT_2022};
+    use crate::transition::{borrowing_test, capital_proxy, capital_share, peak_build, Case};
+    let mut w = String::new();
+    writeln!(w, "| Input | Value | Source |\n|---|---:|---|")?;
+    let src = "StatCan Table 36-10-0013-01, simple multiplier, total industries, 2022 (**unverified**: search-index copy)";
+    for (name, v) in [
+        ("Output per $ of final demand", IO_OUTPUT_2022),
+        ("GDP at market prices per $ of final demand", IO_GDP_2022),
+        ("Gross operating surplus per $ of final demand", IO_GOS_2022),
+        (
+            "International imports per $ of final demand",
+            IO_IMPORTS_2022,
+        ),
+        ("Jobs per $1M of final demand", IO_JOBS_2022),
+    ] {
+        writeln!(w, "| {name} | {v:.3} | {src} |")?;
+    }
+    writeln!(
+        w,
+        "| Capital share of GDP (surplus / GDP) | {:.3} | derived from the two rows above (**unverified**) |",
+        capital_share()
+    )?;
+    writeln!(
+        w,
+        "| Capital proxy (national wealth less residential real estate), $T | {:.1} | StatCan national balance sheet (derived) |",
+        capital_proxy() / 1e6
+    )?;
+    writeln!(w, "\n| Case | Peak build-out investment, $B/yr | GDP from it, $B | Imports, $B | Jobs supported (thousands) | Long-run base gain with k = 0 | Revenue gain with k = 0, $B/yr | Share of the cost of abolition it covers |\n|---|---:|---:|---:|---:|---:|---:|---:|")?;
+    for c in Case::all() {
+        let (inv, g, imp, jobs) = peak_build(&c);
+        let (gain, gap, share) = borrowing_test(&c);
+        let _ = gap;
+        writeln!(
+            w,
+            "| {} | {} | {} | {} | {:.0} | +{} | {} | {} |",
+            c.name,
+            b(inv),
+            b(g),
+            b(imp),
+            jobs / 1000.0,
+            p2(100.0 * (c.long_run_factor(0.0) - 1.0)),
+            b(gain),
+            pct(100.0 * share)
+        )?;
+    }
+    Ok(w)
+}
+
+/// Table 16: levers that would close the gap left with k = 0, per case.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_levers() -> Result<String> {
+    use crate::transition::{levers, Case};
+    let mut w = String::new();
+    writeln!(w, "| Case | Gap, $B | VAT rate that closes it alone | Tax household GST exemptions at the rule rate, $B | Program-Review-sized spending cut, $B | LVT scenario, $B (land value unverified) | VAT rate needed with all three |\n|---|---:|---:|---:|---:|---:|---:|")?;
+    for c in Case::all() {
+        let l = levers(&c);
+        writeln!(
+            w,
+            "| {} | {} | {} | {} | {} | {} | {} |",
+            c.name,
+            b(l.gap),
+            pct(l.rate),
+            b(l.broadening),
+            b(l.spending),
+            b(l.lvt),
+            pct(l.package_rate)
+        )?;
+    }
+    writeln!(w, "\n| Case, with all three levers | k at launch | Years to k = 0 under the rule (within {}) | VAT rate that then meets the need |\n|---|---:|---|---:|", crate::data::HORIZON_YEARS)?;
+    for c in Case::all() {
+        let p = c.with_package();
+        writeln!(
+            w,
+            "| {} | {} | {} | {} |",
+            c.name,
+            pct(100.0 * p.launch_k()),
+            years_text(&p),
+            pct(levers(&c).package_rate)
+        )?;
+    }
+    Ok(w)
+}
+
+/// Table 17: counter-arguments with numbers (central case unless stated).
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_counter_v3() -> Result<String> {
+    use crate::data::{
+        GST_GAP_GROSS_2022, GST_GAP_NET_2022, IE_GDP_2024, IE_GNI_STAR_2024,
+        RECESSION_BASE_DROP_PCT, RECESSION_YEAR,
+    };
+    use crate::transition::{simulate, years_to_repay, Case, RULE_RATE};
+    let c = Case::all()[1];
+    let core = need_core();
+    let cen = Scenario::central();
+    let mut w = String::new();
+    writeln!(
+        w,
+        "| Risk | Measure | Value | Who bears it |\n|---|---|---:|---|"
+    )?;
+    writeln!(
+        w,
+        "| Regressivity | GST credit scaled to {}%, $B/yr (already netted out of the model's base) | {} | low-income households if the credit is not scaled |",
+        num(RULE_RATE),
+        b(GST_CREDIT * RULE_RATE / GST_RATE)
+    )?;
+    writeln!(
+        w,
+        "| Regressivity | Same, share of VAT revenue at {}% | {} | |",
+        num(RULE_RATE),
+        pct(100.0 * GST_CREDIT * RULE_RATE / GST_RATE / cen.revenue(RULE_RATE))
+    )?;
+    for (label, gap) in [("net", GST_GAP_NET_2022), ("gross", GST_GAP_GROSS_2022)] {
+        let s = Scenario {
+            leak: gap / 100.0,
+            ..cen
+        };
+        writeln!(
+            w,
+            "| Evasion | k at launch if the {label} GST/HST gap ({}%) applies to new VAT revenue | {} | compliant firms and buyers |",
+            num(gap),
+            pct(100.0 * s.income_tax_kept(RULE_RATE, core))
+        )?;
+    }
+    let shock = simulate(
+        &c,
+        crate::data::HORIZON_YEARS,
+        Some((RECESSION_YEAR, RECESSION_BASE_DROP_PCT)),
+    );
+    writeln!(
+        w,
+        "| Recession | Deficit change in a year the base falls {}%, $B | {} | taxpayers, through the reversal |",
+        num(RECESSION_BASE_DROP_PCT),
+        b(shock[RECESSION_YEAR as usize].deficit_change)
+    )?;
+    writeln!(
+        w,
+        "| Recession | Years to repay it under the rule | {} | |",
+        years_to_repay(&c, RECESSION_YEAR, RECESSION_BASE_DROP_PCT)
+            .map_or_else(|| "not within the horizon".to_string(), |y| y.to_string())
+    )?;
+    writeln!(
+        w,
+        "| Profit shifting | Ireland 2024: GNI* / GDP | {} | measured GDP overstates domestic income |",
+        pct(100.0 * IE_GNI_STAR_2024 / IE_GDP_2024)
     )?;
     Ok(w)
 }

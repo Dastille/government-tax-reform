@@ -403,8 +403,115 @@ fn expected() -> BTreeMap<String, String> {
     for (k, v) in FACTS {
         e.push((k, (*v).to_string()));
     }
+    // v3: debt-neutral transition (sections 10-12), recomputed from the transition API
+    // and the raw constants with this file's formatters.
+    {
+        use vat_revenue_model::transition::{
+            borrowing_test, levers, simulate, years_to_abolition, years_to_repay, Case,
+        };
+        let yrs =
+            |c: &Case| years_to_abolition(c).map_or_else(|| "never".to_string(), |y| y.to_string());
+        let cases = Case::all();
+        let tags = ["low", "central", "high"];
+        for (i, c) in cases.iter().enumerate() {
+            let tag = tags[i];
+            let leak: &'static str = Box::leak(format!("v3_settle_{tag}").into_boxed_str());
+            e.push((leak, p1(100.0 * c.settled_k())));
+            let n: &'static str = Box::leak(format!("v3_years_{tag}").into_boxed_str());
+            e.push((n, yrs(c)));
+            let n: &'static str = Box::leak(format!("v3_gap_{tag}").into_boxed_str());
+            e.push((n, usd_b(c.residual_gap())));
+            let n: &'static str = Box::leak(format!("v3_pkg_rate_{tag}").into_boxed_str());
+            e.push((n, p1(levers(c).package_rate)));
+            let n: &'static str = Box::leak(format!("v3_k_launch_{tag}").into_boxed_str());
+            e.push((n, p1(100.0 * c.launch_k())));
+        }
+        let (lo_c, cen_c, hi_c) = (cases[0], cases[1], cases[2]);
+        e.push(("v3_rate_alone", p1(levers(&cen_c).rate)));
+        e.push(("v3_pkg_k_low", p1(100.0 * lo_c.with_package().launch_k())));
+        e.push(("v3_pkg_years_low", yrs(&lo_c.with_package())));
+        e.push((
+            "v3_pkg_years_central",
+            match years_to_abolition(&cen_c.with_package()) {
+                Some(0) => "immediately once the levers are in force".into(),
+                Some(y) => format!("after {y} years"),
+                None => "never".into(),
+            },
+        ));
+        e.push(("v3_cover_central", p1(100.0 * borrowing_test(&cen_c).2)));
+        e.push(("v3_cover_high", p1(100.0 * borrowing_test(&hi_c).2)));
+        e.push(("v3_spinup_gain_high", usd_b(borrowing_test(&hi_c).0)));
+        e.push((
+            "v3_interest",
+            format!("{:.1}", 100.0 * PUBLIC_DEBT_CHARGES / UNMATURED_DEBT),
+        ));
+        e.push((
+            "v3_pr_cut",
+            usd_b(DIRECT_PROGRAM_EXPENSES * PROGRAM_REVIEW_DECLINE_PCT / 100.0),
+        ));
+        e.push(("v3_direct", usd_b(DIRECT_PROGRAM_EXPENSES)));
+        e.push(("v3_pr_pct", short(PROGRAM_REVIEW_DECLINE_PCT)));
+        e.push(("v3_k_end", p1(100.0 * cen.income_tax_kept(lo, core))));
+        let shock = simulate(
+            &cen_c,
+            HORIZON_YEARS,
+            Some((RECESSION_YEAR, RECESSION_BASE_DROP_PCT)),
+        );
+        e.push((
+            "v3_recession_def",
+            usd_b(core - shock[RECESSION_YEAR as usize].revenue),
+        ));
+        e.push((
+            "v3_repay",
+            years_to_repay(&cen_c, RECESSION_YEAR, RECESSION_BASE_DROP_PCT)
+                .expect("repaid within the horizon")
+                .to_string(),
+        ));
+        e.push(("v3_repay_design", REPAY_YEARS.to_string()));
+        e.push(("v3_alpha", format!("{:.3}", IO_GOS_2022 / IO_GDP_2022)));
+        e.push((
+            "v3_capital_t",
+            usd_t(NATIONAL_WEALTH_Q2_2025 - RESIDENTIAL_REAL_ESTATE_Q2_2025),
+        ));
+        e.push(("v3_metr", short(METR_2025)));
+        e.push(("v3_metr_super", short(METR_2025_SUPER)));
+        e.push(("v3_semi", short(USER_COST_SEMI_ELASTICITY_UNVERIFIED)));
+        e.push(("v3_gap_net", short(GST_GAP_NET_2022)));
+        e.push(("v3_gap_gross", short(GST_GAP_GROSS_2022)));
+        e.push(("v3_deficit", usd_b(OPERATING_DEFICIT)));
+        e.push(("v3_horizon", HORIZON_YEARS.to_string()));
+        e.push(("v3_drop", short(RECESSION_BASE_DROP_PCT)));
+        let path = simulate(&cen_c, HORIZON_YEARS, None);
+        let inv = path.iter().map(|y| y.investment).fold(0.0_f64, f64::max);
+        e.push(("v3_peak_inv_central", usd_b(inv)));
+        e.push((
+            "v3_peak_jobs_central",
+            format!("{:.0}", inv * IO_JOBS_2022 / 1000.0),
+        ));
+        e.push(("v3_io_gdp", format!("{IO_GDP_2022:.3}")));
+        e.push(("v3_io_jobs", format!("{IO_JOBS_2022:.3}")));
+        let none = cases.iter().all(|c| years_to_abolition(c).is_none());
+        e.push((
+            "v3_verdict",
+            if none {
+                "does not close the gap in any case"
+            } else {
+                "closes the gap in at least one case"
+            }
+            .into(),
+        ));
+        e.push((
+            "v3_pkg_verdict_low",
+            if years_to_abolition(&lo_c.with_package()).is_none() {
+                "still falls short"
+            } else {
+                "also closes"
+            }
+            .into(),
+        ));
+    }
     // Tables come straight from the table builders in `report.rs`, not from `docs.rs`.
-    let tables: [(&str, TableFn); 16] = [
+    let tables: [(&str, TableFn); 22] = [
         ("table:first_principles", report::table_first_principles),
         ("table:baseline", report::table_baseline),
         ("table:static", report::table_static),
@@ -419,6 +526,12 @@ fn expected() -> BTreeMap<String, String> {
         ("table:stack", report::table_stack),
         ("table:k", report::table_k),
         ("table:protect", report::table_protect),
+        ("table:transition", report::table_transition),
+        ("table:transition_path", report::table_transition_path),
+        ("table:recession", report::table_recession),
+        ("table:spinup", report::table_spinup),
+        ("table:levers", report::table_levers),
+        ("table:counter_v3", report::table_counter_v3),
         ("table:key_figures", report::key_figures),
         ("table:readme", report::readme_table),
     ];

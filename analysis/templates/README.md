@@ -5,7 +5,7 @@ A proposal for **fundamental tax reform in mid-sized advanced economies**: repla
 
 This is independent analysis. It is not a bill, not advice, and not affiliated with any government.
 
-Paper: **[tax-whitepaper.md](tax-whitepaper.md)** (v2.0). Model output: [analysis/output/revenue_tables.md](analysis/output/revenue_tables.md).
+Paper: **[tax-whitepaper.md](tax-whitepaper.md)** (v3.0). Model output: [analysis/output/revenue_tables.md](analysis/output/revenue_tables.md).
 
 ## The proposal
 
@@ -28,6 +28,14 @@ Every scenario uses one stated price assumption. **A (central):** the VAT is pas
 - **Full abolition** at {{start_rate}}% needs a taxable base about {{g_hi_a}}× {{g_hi_a_dir}} than today's relative to spending needs. A New Zealand-style broad base {{nz_verdict}}: with it, the static rate needed is {{nz_rate_needed_a}}.
 - **The {{end_rate}}% endpoint** needs about {{g_lo_a}}× the base.
 - **Property tax** (about ${{property_b}}B) stays until LVT revenue replaces it.
+
+## Debt-neutral transition (v3.0)
+
+The paper's §10, §11 and §12 add a rule under which income tax is cut only by revenue already realised above the need, with a pause and a reversal when revenue falls short. Without a shock, the deficit never rises above the baseline.
+
+- **Does it close the gap without debt?** An industry spin-up from lower income tax (a scenario, not a forecast) {{v3_verdict}}. k settles at {{v3_settle_low}} / {{v3_settle_central}} / {{v3_settle_high}} (low / central / high); years to full abolition: {{v3_years_low}} / {{v3_years_central}} / {{v3_years_high}}.
+- **What would close it.** Base broadening, a cut the size of Canada's Program Review (${{v3_pr_cut}}B) and the LVT together; with them, the central case can abolish the income tax, and the VAT it then needs is {{v3_pkg_rate_central}}. The LVT's land value is unverified.
+- **Infrastructure test.** Borrowing to abolish income tax at once fails it: the spin-up revenue covers {{v3_cover_central}} of the cost in the central case.
 - Within each assumption, more revenue always means a lower required rate, and a test enforces this.
 - The paper's §9 lists every original requirement, who it came from, and whether it was kept, reframed or deleted. [CLAIMS.md](CLAIMS.md) maps every claim to its test or source.
 

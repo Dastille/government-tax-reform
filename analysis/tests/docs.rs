@@ -579,3 +579,48 @@ fn comparison_words_match_the_values() {
         }
     );
 }
+
+/// Promotional words the documents must not use.
+const MARKETING_WORDS: [&str; 14] = [
+    "revolutionary",
+    "game-changing",
+    "game changer",
+    "groundbreaking",
+    "cutting-edge",
+    "world-class",
+    "best-in-class",
+    "seamless",
+    "unprecedented",
+    "transformative",
+    "supercharge",
+    "unlock",
+    "bold",
+    "visionary",
+];
+
+#[test]
+fn templates_use_no_marketing_words() {
+    let docs = [
+        ("tax-whitepaper.md", vat_revenue_model::docs::PAPER_TEMPLATE),
+        ("README.md", vat_revenue_model::docs::README_TEMPLATE),
+        ("CLAIMS.md", vat_revenue_model::docs::CLAIMS_TEMPLATE),
+    ];
+    let mut hits = Vec::new();
+    for (file, text) in docs {
+        for (n, line) in text.lines().enumerate() {
+            let lower = line.to_lowercase();
+            for w in MARKETING_WORDS {
+                let found = lower.match_indices(w).any(|(i, _)| {
+                    let before = lower[..i].chars().next_back();
+                    let after = lower[i + w.len()..].chars().next();
+                    !before.is_some_and(char::is_alphanumeric)
+                        && !after.is_some_and(char::is_alphanumeric)
+                });
+                if found {
+                    hits.push(format!("{file}:{}: `{w}`", n + 1));
+                }
+            }
+        }
+    }
+    assert!(hits.is_empty(), "marketing words: {hits:?}");
+}

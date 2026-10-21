@@ -13,5 +13,6 @@ pub mod error;
 pub mod ledger;
 pub mod model;
 pub mod report;
+pub mod transition;
 
 pub use error::{Error, Result};

@@ -427,8 +427,95 @@ pub fn values() -> Result<BTreeMap<String, String>> {
         }
         .into(),
     );
+    // v3: debt-neutral transition and industry spin-up (sections 10-12).
+    {
+        use crate::data::{
+            DIRECT_PROGRAM_EXPENSES, GST_GAP_GROSS_2022, GST_GAP_NET_2022, HORIZON_YEARS,
+            IO_GDP_2022, IO_JOBS_2022, METR_2025, METR_2025_SUPER, OPERATING_DEFICIT,
+            RECESSION_BASE_DROP_PCT, RECESSION_YEAR, REPAY_YEARS,
+            USER_COST_SEMI_ELASTICITY_UNVERIFIED,
+        };
+        use crate::report::years_text;
+        use crate::transition::{
+            borrowing_test, capital_proxy, capital_share, interest_rate, levers, peak_build,
+            program_review_cut, simulate, years_to_abolition, years_to_repay, Case,
+        };
+        let cases = Case::all();
+        for (c, tag) in cases.iter().zip(["low", "central", "high"]) {
+            put(&format!("v3_settle_{tag}"), pct(100.0 * c.settled_k()));
+            put(&format!("v3_years_{tag}"), years_text(c));
+            put(&format!("v3_gap_{tag}"), b(c.residual_gap()));
+            put(&format!("v3_pkg_rate_{tag}"), pct(levers(c).package_rate));
+            put(&format!("v3_k_launch_{tag}"), pct(100.0 * c.launch_k()));
+        }
+        let (lo_c, cen_c, hi_c) = (cases[0], cases[1], cases[2]);
+        put("v3_rate_alone", pct(levers(&cen_c).rate));
+        put("v3_pkg_k_low", pct(100.0 * lo_c.with_package().launch_k()));
+        put("v3_pkg_years_low", years_text(&lo_c.with_package()));
+        put(
+            "v3_pkg_years_central",
+            crate::report::years_phrase(&cen_c.with_package()),
+        );
+        put("v3_cover_central", pct(100.0 * borrowing_test(&cen_c).2));
+        put("v3_cover_high", pct(100.0 * borrowing_test(&hi_c).2));
+        put("v3_spinup_gain_high", b(borrowing_test(&hi_c).0));
+        put("v3_interest", format!("{:.1}", interest_rate()));
+        put("v3_pr_cut", b(program_review_cut()));
+        put("v3_direct", b(DIRECT_PROGRAM_EXPENSES));
+        put("v3_pr_pct", num(crate::data::PROGRAM_REVIEW_DECLINE_PCT));
+        put("v3_k_end", pct(100.0 * cen.income_tax_kept(lo, core)));
+        let shock = simulate(
+            &cen_c,
+            HORIZON_YEARS,
+            Some((RECESSION_YEAR, RECESSION_BASE_DROP_PCT)),
+        );
+        put(
+            "v3_recession_def",
+            b(shock[RECESSION_YEAR as usize].deficit_change),
+        );
+        put(
+            "v3_repay",
+            years_to_repay(&cen_c, RECESSION_YEAR, RECESSION_BASE_DROP_PCT)
+                .map_or_else(|| "more than the horizon".into(), |y| y.to_string()),
+        );
+        put("v3_repay_design", REPAY_YEARS.to_string());
+        put("v3_alpha", format!("{:.3}", capital_share()));
+        put("v3_capital_t", format!("{:.1}", capital_proxy() / 1e6));
+        put("v3_metr", num(METR_2025));
+        put("v3_metr_super", num(METR_2025_SUPER));
+        put("v3_semi", num(USER_COST_SEMI_ELASTICITY_UNVERIFIED));
+        put("v3_gap_net", num(GST_GAP_NET_2022));
+        put("v3_gap_gross", num(GST_GAP_GROSS_2022));
+        put("v3_deficit", b(OPERATING_DEFICIT));
+        put("v3_horizon", HORIZON_YEARS.to_string());
+        put("v3_drop", num(RECESSION_BASE_DROP_PCT));
+        let (inv, _, _, jobs) = peak_build(&cen_c);
+        put("v3_peak_inv_central", b(inv));
+        put("v3_peak_jobs_central", format!("{:.0}", jobs / 1000.0));
+        put("v3_io_gdp", format!("{IO_GDP_2022:.3}"));
+        put("v3_io_jobs", format!("{IO_JOBS_2022:.3}"));
+        let any = cases.iter().any(|c| years_to_abolition(c).is_some());
+        put(
+            "v3_verdict",
+            if any {
+                "closes the gap in at least one case"
+            } else {
+                "does not close the gap in any case"
+            }
+            .into(),
+        );
+        put(
+            "v3_pkg_verdict_low",
+            if years_to_abolition(&lo_c.with_package()).is_some() {
+                "also closes"
+            } else {
+                "still falls short"
+            }
+            .into(),
+        );
+    }
     // Tables and blocks.
-    let tables: [report::Section; 16] = [
+    let tables: [report::Section; 22] = [
         ("table:first_principles", report::table_first_principles),
         ("table:baseline", report::table_baseline),
         ("table:static", report::table_static),
@@ -443,6 +530,12 @@ pub fn values() -> Result<BTreeMap<String, String>> {
         ("table:stack", report::table_stack),
         ("table:k", report::table_k),
         ("table:protect", report::table_protect),
+        ("table:transition", report::table_transition),
+        ("table:transition_path", report::table_transition_path),
+        ("table:recession", report::table_recession),
+        ("table:spinup", report::table_spinup),
+        ("table:levers", report::table_levers),
+        ("table:counter_v3", report::table_counter_v3),
         ("table:key_figures", report::key_figures),
         ("table:readme", report::readme_table),
     ];

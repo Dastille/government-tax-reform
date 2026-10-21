@@ -47,7 +47,7 @@ The paper, README and this file are generated: `analysis/templates/*.md` plus va
 - "one" and ordinals ("second quarter", "third bracket") are not scanned: they are mostly not quantities, so a quantity written that way needs review by eye.
 - The scan checks that a literal sits on a known line; whether it is correct rests on its source. Literals that are model inputs are instead checked against source excerpts (above).
 - Text inside the Rust table code (`report.rs`, `docs.rs`) is not scanned. Tables are built from constants; a few labels hold fixed numbers that are definitions (for example "maximum possible 1.0" for the MPC).
-- The excerpts were captured on 2026-10-18 through the fetch tool's HTML-to-Markdown rendering, `curl` or `pdftotext`, with whitespace collapsed. They are verbatim from those renderings, not byte copies of the pages, and a test cannot show that a live page still says the same thing.
+- The excerpts were captured on 2026-10-18 (v3.0 additions on 2026-10-21) through the fetch tool's HTML-to-Markdown rendering, `curl` or `pdftotext`, with whitespace collapsed. They are verbatim from those renderings, not byte copies of the pages, and a test cannot show that a live page still says the same thing.
 
 ## Within the model
 
@@ -62,6 +62,11 @@ The paper, README and this file are generated: `analysis/templates/*.md` plus va
 | Required rates actually meet the need | Verified | `model.rs` `required_rate_actually_meets_need` |
 | VAT(k) + k × (PIT + CIT) = need | Verified | `model.rs` `partial_replacement_balances` |
 | Rate path {{start_rate}} − {{path_step}}t gives {{start_rate}} / {{path_mid}} / {{end_rate}} at t = 0 / 5 / {{path_years}}; v1.1's formula gave {{v11_end}} | Verified | `model.rs` `rate_path_is_consistent` |
+| Debt-neutral rule: without a shock, the deficit change against the baseline is never positive, in any case, over {{v3_horizon}} years | Verified | `transition.rs` `deficit_never_rises_without_a_shock` |
+| The rule cuts k only from realised, structural surplus, and the cut never exceeds it | Verified | `transition.rs` `cuts_never_exceed_the_structural_surplus` |
+| Pause and reversal: after a {{v3_drop}}% base fall the rule raises k and repays the account in {{v3_repay}} years | Verified | `transition.rs` `recession_triggers_reversal_and_repayment` |
+| Spin-up {{v3_verdict}}: k settles at {{v3_settle_low}} / {{v3_settle_central}} / {{v3_settle_high}} | Verified (arithmetic); semi-elasticity **UNVERIFIED** | `transition.rs` `no_case_reaches_full_abolition`, `simulation_converges_to_settled_k` |
+| With broadening, a Program-Review-sized cut and the LVT, the central case reaches full abolition at a VAT of {{v3_pkg_rate_central}} | Verified (arithmetic); LVT land value **UNVERIFIED** | `transition.rs` `package_closes_the_central_case` |
 | LVT arithmetic: ${{lvt_claim_hi}}B at {{lvt_rate_hi}}% needs ${{land_needed_lo}}T of land | Verified (arithmetic); land value **UNVERIFIED** | `model.rs` `lvt_land_requirement` |
 
 ## Inputs
@@ -74,6 +79,8 @@ Generated from `analysis/src/ledger.rs`. Excerpt files are in `analysis/tests/so
 
 - **Meade Report [R17].** The paper says the committee "favoured an expenditure-tax base, setting out universal (ch. 9) and two-tier (ch. 10) variants". The chapter titles come from the book's table of contents; the report's text was not read for this revision, so the characterisation is secondary.
 - **Hall-Rabushka [R18], Bradford [R19] and the Carter Commission [R21]** are described from publisher pages and a secondary summary; the primary texts were not opened. The paper dates the Carter report 1966, as The Canadian Encyclopedia does; the external audit notes it was dated December 1966 and tabled in February 1967, which was not checked against the report itself.
+- **Statistics Canada Table 36-10-0013-01 [R31].** The live site returned an outage page on the access date; the values were read from the search tool's index copy of the table page. No verbatim excerpt is committed, so these inputs are marked unverified.
+- **IMF working paper [R30].** The IMF pages refused the fetch; the semi-elasticity is from a search summary of the abstract and is unverified.
 - **Saudi Ministry of Finance [R15b].** The page URL encodes 11 May 2020 and its dateline reads 5/12/2020; the paper uses 11 May 2020. The quoted sentence is in the excerpt.
 
 ## Not quantified / UNVERIFIED
@@ -85,4 +92,7 @@ Generated from `analysis/src/ledger.rs`. Excerpt files are in `analysis/tests/so
 | Cost of zero-rating children's clothing | UNVERIFIED |
 | Compliance leakage at higher rates | Assumption sweep only |
 | Which incidence assumption (A or B) holds in practice | Not estimated; both are shown |
+| Capital semi-elasticity to the METR ({{v3_semi}}% per point, IMF working paper [R30]) | UNVERIFIED |
+| Federal share of the METR; the METR cut in the low and central spin-up cases | Scenario |
+| Cost of a universal VAT prebate; Estonian-style distributed-profit tax revenue for Canada | UNVERIFIED |
 | UAE, Bahrain and Oman VAT; Denmark and Australia LVT; constitutional route to entrenchment | UNVERIFIED |

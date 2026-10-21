@@ -1,8 +1,8 @@
 <!-- GENERATED from analysis/templates/tax-whitepaper.md by `cargo run --release -- --write`. Edit the template, not this file. -->
 # Fundamental Tax Reform: Toward a Single Consumption-Based System
 
-**Whitepaper · v2.0 (sourced revision) · October 2026**
-**Author:** Ashlynn (original design, January 2026). v2.0 fixes the arithmetic and adds sources; it does not change the design goals.
+**Whitepaper · v3.0 (debt-neutral transition) · October 2026**
+**Author:** Ashlynn (original design, January 2026). v2.0 fixed the arithmetic and added sources; v3.0 adds a debt-neutral transition rule, an industry spin-up scenario and the infrastructure test (§10, §11 and §12). Neither changes the design goals.
 
 **Scope.** The design is meant for **mid-sized advanced economies**. Canada is the **worked example** because its federal accounts for fiscal year 2024-25 (April 2024 to March 2025, "FY2024-25") are public and detailed. The method carries over to other countries: the VAT rate a country needs equals the revenue it must replace divided by its effective VAT base.
 
@@ -36,6 +36,7 @@
 - The LVT must first replace about **$92.6B** of recurrent property tax, more than the LVT scenario raises ($32B).
 - **Sensitivity B** gives a lower floor: $183.8B static and $215.9B dynamic at 20%, k = 56.1%. The conclusion is the same under either assumption.
 - v2.0 therefore keeps every mechanism of the design. Income taxes are reduced as far as VAT and LVT revenue allows, and they are abolished, and the VAT rate stepped down, only when the fiscal board certifies that revenue covers the need.
+- **v3.0, debt-neutral.** Under a rule that cuts income tax only from revenue already realised (§10), the deficit never rises above the baseline without a shock. An industry spin-up from lower income tax (§11) does not close the gap in any case: k settles at 46.9% in the central case and 42.7% in the high case. Closing the gap takes base broadening, a Program-Review-sized spending cut and the LVT together (§11.3); with them, the central case can abolish the income tax, and the VAT it then needs is 19.1%.
 
 **Key figures:**
 
@@ -443,7 +444,150 @@ Five steps: question each requirement and name who set it; delete what adds noth
 
 ---
 
-## 10. Limitations
+## 10. Debt-neutral transition
+
+Ashlynn's requirement for v3.0: the transition must not add to federal debt. This section states a rule that keeps the deficit at or below the baseline in every year, and tests how far it gets.
+
+### 10.1 The rule
+
+Each year the fiscal board compares realised federal revenue with the core need ($383.8B, today's PIT + CIT + GST). Realised revenue is the VAT, plus the income tax still in force (share k), plus any growth in the land and property base.
+
+1. **Hold the rate.** The VAT stays at 20% until k reaches zero. The step down to 8% (§5.5) waits until then: on today's base, a VAT of 8% would need k = 90.1% under central values, so the step down cannot be debt-neutral while income tax remains.
+2. **Cut only from realised surplus.** k falls by realised revenue above the need, after any balance owed in a compensation account is repaid, and never by more than the structural surplus. Structural revenue leaves out temporary demand from the investment build-out, as the Swiss rule leaves out the cycle.
+3. **Pause.** If realised revenue is below the need, the shortfall is booked in the compensation account and k is not cut.
+4. **Reverse.** If structural revenue is below the need, k rises by the shortfall. While the account is owed, k is raised enough to repay it over 3 years.
+5. **Property and land.** The federal government levies no property tax, so this term is nil unless the LVT (§5.4) is adopted. LVT revenue then counts under the same test.
+
+Without a shock, the deficit change against the baseline is zero or negative in every simulated year of every case (`transition.rs` test `deficit_never_rises_without_a_shock`). No rule can prevent a deficit in a year when the base falls unexpectedly. The rule's answer is the account and the reversal (§12.1).
+
+### 10.2 Precedents for the rule
+
+| Country | Rule | Relevance | Source |
+|---|---|---|---|
+| Canada, Program Review | Spending under review fell 18.9% relative to 1994-95; it covered about $52B of spending, excluding major statutory transfers. Interim deficit target 3% of GDP ($24.3B), pursued mainly through $25.3B of cumulative spending reductions: "nearly seven dollars of spending reduction for every dollar of tax revenue increase" | Spending review at this scale has been done in Canada | Budget 1995 [R23] |
+| Switzerland, debt brake | Ordinary spending is capped at receipts adjusted by the ratio of trend GDP to current GDP; shortfalls go to a compensation account that must be cleared in later years; a tax cut must be matched by spending cuts. Approved by 85% on 2 December 2001; debt ratio from 25.3% (2003) to 13.5% (2019) | Source of the structural test, the account and the matching rule | Federal Finance Administration [R24] |
+| Germany, Schuldenbremse | Structural borrowing up to 0.35% of GDP; a control account whose negative balance may not exceed 1.5% of GDP | Source of the control-account trigger | Article 115 Act [R25] |
+| Sweden, fiscal framework | Surplus target over the business cycle and a debt anchor of 35% of GDP; the framework dates from the crisis of the early 1990s | A surplus rule can last decades | Government Offices of Sweden [R26] |
+| New Zealand, GST | GST at a single rate of 10% from 1 October 1986; personal income tax rates cut on the same date; new top rate 48c | A broad VAT replaced part of income tax in one step | Inland Revenue [R27, R28] |
+
+### 10.3 Result
+
+| Case | Spending effect | Capital per point of METR cut | METR cut, points | Speed per year | k at launch | k after 10 years | k settles at | Capital stock, long run | Years to k = 0 (within 100) | Gap left with k = 0, $B |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---|---:|
+| Low | MPC 0.50 | 0.1% | 5 | 0.1 | 49.9% | 49.8% | 49.8% | +0.3% | never | 156.4 |
+| Central | MPC 0.95 | 0.2% | 8 | 0.2 | 47.3% | 46.9% | 46.9% | +0.8% | never | 140.0 |
+| High | MPC 0.95 + multipliers | 0.4% | 13.2 | 0.3 | 44.4% | 42.8% | 42.7% | +3.0% | never | 120.2 |
+
+The rule keeps the transition debt-free, but the spin-up does not close the gap in any case. Within 100 years, k settles at 49.8% (low), 46.9% (central) and 42.7% (high), against 49.9%, 47.3% and 44.4% at launch. Years to full abolition within that horizon: never, never and never. With k at zero, the gap left is $156.4B, $140.0B and $120.2B a year.
+
+Central case, year by year:
+
+| Year | k | Capital stock vs launch | Build-out investment, $B | Revenue, $B | Structural revenue, $B | Deficit change vs baseline, $B |
+|---:|---:|---:|---:|---:|---:|---:|
+| 0 | 47.34% | +0.00% | 0.0 | 383.8 | 383.8 | 0.0 |
+| 1 | 47.34% | +0.17% | 15.0 | 385.6 | 384.0 | -1.8 |
+| 2 | 47.26% | +0.30% | 12.0 | 385.3 | 384.0 | -1.5 |
+| 3 | 47.18% | +0.41% | 9.6 | 385.0 | 384.0 | -1.2 |
+| 5 | 47.08% | +0.57% | 6.2 | 384.5 | 383.9 | -0.8 |
+| 10 | 46.95% | +0.76% | 2.1 | 384.0 | 383.8 | -0.3 |
+| 20 | 46.89% | +0.84% | 0.2 | 383.8 | 383.8 | 0.0 |
+| 50 | 46.88% | +0.85% | 0.0 | 383.8 | 383.8 | 0.0 |
+
+---
+
+## 11. Industry spin-up scenario
+
+This is a scenario, not a forecast. It asks how much new investment lower income tax could bring, and how much of the gap that investment's tax base would close.
+
+### 11.1 Mechanism and inputs
+
+- **Cost of capital.** Canada's marginal effective tax rate (METR) on new business investment is 15.6%, or 13.2% with the Budget 2025 super-deduction [R29]. The high case removes all of the latter. The low and central cases remove less, because part of the METR is provincial; the federal share is not in the sources used here.
+- **Response.** The capital stock rises by 0.2% per point of METR cut in the central case, less in the low case and more in the high case (table below). This semi-elasticity is **unverified**: it is the figure reported for an IMF working paper on Canadian capital stocks [R30], whose text could not be opened. Capital moves toward its new level at a set speed each year.
+- **Base.** A larger capital stock raises output in proportion to the capital share of GDP, 0.418 (gross operating surplus over GDP per dollar of final demand), and the VAT base and remaining income tax rise with it. The capital stock proxy is national wealth less residential real estate, $8.9T; it includes land and government assets, so it overstates business capital and makes the spin-up larger.
+- **Build-out.** Investment during the build-out is demand: 0.833 of GDP and 6.199 jobs per $1M of final demand, from Statistics Canada's input-output multipliers, Table 36-10-0013-01 [R31]. These values are **unverified**: the Statistics Canada site was down on the access date, and they were read from a search index's copy of the table. The capital share above comes from the same table. This is temporary, so the rule does not count it as structural. In the central case it peaks at $15.0B of investment in the first year, supporting about 93k jobs.
+
+| Input | Value | Source |
+|---|---:|---|
+| Output per $ of final demand | 1.560 | StatCan Table 36-10-0013-01, simple multiplier, total industries, 2022 (**unverified**: search-index copy) |
+| GDP at market prices per $ of final demand | 0.833 | StatCan Table 36-10-0013-01, simple multiplier, total industries, 2022 (**unverified**: search-index copy) |
+| Gross operating surplus per $ of final demand | 0.348 | StatCan Table 36-10-0013-01, simple multiplier, total industries, 2022 (**unverified**: search-index copy) |
+| International imports per $ of final demand | 0.167 | StatCan Table 36-10-0013-01, simple multiplier, total industries, 2022 (**unverified**: search-index copy) |
+| Jobs per $1M of final demand | 6.199 | StatCan Table 36-10-0013-01, simple multiplier, total industries, 2022 (**unverified**: search-index copy) |
+| Capital share of GDP (surplus / GDP) | 0.418 | derived from the two rows above (**unverified**) |
+| Capital proxy (national wealth less residential real estate), $T | 8.9 | StatCan national balance sheet (derived) |
+
+| Case | Peak build-out investment, $B/yr | GDP from it, $B | Imports, $B | Jobs supported (thousands) | Long-run base gain with k = 0 | Revenue gain with k = 0, $B/yr | Share of the cost of abolition it covers |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Low | 2.2 | 1.9 | 0.4 | 14 | +0.21% | 0.5 | 0.3% |
+| Central | 15.0 | 12.5 | 2.5 | 93 | +0.67% | 1.6 | 1.1% |
+| High | 78.3 | 65.2 | 13.1 | 485 | +2.21% | 5.7 | 4.5% |
+
+### 11.2 Precedents
+
+- **Ireland.** Low corporate tax drew large booked profits. Ireland's statistics office publishes modified GNI (GNI*) because globalisation effects distort GDP; GNI* was 57.1% of GDP [R32]. Under this design no CIT is levied, so booked profits would raise measured GDP but add no federal revenue beyond the VAT on domestic spending. The spin-up above counts only domestic capital.
+- **Estonia.** Estonia taxes company profits only when distributed, at 22/78 of the net distribution [R33]. It is a middle option: it removes the tax on retained, reinvested profit while keeping a tax on payouts. It is not modelled; its revenue for Canada is **unverified**.
+
+### 11.3 Levers that would close the gap
+
+| Case | Gap, $B | VAT rate that closes it alone | Tax household GST exemptions at the rule rate, $B | Program-Review-sized spending cut, $B | LVT scenario, $B (land value unverified) | VAT rate needed with all three |
+|---|---:|---:|---:|---:|---:|---:|
+| Low | 156.4 | 34.0% | 66.7 | 44.9 | 32.0 | 20.5% |
+| Central | 140.0 | 31.9% | 67.0 | 44.9 | 32.0 | 19.1% |
+| High | 120.2 | 29.5% | 68.1 | 44.9 | 32.0 | 17.6% |
+
+| Case, with all three levers | k at launch | Years to k = 0 under the rule (within 100) | VAT rate that then meets the need |
+|---|---:|---|---:|
+| Low | 2.6% | never | 20.5% |
+| Central | 0.0% | 0 | 19.1% |
+| High | 0.0% | 0 | 17.6% |
+
+The arithmetic, central case (each figure is in the model output and reproduced by `cargo run --release`):
+
+- **Rate.** The VAT that closes the gap alone, with no income tax and the long-run base, is 31.9%.
+- **Base broadening.** Taxing the household GST exemptions and zero-rating [R3] at the rule rate: their cost at today's rate, times the rule rate over today's rate.
+- **Spending review.** A cut the size of the Program Review: 18.9% of today's direct program expenses ($237.6B [R2]) is $44.9B. Direct program expenses include transfers to Indigenous Peoples and other programs; which items to cut is a political choice this paper does not make.
+- **LVT.** The scenario in §5.4, $32B; the land value is **unverified**.
+
+With all of these levers, the VAT that meets the need with no income tax is 20.5% (low), 19.1% (central) and 17.6% (high). Under the rule at 20%, the central case reaches full abolition immediately once the levers are in force. The low case still falls short: k stays at about 2.6% (years to zero: never). The levers take time to enact; the Program Review cuts were phased in over several budget years [R23].
+
+---
+
+## 12. The system as infrastructure
+
+Ashlynn's framing is that the tax system is infrastructure. The test for infrastructure finance is that borrowing is matched by a measured return, not used to fund operating deficits. Finance Canada is moving to a capital budget that "distinguishes its day-to-day operational spending from expenditure that stimulates public and private sector capital formation" [R2].
+
+Applied here: abolishing the income tax at once, on borrowed money, would cost the gap every year. The spin-up's extra revenue covers 1.1% of that cost in the central case and 4.5% in the high case ($5.7B a year), before interest. The average rate on federal unmatured debt is about 3.6% (public debt charges over unmatured debt [R2]). Borrowing for the tax cut therefore fails the infrastructure test: the debt would compound, on top of today's deficit of $36.3B. The rule in §10 is the infrastructure version of the transition: each step is paid for by revenue already measured.
+
+### 12.1 Counter-arguments, with who bears them
+
+| Risk | Measure | Value | Who bears it |
+|---|---|---:|---|
+| Regressivity | GST credit scaled to 20%, $B/yr (already netted out of the model's base) | 25.1 | low-income households if the credit is not scaled |
+| Regressivity | Same, share of VAT revenue at 20% | 10.3% | |
+| Evasion | k at launch if the net GST/HST gap (5.8%) applies to new VAT revenue | 50.7% | compliant firms and buyers |
+| Evasion | k at launch if the gross GST/HST gap (13.5%) applies to new VAT revenue | 55.1% | compliant firms and buyers |
+| Recession | Deficit change in a year the base falls 3%, $B | 10.8 | taxpayers, through the reversal |
+| Recession | Years to repay it under the rule | 3 | |
+| Profit shifting | Ireland 2024: GNI* / GDP | 57.1% | measured GDP overstates domestic income |
+
+- **Regressivity and the credit.** A VAT takes a larger share of income from low-income households, though roughly the same share of their spending [R6, R6b]. Scaling the GST credit to 20% costs $25.1B a year; the model already nets it out of revenue. A universal prebate paid to every household would cost more; its cost is **unverified**.
+- **Evasion and the VAT gap.** The CRA estimates the net GST/HST gap at 5.8% and the gross gap at 13.5% of revenue [R34]. If either applied to the new VAT revenue, k at launch would be higher (table above), and the shortfall falls on compliant firms and buyers.
+- **Provincial harmonization.** In HST provinces the federal and provincial rates share one base [R3]. A federal rate of 20% on top of provincial sales taxes needs agreements with each province, and Quebec administers its own QST. Not modelled.
+- **Capital flight.** Removing CIT and PIT lowers the incentive to move capital out. The risk runs the other way: profit booked in Canada without real activity, as in Ireland. Non-resident income tax stays outside the core need and is kept.
+- **Recession.** A base 3% lower for a year raises that year's deficit by $10.8B in the central case. The rule pauses cuts, raises k, and repays the account in 3 years (table below). The cost falls on income-tax payers through the higher k, and on households, since the consumption base falls with spending.
+
+| Year | k | Revenue, $B | Deficit change vs baseline, $B | Compensation account owed, $B | Rule action for next year |
+|---:|---:|---:|---:|---:|---|
+| 4 | 47.12% | 384.7 | -1.0 | 0.0 | cut k |
+| 5 | 47.08% | 373.0 | 10.8 | 10.8 | reverse: raise k |
+| 6 | 48.16% | 387.7 | -3.9 | 6.8 | reverse: raise k |
+| 7 | 48.84% | 389.7 | -5.9 | 0.9 | reverse: raise k |
+| 8 | 48.93% | 390.0 | -6.2 | 0.0 | cut k |
+| 9 | 47.34% | 385.2 | -1.4 | 0.0 | cut k |
+
+---
+
+## 13. Limitations
 
 - **Accounting model, not a general-equilibrium model.** The MPC, taxable share and multipliers are fixed. There are no wage, price-level, exchange-rate or interest-rate responses beyond the stated incidence assumption.
 - **Incidence.** Headline figures assume full pass-through with the real basket held (A). If nominal spending does not rise with prices (B), revenue at 20% is about $26B lower and k rises from 47.3% to 56.1%. Reality is likely between the two; it is not estimated here.
@@ -455,12 +599,13 @@ Five steps: question each requirement and name who set it; delete what adds noth
 - **The land value total is unverified.**
 - **Compliance leakage** at higher rates is a what-if, not an estimate. The growth addition is a what-if, not an estimate.
 - **Distribution by decile** and the full dividend cost are **unverified**.
-- **Transition financing.** Deficits during the transition and debt costs (federal debt is 41.2% of GDP [R2]) are not modelled.
+- **Transition financing.** The rule in §10 keeps each year's deficit at or below the baseline, so no transition debt is modelled; federal debt is 41.2% of GDP [R2]. The rule's result depends on the spin-up inputs below.
+- **Spin-up inputs.** The capital semi-elasticity is **unverified**. The input-output values, and the capital share derived from them, are **unverified**: they were read from a search index's copy of the Statistics Canada table because the live site was down when accessed. The capital proxy includes land and government assets. The METR cut in the low and central cases is a scenario, not an estimate of the federal share.
 - **Portability.** Other mid-sized advanced economies have different VRRs and income-tax shares. Rerun the model with their inputs.
 
 ---
 
-## 11. References
+## 14. References
 
 - [R1] Receiver General for Canada, *Public Accounts of Canada 2025*, Vol. I, Section 3 "Revenues", Tables 3.2 and 3.3. https://www.tpsgc-pwgsc.gc.ca/recgen/cpc-pac/2025/vol1/s3/rvnu-eng.html
 - [R2] Department of Finance Canada, *Annual Financial Report of the Government of Canada, Fiscal Year 2024–2025*, Tables 2 and 4. https://www.canada.ca/en/department-finance/services/publications/annual-financial-report/2025.html
@@ -486,6 +631,18 @@ Five steps: question each requirement and name who set it; delete what adds noth
 - [R20] U.S. Congress, H.R. 25 (119th Congress), *FairTax Act of 2025*, introduced text (Title I repeals; proposed sec. 101(b) rate; ch. 3 family consumption allowance). https://www.govinfo.gov/content/pkg/BILLS-119hr25ih/html/BILLS-119hr25ih.htm
 - [R21] Royal Commission on Taxation (Carter Commission), *Report* (1966); summary in *The Canadian Encyclopedia*, "Royal Commission on Taxation". https://thecanadianencyclopedia.ca/en/article/royal-commission-on-taxation
 - [R22] Inland Revenue (New Zealand), "GST rate increase", Taxation (Budget Measures) Act 2010. https://www.taxtechnical.ird.govt.nz/new-legislation/act-articles/taxation-budget-measures-act-2010/gst-rate-increase
+- [R23] Department of Finance Canada, *Budget 1995*, Budget Plan (Program Review). https://www.budget.canada.ca/archives/budget95/binb/budget1995-eng.pdf
+- [R24] Swiss Federal Finance Administration, "Federal Government's debt brake". https://www.efv.admin.ch/en/federal-governments-debt-brake
+- [R25] German Federal Ministry of Finance, "Act to implement Article 115 of the Basic Law" (English translation). https://www.bundesfinanzministerium.de/Content/EN/Gesetze/Laws/2009-08-10-article-115-act.html
+- [R26] Government Offices of Sweden, "The fiscal policy framework". https://www.government.se/government-of-sweden/ministry-of-finance/central-government-budget/the-fiscal-policy-framework/
+- [R27] Inland Revenue (New Zealand), "Goods and Services Tax Bill 1985" (archived commentary). https://www.taxtechnical.ird.govt.nz/pib-reviews/archived-legislative-commentary/gst/goods-and-services-tax-bill-1985
+- [R28] Inland Revenue (New Zealand), "Income Tax Amendment Act (No 2) 1986" (archived commentary). https://www.taxtechnical.ird.govt.nz/pib-reviews/archived-legislative-commentary/income-tax/income-tax-amendment-act-no-2-1986
+- [R29] Department of Finance Canada, *Budget 2025*, Chapter 1. https://budget.canada.ca/2025/report-rapport/chap1-en.html
+- [R30] International Monetary Fund, Working Paper WP/20/77, "Tax Elasticity Estimates for Capital Stocks in Canada" (abstract only; **unverified**). https://www.imf.org/en/Publications/WP/Issues/2020/06/05/Tax-Elasticity-Estimates-for-Capital-Stocks-in-Canada-49461
+- [R31] Statistics Canada, Table 36-10-0013-01, "Input-output multipliers, summary level". https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610001301
+- [R32] Central Statistics Office (Ireland), *Annual National Accounts 2024*, "GNI and De-Globalised Results". https://www.cso.ie/en/releasesandpublications/ep/p-ana/annualnationalaccounts2024/gniandde-globalisedresults/
+- [R33] Estonian Tax and Customs Board, "Tax liabilities of companies". https://www.emta.ee/en/business-client/registration-business/non-residents-e-residents/tax-liabilities-companies
+- [R34] Canada Revenue Agency, "Overall federal tax gap report 2026". https://www.canada.ca/en/revenue-agency/corporate/about-canada-revenue-agency-cra/tax-canada-a-conceptual-study/tax-gap-brief-overview/2026-overall-federal-tax-gap-report.html
 - Nova Scotia Department of Finance, "Government Financial Statistics, 2024" (21 November 2025), from Statistics Canada Table 10-10-0147-01. https://novascotia.ca/finance/statistics/archive_news.asp?df=&dg=&dti=3&dto=0&id=21517 · Statistics Canada, *The Daily*, 25 September 2024 (population, 1 July 2024). https://www150.statcan.gc.ca/n1/daily-quotidien/240925/dq240925d-eng.htm
 
 ---

@@ -215,4 +215,109 @@ pub const FACTS: &[(&str, &str)] = &[
     ("cgeb_increase", "25"),
     ("fairtax_rate", "23"),
     ("debt_pct_gdp", "41.2"),
+    // v3 precedents (debt-neutral transition, section 10 and 11 of the paper).
+    ("ch_yes_vote", "85"),
+    ("ch_debt_2003", "25.3% (2003)"),
+    ("ch_debt_2019", "13.5% (2019)"),
+    ("de_structural", "0.35"),
+    ("de_control", "1.5"),
+    ("se_debt_anchor", "35"),
+    ("nz_gst_1986", "10"),
+    ("nz_top_1986", "48"),
+    ("ee_rate", "22/78"),
+    ("pr_scope_b", "52"),
+    ("pr_deficit_target", "3"),
+    ("pr_deficit_target_b", "24.3"),
+    ("pr_cuts_b", "25.3"),
+    ("ie_gni_share", "57.1"),
+    ("ch_vote_date", "2 December 2001"),
+    ("nz_date", "1 October 1986"),
+    ("se_origin", "the early 1990s"),
+    ("pr_base_year", "1994-95"),
+    (
+        "pr_ratio",
+        "nearly seven dollars of spending reduction for every dollar of tax revenue increase",
+    ),
 ];
+
+// ---------------------------------------------------------------------------
+// v3: debt-neutral transition and industry spin-up (sections 10-12 of the paper).
+// ---------------------------------------------------------------------------
+/// Canada's marginal effective tax rate (METR) on new business investment, 2025, per cent,
+/// before the Budget 2025 productivity super-deduction (Budget 2025, ch. 1, Chart 1.1).
+/// <https://budget.canada.ca/2025/report-rapport/chap1-en.html>
+pub const METR_2025: f64 = 15.6;
+/// Canada's METR with the productivity super-deduction, per cent (same source). It is the
+/// most a tax cut can remove from the METR, so it bounds the high spin-up case.
+pub const METR_2025_SUPER: f64 = 13.2;
+
+/// Statistics Canada Table 36-10-0013-01, "Input-output multipliers, summary level", simple
+/// multiplier, total industries, Canada, 2022: output per dollar of output delivered to
+/// final demand. **UNVERIFIED**: read from the search tool's index copy of the table page;
+/// the live site returned an outage page on 2026-10-21, so no verbatim excerpt exists.
+pub const IO_OUTPUT_2022: f64 = 1.560;
+/// Same table: GDP at market prices per dollar of output to final demand, 2022.
+pub const IO_GDP_2022: f64 = 0.833;
+/// Same table: gross operating surplus per dollar of output to final demand, 2022.
+pub const IO_GOS_2022: f64 = 0.348;
+/// Same table: international imports per dollar of output to final demand, 2022.
+pub const IO_IMPORTS_2022: f64 = 0.167;
+/// Same table: jobs per million dollars of output to final demand, 2022.
+pub const IO_JOBS_2022: f64 = 6.199;
+
+/// Gross GST/HST gap, tax year 2022, per cent of federal GST/HST revenue (CRA, Overall
+/// federal tax gap report 2026, Figure 10).
+/// <https://www.canada.ca/en/revenue-agency/corporate/about-canada-revenue-agency-cra/tax-canada-a-conceptual-study/tax-gap-brief-overview/2026-overall-federal-tax-gap-report.html>
+pub const GST_GAP_GROSS_2022: f64 = 13.5;
+/// Net GST/HST gap (after CRA compliance and collection), tax year 2022, per cent (same).
+pub const GST_GAP_NET_2022: f64 = 5.8;
+
+/// Total direct program expenses, FY2024-25, $M (AFR 2024-25, Table 5).
+pub const DIRECT_PROGRAM_EXPENSES: f64 = 237_594.0;
+/// Public debt charges, FY2024-25, $M (AFR 2024-25, Table 5).
+pub const PUBLIC_DEBT_CHARGES: f64 = 53_410.0;
+/// Unmatured debt at March 31, 2025, $M (AFR 2024-25, statement of financial position).
+pub const UNMATURED_DEBT: f64 = 1_485_887.0;
+/// Annual operating deficit, FY2024-25, $M (AFR 2024-25, Table 6).
+pub const OPERATING_DEFICIT: f64 = 36_348.0;
+
+/// Spending covered by Canada's 1994-95 Program Review, $M ("about $52 billion worth of
+/// spending, excluding only major statutory transfers", Budget 1995, Budget Plan).
+/// <https://www.budget.canada.ca/archives/budget95/binb/budget1995-eng.pdf>
+pub const PROGRAM_REVIEW_SCOPE: f64 = 52_000.0;
+/// Decline in Program Review spending by 1997-98 relative to 1994-95, per cent (same).
+pub const PROGRAM_REVIEW_DECLINE_PCT: f64 = 18.9;
+
+/// Ireland, GDP at current market prices, 2024, EUR M (CSO, Annual National Accounts
+/// 2024, Table 2.2). <https://www.cso.ie/en/releasesandpublications/ep/p-ana/annualnationalaccounts2024/gniandde-globalisedresults/>
+pub const IE_GDP_2024: f64 = 562_794.0;
+/// Ireland, modified gross national income (GNI*), 2024, EUR M (same table).
+pub const IE_GNI_STAR_2024: f64 = 321_098.0;
+
+/// Long-run semi-elasticity of the machinery-and-equipment capital stock to the METR:
+/// per cent of capital per percentage point of METR. **UNVERIFIED**: from the abstract of
+/// IMF Working Paper WP/20/77, "Tax Elasticity Estimates for Capital Stocks in Canada"
+/// (user-cost elasticity about -1.3, semi-elasticity about -0.2), as reported by a search
+/// index. The IMF pages refused the fetch, so no verbatim excerpt is committed.
+pub const USER_COST_SEMI_ELASTICITY_UNVERIFIED: f64 = 0.2;
+
+/// Spin-up scenarios (low, central, high): multiplier on the semi-elasticity above.
+/// Scenario parameters, not data.
+pub const SPINUP_ELASTICITY_SCALE: [f64; 3] = [0.5, 1.0, 2.0];
+/// METR cut, percentage points, from abolishing all federal CIT (low, central). The high
+/// case uses [`METR_2025_SUPER`], the whole remaining METR. Scenario parameters: the
+/// federal share of the METR is not published in the sources used here.
+pub const SPINUP_METR_CUT_PP: [f64; 2] = [5.0, 8.0];
+/// Share of the gap between the capital stock and its new target closed each year
+/// (low, central, high). Scenario parameters.
+pub const SPINUP_SPEED: [f64; 3] = [0.1, 0.2, 0.3];
+/// Recession stress test: one-year fall in the taxable base, per cent. Scenario parameter.
+pub const RECESSION_BASE_DROP_PCT: f64 = 3.0;
+/// Year of the recession stress test (years after launch). Scenario parameter.
+pub const RECESSION_YEAR: u32 = 5;
+/// Years simulated under the debt-neutral rule. Design choice of this revision.
+pub const HORIZON_YEARS: u32 = 100;
+/// Years over which the rule repays a shortfall booked in the compensation account.
+/// Design choice of this revision (the Swiss rule requires repayment "in subsequent
+/// years" without a fixed count).
+pub const REPAY_YEARS: u32 = 3;

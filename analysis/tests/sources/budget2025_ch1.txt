@@ -1,0 +1,6 @@
+URL: https://budget.canada.ca/2025/report-rapport/chap1-en.html
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+Canada's METR will be reduced from 15.6 per cent to 13.2 per cent

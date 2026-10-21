@@ -1,0 +1,11 @@
+URL: https://www.efv.admin.ch/en/federal-governments-debt-brake
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+the annual ceiling for ordinary expenditure is linked to the amount of ordinary receipts
+ratio of trend gross domestic product (trend GDP) to current GDP
+However, a tax reduction has to be accompanied by expenditure cuts.
+Any deficit in the compensation account has to be eliminated in subsequent years.
+with the Confederation's debt ratio falling from 25.3% (2003) to 13.5% (2019).
+The constitutional article was accepted with a “yes” vote of 85% in the referendum of 2 December 2001.
