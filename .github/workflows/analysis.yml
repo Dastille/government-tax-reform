@@ -1,9 +1,8 @@
 name: revenue-model
 
 on:
-  push:
-    branches: [main, v2-sourced-revision]
-  pull_request:
+  # Dispatch-only: the account is on the GitHub Free plan and Actions minutes are capped.
+  # Checks run locally; receipts are posted on the PR. Do not re-add push/pull_request/schedule.
   workflow_dispatch:
 
 permissions:
