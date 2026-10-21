@@ -1,0 +1,7 @@
+URL: https://wdi.worldbank.org/table/4.8
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: curl, HTML tags stripped
+Excerpt (verbatim; whitespace collapsed):
+---
+Structure of demand Final consumption expenditure General government final consumption expenditure Households and NPISHs final consumption expenditure Gross capital formation Exports of goods and services Imports of goods and services % of GDP % of GDP % of GDP % of GDP % of GDP % of GDP 2015 2024 2015 2024 2015 2024 2015 2024 2015 2024 2015 2024
+Canada 78.7 77.0 20.9 21.4 57.8 55.6 23.8 23.2 31.8 32.5 34.3 32.7

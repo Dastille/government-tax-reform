@@ -1,0 +1,10 @@
+URL: https://www.canada.ca/en/department-finance/services/publications/annual-financial-report/2025.html
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+Table 4 Revenues
+| Employment Insurance premiums | 31,530 | 29,560 | 1,970 | 6.7 |
+| Total revenues | 510,951 | 459,549 | 51,402 | 11.2 |
+The ratio stood at 16.6 per cent in 2024-25 (up from 15.7 per cent in 2023-24)
+The federal debt stood at 41.2 per cent of GDP in 2024-25, down from 42.1 per cent in 2023-24.

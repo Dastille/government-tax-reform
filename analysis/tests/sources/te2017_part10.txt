@@ -1,0 +1,7 @@
+URL: https://www.canada.ca/en/department-finance/services/publications/federal-tax-expenditures/2017/part-10.html
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+When it was abolished, the FST, which had been in effect since 1924, applied at a general rate of 13.5% on goods manufactured in Canada at the time they were sold by the manufacturer, including when they were destined for export.
+The GST, which replaced this tax, originally applied at a lower flat rate of 7% (since reduced to 5%) to a wider range of goods and services.

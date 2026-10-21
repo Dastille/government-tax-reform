@@ -1,0 +1,6 @@
+URL: https://novascotia.ca/finance/statistics/archive_news.asp?df=&dg=&dti=3&dto=0&id=21517
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: curl, HTML tags stripped
+Excerpt (verbatim; whitespace collapsed):
+---
+Property tax revenues for consolidated provincial-local governments amounted to $1,747 per capita in Nova Scotia, which was 77.9% of the national average ($2,242).
