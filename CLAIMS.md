@@ -117,6 +117,11 @@ Generated from `analysis/src/ledger.rs`. Excerpt files are in `analysis/tests/so
 | Estonia: profits taxed when distributed, at 22/78 | Verified (source excerpt) | Estonian Tax and Customs Board [R33]; excerpt `emta_companies` |
 | Spin-up cases: semi-elasticity scale, METR cut and speed; recession of 3% in one year | Scenario parameter, not data | Chosen to span low, central and high cases; not estimates |
 | Rule: repay the compensation account over 3 years; simulate 100 years | Design choice (ab193f4), not data | Design choice of v3.0 (not in ab193f4); the Swiss rule [R24] sets no fixed repayment period |
+| Federal bracket thresholds and basic personal amount ($14,398), 2022 tax year; 50% of realised capital gains taxable | Verified (source excerpt) | CRA T1 final statistics, 2022 tax year [R35]; excerpt `cra_t1_2022` |
+| Top 1% from $322,000: 12.6% of income, 22.7% of income taxes; top 10% from $115,000; effective rate 20.1% | Verified (source excerpt) | Nova Scotia Finance [R36]; excerpt `ns_high_income_2022` |
+| Wealth tax: 1% above $10M raises $12.6B; behaviour 35%, administration 2% | Verified (source excerpt) | PBO election costing [R37]; excerpt `pbo_wealth_2021` |
+| MBM family-of-four line $54,369 (large Ontario cities); share aged 0 to 14 15.2% | **UNVERIFIED** | Statistics Canada Table 11-10-0066-01 [R40] and The Daily, read from a search index; the site was down when accessed |
+| Distribution rows: incomes, consumption shares, retiree and asset-rich spending | Scenario parameter, not data | Representative filers; the household spending tables by quintile were not retrievable |
 
 ## Source caveats
 

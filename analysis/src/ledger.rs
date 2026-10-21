@@ -346,4 +346,51 @@ pub const INPUTS: &[Claim] = &[
         "Design choice of v3.0 (not in ab193f4); the Swiss rule [R24] sets no fixed repayment period",
         &["REPAY_YEARS", "HORIZON_YEARS"],
     ),
+    c(
+        "Federal bracket thresholds and basic personal amount ({{es_bpa}}), 2022 tax year; {{es_cg_incl}}% of realised capital gains taxable",
+        Source,
+        "CRA T1 final statistics, 2022 tax year [R35]; excerpt `cra_t1_2022`",
+        &["BRACKET_TOPS_2022", "BPA_2022", "CG_INCLUSION_PCT"],
+    ),
+    c(
+        "Top 1% from {{es_top1_threshold}}: {{es_top1_income}}% of income, {{es_top1_tax}}% of income taxes; top 10% from {{es_top10_threshold}}; effective rate {{es_eff_rate}}%",
+        Source,
+        "Nova Scotia Finance [R36]; excerpt `ns_high_income_2022`",
+        &[
+            "TOP1_THRESHOLD_2022",
+            "TOP10_THRESHOLD_2022",
+            "TOP1_INCOME_SHARE_2022",
+            "TOP1_TAX_SHARE_2022",
+            "EFFECTIVE_RATE_2022",
+        ],
+    ),
+    c(
+        "Wealth tax: {{es_wt_rate}}% above ${{es_wt_threshold}}M raises ${{es_wt_b}}B; behaviour {{es_wt_behaviour}}%, administration {{es_wt_admin}}%",
+        Source,
+        "PBO election costing [R37]; excerpt `pbo_wealth_2021`",
+        &[
+            "WEALTH_TAX_2024_25",
+            "WEALTH_TAX_RATE_PCT",
+            "WEALTH_TAX_THRESHOLD",
+            "WEALTH_TAX_BEHAVIOUR_PCT",
+            "WEALTH_TAX_ADMIN_PCT",
+        ],
+    ),
+    c(
+        "MBM family-of-four line {{es_mbm4}} (large Ontario cities); share aged 0 to 14 {{es_child_share}}%",
+        Unverified,
+        "Statistics Canada Table 11-10-0066-01 [R40] and The Daily, read from a search index; the site was down when accessed",
+        &["MBM_FAMILY4_UNVERIFIED", "CHILD_SHARE_0_14_UNVERIFIED"],
+    ),
+    c(
+        "Distribution rows: incomes, consumption shares, retiree and asset-rich spending",
+        Scenario,
+        "Representative filers; the household spending tables by quintile were not retrievable",
+        &[
+            "DIST_INCOME_SCENARIO",
+            "DIST_SPEND_SHARE_SCENARIO",
+            "RETIREE_SCENARIO",
+            "ASSET_RICH_SPENDING_SCENARIO",
+        ],
+    ),
 ];

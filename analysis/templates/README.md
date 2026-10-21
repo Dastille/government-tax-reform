@@ -36,6 +36,11 @@ The paper's §10, §11 and §12 add a rule under which income tax is cut only by
 - **Does it close the gap without debt?** An industry spin-up from lower income tax (a scenario, not a forecast) {{v3_verdict}}. k settles at {{v3_settle_low}} / {{v3_settle_central}} / {{v3_settle_high}} (low / central / high); years to full abolition: {{v3_years_low}} / {{v3_years_central}} / {{v3_years_high}}.
 - **What would close it.** Base broadening, a cut the size of Canada's Program Review (${{v3_pr_cut}}B) and the LVT together; with them, the central case can abolish the income tax, and the VAT it then needs is {{v3_pkg_rate_central}}. The LVT's land value is unverified.
 - **Infrastructure test.** Borrowing to abolish income tax at once fails it: the spin-up revenue covers {{v3_cover_central}} of the cost in the central case.
+
+## End state: no income tax (v3.0, §13)
+
+- **Balanced packages, no income tax.** VAT and spending review: {{es_rate_a}}. Adding the LVT: {{es_rate_b}}. Adding the PBO wealth tax: {{es_rate_c}}. Each includes a prebate that removes the VAT on spending up to the MBM poverty line (net ${{es_prebate_net_b}}B a year in package B); without it the rates are {{es_noprebate_a}} / {{es_noprebate_b}} / {{es_noprebate_c}}.
+- **Who pays.** Filers living on current income gain; those spending from savings, borrowing or unrealised gains pay more. The MBM line, the age share and the land value are unverified; consumption by income is a scenario.
 - Within each assumption, more revenue always means a lower required rate, and a test enforces this.
 - The paper's §9 lists every original requirement, who it came from, and whether it was kept, reframed or deleted. [CLAIMS.md](CLAIMS.md) maps every claim to its test or source.
 

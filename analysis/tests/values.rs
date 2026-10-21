@@ -510,8 +510,101 @@ fn expected() -> BTreeMap<String, String> {
             .into(),
         ));
     }
+    // v3 end state (section 13). Rates come from the crate's solver (tests/endstate.rs
+    // checks that each balances); the dollar figures are recomputed here from the inputs.
+    {
+        use vat_revenue_model::data::{
+            ASSET_RICH_SPENDING_SCENARIO, BPA_2022, BRACKETS_2023, BRACKET_TOPS_2022,
+            CG_INCLUSION_PCT, CHILD_SHARE_0_14_UNVERIFIED, EFFECTIVE_RATE_2022, GST_CREDIT,
+            MBM_FAMILY4_UNVERIFIED, POPULATION_2024, RETIREE_SCENARIO, TE_HOUSEHOLD,
+            TOP10_THRESHOLD_2022, TOP1_INCOME_SHARE_2022, TOP1_TAX_SHARE_2022, TOP1_THRESHOLD_2022,
+            WEALTH_TAX_2024_25, WEALTH_TAX_ADMIN_PCT, WEALTH_TAX_BEHAVIOUR_PCT,
+            WEALTH_TAX_RATE_PCT, WEALTH_TAX_THRESHOLD,
+        };
+        use vat_revenue_model::endstate::{rate_without_prebate, Package};
+        use vat_revenue_model::model::{broadening_factor, taxable_share_central, te_sum};
+        let money = |x: f64| -> String {
+            let r = x.round();
+            let s = commas(&format!("{:.0}", r.abs()));
+            if r < 0.0 {
+                format!("−${s}")
+            } else {
+                format!("${s}")
+            }
+        };
+        let ps = Package::all();
+        let names = [
+            ("es_rate_a", "es_noprebate_a"),
+            ("es_rate_b", "es_noprebate_b"),
+            ("es_rate_c", "es_noprebate_c"),
+        ];
+        for (p, (r, n)) in ps.iter().zip(names) {
+            e.push((r, p1(p.rate())));
+            e.push((n, p1(rate_without_prebate(p))));
+        }
+        let rb = ps[1].rate();
+        let wide = (taxable_share_central() * broadening_factor(te_sum(&TE_HOUSEHOLD))).min(1.0);
+        let line = MBM_FAMILY4_UNVERIFIED / 2.0;
+        let each = rb / 100.0 * wide * line;
+        let people = POPULATION_2024 * (1.0 - CHILD_SHARE_0_14_UNVERIFIED / 100.0);
+        e.push((
+            "es_prebate_net_b",
+            usd_b(each * people / 1e6 - GST_CREDIT * rb / 5.0),
+        ));
+        e.push(("es_prebate_each_b", money(each)));
+        e.push(("es_mbm4", money(MBM_FAMILY4_UNVERIFIED)));
+        e.push(("es_mbm1", money(line)));
+        e.push(("es_people_m", format!("{:.1}", people / 1e6)));
+        e.push(("es_child_share", short(CHILD_SHARE_0_14_UNVERIFIED)));
+        e.push(("es_share_wide", format!("{wide:.3}")));
+        let pit = |y: f64| -> f64 {
+            let tops = [
+                0.0,
+                BRACKET_TOPS_2022[0],
+                BRACKET_TOPS_2022[1],
+                BRACKET_TOPS_2022[2],
+                BRACKET_TOPS_2022[3],
+                f64::MAX,
+            ];
+            let t: f64 = (0..5)
+                .map(|i| (y.min(tops[i + 1]) - tops[i]).max(0.0) * BRACKETS_2023[i] / 100.0)
+                .sum();
+            (t - 0.15 * BPA_2022).max(0.0)
+        };
+        let gain = |y: f64, c: f64| -> f64 {
+            pit(y) + 0.05 * taxable_share_central() * c - (rb / 100.0 * wide * c - each)
+        };
+        e.push((
+            "es_rich_loss",
+            money(-gain(0.0, ASSET_RICH_SPENDING_SCENARIO)),
+        ));
+        e.push(("es_rich_spend", money(ASSET_RICH_SPENDING_SCENARIO)));
+        e.push(("es_retiree_income", money(RETIREE_SCENARIO[0])));
+        e.push(("es_retiree_spend", money(RETIREE_SCENARIO[1])));
+        e.push((
+            "es_retiree_gain",
+            money(gain(RETIREE_SCENARIO[0], RETIREE_SCENARIO[1])),
+        ));
+        e.push(("es_mbm_gain", money(gain(line, line))));
+        e.push((
+            "es_top1_gain",
+            money(gain(TOP1_THRESHOLD_2022, 0.6 * TOP1_THRESHOLD_2022)),
+        ));
+        e.push(("es_bpa", money(BPA_2022)));
+        e.push(("es_cg_incl", short(CG_INCLUSION_PCT)));
+        e.push(("es_top1_threshold", money(TOP1_THRESHOLD_2022)));
+        e.push(("es_top10_threshold", money(TOP10_THRESHOLD_2022)));
+        e.push(("es_top1_income", short(TOP1_INCOME_SHARE_2022)));
+        e.push(("es_top1_tax", short(TOP1_TAX_SHARE_2022)));
+        e.push(("es_eff_rate", short(EFFECTIVE_RATE_2022)));
+        e.push(("es_wt_b", usd_b(WEALTH_TAX_2024_25)));
+        e.push(("es_wt_rate", short(WEALTH_TAX_RATE_PCT)));
+        e.push(("es_wt_threshold", short(WEALTH_TAX_THRESHOLD)));
+        e.push(("es_wt_behaviour", short(WEALTH_TAX_BEHAVIOUR_PCT)));
+        e.push(("es_wt_admin", short(WEALTH_TAX_ADMIN_PCT)));
+    }
     // Tables come straight from the table builders in `report.rs`, not from `docs.rs`.
-    let tables: [(&str, TableFn); 22] = [
+    let tables: [(&str, TableFn); 26] = [
         ("table:first_principles", report::table_first_principles),
         ("table:baseline", report::table_baseline),
         ("table:static", report::table_static),
@@ -532,6 +625,10 @@ fn expected() -> BTreeMap<String, String> {
         ("table:spinup", report::table_spinup),
         ("table:levers", report::table_levers),
         ("table:counter_v3", report::table_counter_v3),
+        ("table:endstate", report::table_endstate),
+        ("table:distribution", report::table_distribution),
+        ("table:options", report::table_options),
+        ("table:counter_endstate", report::table_counter_endstate),
         ("table:key_figures", report::key_figures),
         ("table:readme", report::readme_table),
     ];

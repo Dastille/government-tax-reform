@@ -2,7 +2,7 @@
 # Fundamental Tax Reform: Toward a Single Consumption-Based System
 
 **Whitepaper · v3.0 (debt-neutral transition) · October 2026**
-**Author:** Ashlynn (original design, January 2026). v2.0 fixed the arithmetic and added sources; v3.0 adds a debt-neutral transition rule, an industry spin-up scenario and the infrastructure test (§10, §11 and §12). Neither changes the design goals.
+**Author:** Ashlynn (original design, January 2026). v2.0 fixed the arithmetic and added sources; v3.0 adds a debt-neutral transition rule, an industry spin-up scenario and the infrastructure test (§10, §11 and §12), and the end state with no income tax (§13). None changes the design goals.
 
 **Scope.** The design is meant for **mid-sized advanced economies**. Canada is the **worked example** because its federal accounts for fiscal year 2024-25 (April 2024 to March 2025, "FY2024-25") are public and detailed. The method carries over to other countries: the VAT rate a country needs equals the revenue it must replace divided by its effective VAT base.
 
@@ -37,6 +37,7 @@
 - **Sensitivity B** gives a lower floor: $183.8B static and $215.9B dynamic at 20%, k = 56.1%. The conclusion is the same under either assumption.
 - v2.0 therefore keeps every mechanism of the design. Income taxes are reduced as far as VAT and LVT revenue allows, and they are abolished, and the VAT rate stepped down, only when the fiscal board certifies that revenue covers the need.
 - **v3.0, debt-neutral.** Under a rule that cuts income tax only from revenue already realised (§10), the deficit never rises above the baseline without a shock. An industry spin-up from lower income tax (§11) does not close the gap in any case: k settles at 46.9% in the central case and 42.7% in the high case. Closing the gap takes base broadening, a Program-Review-sized spending cut and the LVT together (§11.3); with them, the central case can abolish the income tax, and the VAT it then needs is 19.1%.
+- **End state (§13).** With no income tax, a balanced budget and a prebate that removes the VAT on spending up to the poverty line, the VAT that balances is 36.2%, 32.6% or 31.2% depending on the package (21.1% to 18.3% without the prebate).
 
 **Key figures:**
 
@@ -587,7 +588,82 @@ Applied here: abolishing the income tax at once, on borrowed money, would cost t
 
 ---
 
-## 13. Limitations
+## 13. End state: no income tax, budget balanced
+
+This section designs the destination without the path to it: federal PIT and CIT both at zero (k = 0), the budget balanced every year, and no transition debt. It uses the central spin-up case's long-run base (§11) with the household GST exemptions taxed (§11.3). The question it answers is which mixes of revenue balance, at what VAT rate, and who gains or pays.
+
+### 13.1 What the income tax does and does not reach today
+
+- **Who pays it.** In the latest year with published shares, the top 1% of taxfilers (total income above $322,000, capital gains included) reported 12.6% of total income and paid 22.7% of federal and provincial income taxes; the top 10% started at $115,000; the average effective rate was 20.1% [R36]. The income tax is progressive on the income it sees. The top 10% share of tax for Canada was not in the sources we could reach; it is **unverified**.
+- **What it does not see.** A capital gain is taxed only when realised, and then only 50% of it [R35]. A gain that is held is not income for the tax. At death, the owner is "deemed to have, immediately before the taxpayer's death, disposed of each capital property" at fair market value [R39, s. 70(5)], unless it passes to a spouse [R39, s. 70(6)]. So unrealised gains are deferred, not exempt; an owner can live on borrowing or on assets that are not sold, and pay no income tax while doing so.
+- **What that means for the end state.** Abolishing PIT also abolishes the deemed disposition at death. A consumption tax reaches what the owners of unrealised gains spend, but not what they hold or pass on. Only a wealth or inheritance tax reaches the holding.
+
+### 13.2 The prebate
+
+Each resident aged 15 and over receives the VAT on spending up to the single-person Market Basket Measure (MBM) line: half the family-of-four line of $54,369 [R40], or $27,185, times the taxable share of spending once the exemptions are taxed (0.808). A single adult, or two adults with two children, at the line pays no net VAT. About 35.0M people qualify (everyone except the 15.2% aged 0 to 14). The prebate replaces the GST credit, which the model already nets out of revenue, so its net cost is the prebate less the scaled credit. The MBM line and the age share are **unverified** (Statistics Canada was unreachable when accessed); the MBM line chosen is a large-city one, so it is generous for rural areas.
+
+### 13.3 Packages that balance
+
+| Package | Spending review, $B | LVT, $B (land value unverified) | Wealth tax, $B | VAT revenue, $B | Prebate, $B | Less GST credit it replaces, $B | Balance, $B | **VAT rate** | Rate if the GST credit is scaled instead of a prebate | Prebate per person aged 15+ |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| A: VAT and spending review | 44.9 | 0.0 | 0.0 | 571.9 | 278.4 | 45.4 | 0.0 | **36.2%** | 21.1% | $7,950 |
+| B: A plus land value tax | 44.9 | 32.0 | 0.0 | 516.7 | 250.7 | 40.8 | 0.0 | **32.6%** | 19.1% | $7,161 |
+| C: B plus wealth tax | 44.9 | 32.0 | 12.6 | 495.1 | 239.9 | 39.1 | 0.0 | **31.2%** | 18.3% | $6,852 |
+
+Need: $383.8B (PIT + CIT + net GST). Net prebate cost at each package's rate: $233.0B, $209.9B, $200.8B.
+
+- **A: VAT and spending review.** The VAT that balances is 36.2% (21.1% without the prebate).
+- **B: A plus the LVT.** 32.6% (19.1% without the prebate). The land value is **unverified**.
+- **C: B plus a wealth tax.** 31.2% (18.3% without the prebate). The wealth tax is the PBO's costing of 1% a year on family net wealth above $10M: $12.6B in the model year, after a 35% behavioural reduction and 2% administration cost [R37].
+
+The prebate is what sets the rate. At package B it costs $209.9B a year net, or $7,161 per person. Without it, each package needs a rate close to the §10 starting rate; with it, each needs a rate above any standard VAT in the OECD.
+
+| Option | Rate | Revenue, $B/yr | Status | In packages |
+|---|---|---:|---|---|
+| Annual net wealth tax (PBO costing) | 1% above $10M of family net wealth | 12.6 | sourced; assumes 35% behavioural reduction and 2% administration cost | C |
+| Land value tax | as in §5.4 | 32.0 | land value unverified | B, C |
+| Distributed-profit tax (Estonia) | 22/78 of the net distribution | not computed | Canadian distribution base unverified | no |
+| Resource royalties | set by each province | 0 federal | resources belong to the provinces (Constitution Act, 1867, s. 109) | no |
+| Inheritance or estate tax | not set | not computed | no Canadian costing found; capital gains are taxed at death today only through the income tax | no |
+
+- **Distributed-profit tax.** Estonia taxes company profits at 22/78 of the net distribution, when paid out [R33]. For Canada its base would be dividends and other distributions; that base is **unverified**, so no revenue is computed.
+- **Resource royalties.** Mines, minerals and royalties belong to the provinces [R38, s. 109]. They are not a federal lever.
+- **Inheritance tax.** None of the sources used here costs one for Canada; it is listed, not computed.
+
+### 13.4 Who gains and who pays
+
+| Filer | Total income | Consumption (scenario) | Today: federal PIT + GST | End state: VAT at 32.6% less prebate | Gain (+) or loss (−) | Change, % of income |
+|---|---:|---:|---:|---:|---:|---:|
+| Single at the MBM line | $27,185 | $27,185 | $2,752 | $0 | $2,752 | 10.1% |
+| Wage earner | $50,000 | $45,000 | $6,721 | $4,693 | $2,028 | 4.1% |
+| Top 10% threshold | $115,000 | $92,000 | $22,280 | $17,073 | $5,208 | 4.5% |
+| Higher earner | $200,000 | $140,000 | $47,184 | $29,716 | $17,468 | 8.7% |
+| Top 1% threshold | $322,000 | $193,200 | $88,208 | $43,729 | $44,479 | 13.8% |
+| High earner | $1,000,000 | $400,000 | $318,292 | $98,201 | $220,091 | 22.0% |
+| Retiree drawing savings | $30,000 | $50,000 | $3,874 | $6,010 | −$2,135 | −7.1% |
+| Asset-rich, no realised income | $0 | $250,000 | $7,670 | $58,691 | −$51,021 | no income |
+
+Federal taxes only, single filers, package B. "Today" is federal PIT on the 2022 brackets [R35] less the basic personal amount ($14,398) [R35], plus the 5% GST on the taxable share of spending. It ignores every other credit (including the GST credit, CPP and EI credits and the Canada Workers Benefit), so it overstates today's tax for low incomes. Consumption by income is a scenario: the Survey of Household Spending tables by quintile could not be retrieved, so this is a table of representative filers, not deciles.
+
+- **Gainers.** Every filer whose spending is mostly out of current income gains. The filer at the MBM line gains $2,752 a year; the filer at the top 1% threshold gains $44,479. The gain rises with income, because the income tax is progressive and the VAT is close to proportional to spending.
+- **Payers.** Those who spend more than their taxable income: a retiree with $30,000 of income who spends $50,000 changes by −$2,135; an owner with no realised income who spends $250,000 from unrealised gains or borrowing pays $51,021 more. Corporate income tax is not assigned to any row; whoever bears it today (shareholders, workers or customers) also gains.
+- **What balances it.** The rows do not sum to the budget. The money comes from the spending review (its recipients pay), from spending out of wealth, from the LVT on landowners and, in C, from the wealth tax on families above $10M.
+
+### 13.5 Counter-arguments to each package
+
+| Package | Strongest counter-argument | Measure |
+|---|---|---|
+| A | The rate is above Hungary's, the highest standard VAT rate in the OECD, so evasion rises | VAT 36.2% against 27% [R4]; the gross GST/HST gap is already 13.5% at 5% [R34] |
+| A | The prebate costs about as much as all of today's direct program expenses | net $233.0B a year against $237.6B [R2] |
+| B | The land value is not verified, so the LVT may raise much less | if the LVT raised nothing, B's rate would be A's: 36.2% |
+| B | Provinces and municipalities already tax property | the LVT must first replace $92.6B of property tax (§5.4) |
+| C | Wealth is hard to value and mobile; the PBO already cuts the base by 35% for avoidance | VAT 31.2% with it, 32.6% without it |
+| All | With PIT at zero, the deemed disposition at death goes with it, so gains never realised are never taxed | only the VAT on what the owners spend, and package C's wealth tax, reach them |
+| All | Retirees who saved out of taxed income pay VAT again when they spend | see the retiree row in §13.4 |
+
+---
+
+## 14. Limitations
 
 - **Accounting model, not a general-equilibrium model.** The MPC, taxable share and multipliers are fixed. There are no wage, price-level, exchange-rate or interest-rate responses beyond the stated incidence assumption.
 - **Incidence.** Headline figures assume full pass-through with the real basket held (A). If nominal spending does not rise with prices (B), revenue at 20% is about $26B lower and k rises from 47.3% to 56.1%. Reality is likely between the two; it is not estimated here.
@@ -598,14 +674,15 @@ Applied here: abolishing the income tax at once, on borrowed money, would cost t
 - **Multipliers** are short-run estimates from 2009 [R8], with leakage built in. Long-run CIT effects may be larger.
 - **The land value total is unverified.**
 - **Compliance leakage** at higher rates is a what-if, not an estimate. The growth addition is a what-if, not an estimate.
-- **Distribution by decile** and the full dividend cost are **unverified**.
+- **Distribution.** §13.4 uses representative filers with scenario consumption, not deciles; the decile data and the full dividend cost are **unverified**.
+- **End-state inputs.** The MBM line, the age share and the land value are **unverified**; the wealth tax uses the PBO costing as published.
 - **Transition financing.** The rule in §10 keeps each year's deficit at or below the baseline, so no transition debt is modelled; federal debt is 41.2% of GDP [R2]. The rule's result depends on the spin-up inputs below.
 - **Spin-up inputs.** The capital semi-elasticity is **unverified**. The input-output values, and the capital share derived from them, are **unverified**: they were read from a search index's copy of the Statistics Canada table because the live site was down when accessed. The capital proxy includes land and government assets. The METR cut in the low and central cases is a scenario, not an estimate of the federal share.
 - **Portability.** Other mid-sized advanced economies have different VRRs and income-tax shares. Rerun the model with their inputs.
 
 ---
 
-## 14. References
+## 15. References
 
 - [R1] Receiver General for Canada, *Public Accounts of Canada 2025*, Vol. I, Section 3 "Revenues", Tables 3.2 and 3.3. https://www.tpsgc-pwgsc.gc.ca/recgen/cpc-pac/2025/vol1/s3/rvnu-eng.html
 - [R2] Department of Finance Canada, *Annual Financial Report of the Government of Canada, Fiscal Year 2024–2025*, Tables 2 and 4. https://www.canada.ca/en/department-finance/services/publications/annual-financial-report/2025.html
@@ -643,6 +720,12 @@ Applied here: abolishing the income tax at once, on borrowed money, would cost t
 - [R32] Central Statistics Office (Ireland), *Annual National Accounts 2024*, "GNI and De-Globalised Results". https://www.cso.ie/en/releasesandpublications/ep/p-ana/annualnationalaccounts2024/gniandde-globalisedresults/
 - [R33] Estonian Tax and Customs Board, "Tax liabilities of companies". https://www.emta.ee/en/business-client/registration-business/non-residents-e-residents/tax-liabilities-companies
 - [R34] Canada Revenue Agency, "Overall federal tax gap report 2026". https://www.canada.ca/en/revenue-agency/corporate/about-canada-revenue-agency-cra/tax-canada-a-conceptual-study/tax-gap-brief-overview/2026-overall-federal-tax-gap-report.html
+- [R35] Canada Revenue Agency, "Individual Income Tax Return Statistics (2022 tax year)". https://www.canada.ca/en/revenue-agency/programs/about-canada-revenue-agency-cra/income-statistics-gst-hst-statistics/t1-final-statistics/2022-tax-year.html
+- [R36] Nova Scotia Department of Finance, "High income trends and effective tax rates, 2022", from Statistics Canada Tables 11-10-0054-01 and 11-10-0056-01. https://novascotia.ca/finance/statistics/archive_news.asp?df=&dg=&dti=3&dto=0&id=20388
+- [R37] Parliamentary Budget Officer, "Implement annual net wealth tax", election proposal costing. https://distribution-a617274656661637473.pbo-dpb.ca/e45d50992f5e3c2e474f60ce79b76664db4bdf21c2f2059901c3575c65f6c0fd
+- [R38] Constitution Act, 1867, s. 109. https://laws-lois.justice.gc.ca/eng/const/section-109.html
+- [R39] Income Tax Act, s. 70. https://laws-lois.justice.gc.ca/eng/acts/I-3.3/section-70.html
+- [R40] Statistics Canada, Table 11-10-0066-01, "Market Basket Measure (MBM) thresholds" (**unverified**; site unreachable when accessed). https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1110006601
 - Nova Scotia Department of Finance, "Government Financial Statistics, 2024" (21 November 2025), from Statistics Canada Table 10-10-0147-01. https://novascotia.ca/finance/statistics/archive_news.asp?df=&dg=&dti=3&dto=0&id=21517 · Statistics Canada, *The Daily*, 25 September 2024 (population, 1 July 2024). https://www150.statcan.gc.ca/n1/daily-quotidien/240925/dq240925d-eng.htm
 
 ---

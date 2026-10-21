@@ -286,6 +286,51 @@ Static scaling (A) of two existing measures: the GST credit (PA 2025 Table 3.3) 
 | Recession | Years to repay it under the rule | 3 | |
 | Profit shifting | Ireland 2024: GNI* / GDP | 57.1% | measured GDP overstates domestic income |
 
+## Table 18. End state: three balanced packages
+
+| Package | Spending review, $B | LVT, $B (land value unverified) | Wealth tax, $B | VAT revenue, $B | Prebate, $B | Less GST credit it replaces, $B | Balance, $B | **VAT rate** | Rate if the GST credit is scaled instead of a prebate | Prebate per person aged 15+ |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| A: VAT and spending review | 44.9 | 0.0 | 0.0 | 571.9 | 278.4 | 45.4 | 0.0 | **36.2%** | 21.1% | $7,950 |
+| B: A plus land value tax | 44.9 | 32.0 | 0.0 | 516.7 | 250.7 | 40.8 | 0.0 | **32.6%** | 19.1% | $7,161 |
+| C: B plus wealth tax | 44.9 | 32.0 | 12.6 | 495.1 | 239.9 | 39.1 | 0.0 | **31.2%** | 18.3% | $6,852 |
+
+Need: $383.8B (PIT + CIT + net GST). Net prebate cost at each package's rate: $233.0B, $209.9B, $200.8B.
+
+## Table 19. Who gains and who pays (federal, single filers, package B)
+
+| Filer | Total income | Consumption (scenario) | Today: federal PIT + GST | End state: VAT at 32.6% less prebate | Gain (+) or loss (−) | Change, % of income |
+|---|---:|---:|---:|---:|---:|---:|
+| Single at the MBM line | $27,185 | $27,185 | $2,752 | $0 | $2,752 | 10.1% |
+| Wage earner | $50,000 | $45,000 | $6,721 | $4,693 | $2,028 | 4.1% |
+| Top 10% threshold | $115,000 | $92,000 | $22,280 | $17,073 | $5,208 | 4.5% |
+| Higher earner | $200,000 | $140,000 | $47,184 | $29,716 | $17,468 | 8.7% |
+| Top 1% threshold | $322,000 | $193,200 | $88,208 | $43,729 | $44,479 | 13.8% |
+| High earner | $1,000,000 | $400,000 | $318,292 | $98,201 | $220,091 | 22.0% |
+| Retiree drawing savings | $30,000 | $50,000 | $3,874 | $6,010 | −$2,135 | −7.1% |
+| Asset-rich, no realised income | $0 | $250,000 | $7,670 | $58,691 | −$51,021 | no income |
+
+## Table 20. Other revenue options
+
+| Option | Rate | Revenue, $B/yr | Status | In packages |
+|---|---|---:|---|---|
+| Annual net wealth tax (PBO costing) | 1% above $10M of family net wealth | 12.6 | sourced; assumes 35% behavioural reduction and 2% administration cost | C |
+| Land value tax | as in §5.4 | 32.0 | land value unverified | B, C |
+| Distributed-profit tax (Estonia) | 22/78 of the net distribution | not computed | Canadian distribution base unverified | no |
+| Resource royalties | set by each province | 0 federal | resources belong to the provinces (Constitution Act, 1867, s. 109) | no |
+| Inheritance or estate tax | not set | not computed | no Canadian costing found; capital gains are taxed at death today only through the income tax | no |
+
+## Table 21. Counter-arguments to each package
+
+| Package | Strongest counter-argument | Measure |
+|---|---|---|
+| A | The rate is above Hungary's, the highest standard VAT rate in the OECD, so evasion rises | VAT 36.2% against 27% [R4]; the gross GST/HST gap is already 13.5% at 5% [R34] |
+| A | The prebate costs about as much as all of today's direct program expenses | net $233.0B a year against $237.6B [R2] |
+| B | The land value is not verified, so the LVT may raise much less | if the LVT raised nothing, B's rate would be A's: 36.2% |
+| B | Provinces and municipalities already tax property | the LVT must first replace $92.6B of property tax (§5.4) |
+| C | Wealth is hard to value and mobile; the PBO already cuts the base by 35% for avoidance | VAT 31.2% with it, 32.6% without it |
+| All | With PIT at zero, the deemed disposition at death goes with it, so gains never realised are never taxed | only the VAT on what the owners spend, and package C's wealth tax, reach them |
+| All | Retirees who saved out of taxed income pay VAT again when they spend | see the retiree row in §13.4 |
+
 ## Key figures
 
 | Key figure (Canada FY2024-25, federal; incidence A unless stated) | Value |

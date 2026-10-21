@@ -9,6 +9,7 @@
 
 pub mod data;
 pub mod docs;
+pub mod endstate;
 pub mod error;
 pub mod ledger;
 pub mod model;

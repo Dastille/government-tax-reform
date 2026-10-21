@@ -514,8 +514,58 @@ pub fn values() -> Result<BTreeMap<String, String>> {
             .into(),
         );
     }
+    // v3 end state: k = 0, balanced budget (section 13).
+    {
+        use crate::data::{
+            ASSET_RICH_SPENDING_SCENARIO, BPA_2022, CG_INCLUSION_PCT, CHILD_SHARE_0_14_UNVERIFIED,
+            EFFECTIVE_RATE_2022, MBM_FAMILY4_UNVERIFIED, RETIREE_SCENARIO, TOP10_THRESHOLD_2022,
+            TOP1_INCOME_SHARE_2022, TOP1_TAX_SHARE_2022, TOP1_THRESHOLD_2022, WEALTH_TAX_2024_25,
+            WEALTH_TAX_ADMIN_PCT, WEALTH_TAX_BEHAVIOUR_PCT, WEALTH_TAX_RATE_PCT,
+            WEALTH_TAX_THRESHOLD,
+        };
+        use crate::endstate::{
+            distribution, mbm_single, prebate_each, prebate_net, prebate_people,
+            rate_without_prebate, taxable_share_wide, Package,
+        };
+        use crate::report::dollars;
+        let ps = Package::all();
+        for (p, tag) in ps.iter().zip(["a", "b", "c"]) {
+            put(&format!("es_rate_{tag}"), pct(p.rate()));
+            put(&format!("es_noprebate_{tag}"), pct(rate_without_prebate(p)));
+        }
+        let rb = ps[1].rate();
+        put("es_prebate_net_b", b(prebate_net(rb)));
+        put("es_prebate_each_b", dollars(prebate_each(rb)));
+        put("es_mbm4", dollars(MBM_FAMILY4_UNVERIFIED));
+        put("es_mbm1", dollars(mbm_single()));
+        put("es_people_m", format!("{:.1}", prebate_people() / 1e6));
+        put("es_child_share", num(CHILD_SHARE_0_14_UNVERIFIED));
+        put("es_share_wide", format!("{:.3}", taxable_share_wide()));
+        let d = distribution(rb);
+        let rich = d[d.len() - 1];
+        let ret = d[d.len() - 2];
+        put("es_rich_spend", dollars(ASSET_RICH_SPENDING_SCENARIO));
+        put("es_rich_loss", dollars(-rich.gain()));
+        put("es_retiree_income", dollars(RETIREE_SCENARIO[0]));
+        put("es_retiree_spend", dollars(RETIREE_SCENARIO[1]));
+        put("es_retiree_gain", dollars(ret.gain()));
+        put("es_mbm_gain", dollars(d[0].gain()));
+        put("es_top1_gain", dollars(d[4].gain()));
+        put("es_bpa", dollars(BPA_2022));
+        put("es_cg_incl", num(CG_INCLUSION_PCT));
+        put("es_top1_threshold", dollars(TOP1_THRESHOLD_2022));
+        put("es_top10_threshold", dollars(TOP10_THRESHOLD_2022));
+        put("es_top1_income", num(TOP1_INCOME_SHARE_2022));
+        put("es_top1_tax", num(TOP1_TAX_SHARE_2022));
+        put("es_eff_rate", num(EFFECTIVE_RATE_2022));
+        put("es_wt_b", b(WEALTH_TAX_2024_25));
+        put("es_wt_rate", num(WEALTH_TAX_RATE_PCT));
+        put("es_wt_threshold", num(WEALTH_TAX_THRESHOLD));
+        put("es_wt_behaviour", num(WEALTH_TAX_BEHAVIOUR_PCT));
+        put("es_wt_admin", num(WEALTH_TAX_ADMIN_PCT));
+    }
     // Tables and blocks.
-    let tables: [report::Section; 22] = [
+    let tables: [report::Section; 26] = [
         ("table:first_principles", report::table_first_principles),
         ("table:baseline", report::table_baseline),
         ("table:static", report::table_static),
@@ -536,6 +586,10 @@ pub fn values() -> Result<BTreeMap<String, String>> {
         ("table:spinup", report::table_spinup),
         ("table:levers", report::table_levers),
         ("table:counter_v3", report::table_counter_v3),
+        ("table:endstate", report::table_endstate),
+        ("table:distribution", report::table_distribution),
+        ("table:options", report::table_options),
+        ("table:counter_endstate", report::table_counter_endstate),
         ("table:key_figures", report::key_figures),
         ("table:readme", report::readme_table),
     ];

@@ -756,7 +756,7 @@ pub fn render() -> Result<String> {
         "All amounts are $ billions, federal government, fiscal year April 2024 to March 2025.\n"
     )?;
     writeln!(s, "{}", incidence_note()?)?;
-    let sections: [Section; 21] = [
+    let sections: [Section; 25] = [
         (
             "Table 0. First-principles derivation (incidence A)",
             table_first_principles,
@@ -822,6 +822,19 @@ pub fn render() -> Result<String> {
         ),
         ("Table 16. Levers for the gap left with k = 0", table_levers),
         ("Table 17. Counter-arguments, measured", table_counter_v3),
+        (
+            "Table 18. End state: three balanced packages",
+            table_endstate,
+        ),
+        (
+            "Table 19. Who gains and who pays (federal, single filers, package B)",
+            table_distribution,
+        ),
+        ("Table 20. Other revenue options", table_options),
+        (
+            "Table 21. Counter-arguments to each package",
+            table_counter_endstate,
+        ),
         ("Key figures", key_figures),
     ];
     for (title, f) in sections {
@@ -1274,5 +1287,168 @@ pub fn table_counter_v3() -> Result<String> {
         "| Profit shifting | Ireland 2024: GNI* / GDP | {} | measured GDP overstates domestic income |",
         pct(100.0 * IE_GNI_STAR_2024 / IE_GDP_2024)
     )?;
+    Ok(w)
+}
+
+/// Dollars with thousands separators, no decimals; negative values with a minus sign.
+#[must_use]
+pub fn dollars(x: f64) -> String {
+    let r = x.round();
+    let s = thousands(&format!("{:.0}", r.abs()));
+    if r < 0.0 {
+        format!("−${s}")
+    } else {
+        format!("${s}")
+    }
+}
+
+/// Value of a key in [`crate::data::FACTS`] (empty if absent).
+fn fact(key: &str) -> &'static str {
+    crate::data::FACTS
+        .iter()
+        .find(|(k, _)| *k == key)
+        .map_or("", |(_, v)| *v)
+}
+
+/// Table 18: the three balanced end-state packages (k = 0).
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_endstate() -> Result<String> {
+    use crate::endstate::{
+        base_scenario, credit_scaled, prebate_each, prebate_gross, prebate_net,
+        rate_without_prebate, Package,
+    };
+    let mut w = String::new();
+    writeln!(w, "| Package | Spending review, $B | LVT, $B (land value unverified) | Wealth tax, $B | VAT revenue, $B | Prebate, $B | Less GST credit it replaces, $B | Balance, $B | **VAT rate** | Rate if the GST credit is scaled instead of a prebate | Prebate per person aged 15+ |\n|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")?;
+    for p in Package::all() {
+        let r = p.rate();
+        writeln!(
+            w,
+            "| {} | {} | {} | {} | {} | {} | {} | {} | **{}** | {} | {} |",
+            p.name,
+            b(p.spending),
+            b(p.lvt),
+            b(p.wealth),
+            b(base_scenario().revenue(r)),
+            b(prebate_gross(r)),
+            b(credit_scaled(r)),
+            bz(p.balance(r)),
+            pct(r),
+            pct(rate_without_prebate(&p)),
+            dollars(prebate_each(r))
+        )?;
+    }
+    let nets = Package::all()
+        .iter()
+        .map(|p| format!("${}B", b(prebate_net(p.rate()))))
+        .collect::<Vec<_>>()
+        .join(", ");
+    writeln!(
+        w,
+        "\nNeed: ${}B (PIT + CIT + net GST). Net prebate cost at each package's rate: {nets}.",
+        b(need_core())
+    )?;
+    Ok(w)
+}
+
+/// Table 19: who gains and who pays, federal taxes per single filer, package B.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_distribution() -> Result<String> {
+    use crate::endstate::{distribution, Package};
+    let r = Package::all()[1].rate();
+    let labels = [
+        "Single at the MBM line",
+        "Wage earner",
+        "Top 10% threshold",
+        "Higher earner",
+        "Top 1% threshold",
+        "High earner",
+        "Retiree drawing savings",
+        "Asset-rich, no realised income",
+    ];
+    let mut w = String::new();
+    writeln!(w, "| Filer | Total income | Consumption (scenario) | Today: federal PIT + GST | End state: VAT at {} less prebate | Gain (+) or loss (−) | Change, % of income |\n|---|---:|---:|---:|---:|---:|---:|", pct(r))?;
+    for (l, h) in labels.iter().zip(distribution(r)) {
+        let share = if h.income > 0.0 {
+            pct(100.0 * h.gain() / h.income).replace('-', "−")
+        } else {
+            "no income".to_string()
+        };
+        writeln!(
+            w,
+            "| {l} | {} | {} | {} | {} | {} | {share} |",
+            dollars(h.income),
+            dollars(h.spending),
+            dollars(h.today),
+            dollars(h.end),
+            dollars(h.gain())
+        )?;
+    }
+    Ok(w)
+}
+
+/// Table 20: other options and why each is in or out of the packages.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_options() -> Result<String> {
+    use crate::data::{
+        WEALTH_TAX_2024_25, WEALTH_TAX_ADMIN_PCT, WEALTH_TAX_BEHAVIOUR_PCT, WEALTH_TAX_RATE_PCT,
+        WEALTH_TAX_THRESHOLD,
+    };
+    let mut w = String::new();
+    writeln!(
+        w,
+        "| Option | Rate | Revenue, $B/yr | Status | In packages |\n|---|---|---:|---|---|"
+    )?;
+    writeln!(
+        w,
+        "| Annual net wealth tax (PBO costing) | {}% above ${}M of family net wealth | {} | sourced; assumes {}% behavioural reduction and {}% administration cost | C |",
+        num(WEALTH_TAX_RATE_PCT),
+        num(WEALTH_TAX_THRESHOLD),
+        b(WEALTH_TAX_2024_25),
+        num(WEALTH_TAX_BEHAVIOUR_PCT),
+        num(WEALTH_TAX_ADMIN_PCT)
+    )?;
+    writeln!(
+        w,
+        "| Land value tax | as in §5.4 | {} | land value unverified | B, C |",
+        b(lvt_scenario())
+    )?;
+    writeln!(w, "| Distributed-profit tax (Estonia) | {} of the net distribution | not computed | Canadian distribution base unverified | no |", fact("ee_rate"))?;
+    writeln!(w, "| Resource royalties | set by each province | 0 federal | resources belong to the provinces (Constitution Act, 1867, s. 109) | no |")?;
+    writeln!(w, "| Inheritance or estate tax | not set | not computed | no Canadian costing found; capital gains are taxed at death today only through the income tax | no |")?;
+    Ok(w)
+}
+
+/// Table 21: strongest counter-arguments to each package.
+///
+/// # Errors
+/// Only if formatting into a `String` fails.
+pub fn table_counter_endstate() -> Result<String> {
+    use crate::data::{GST_GAP_GROSS_2022, WEALTH_TAX_BEHAVIOUR_PCT};
+    use crate::endstate::{prebate_net, Package};
+    let p = Package::all();
+    let (ra, rb, rc) = (p[0].rate(), p[1].rate(), p[2].rate());
+    let mut w = String::new();
+    writeln!(
+        w,
+        "| Package | Strongest counter-argument | Measure |\n|---|---|---|"
+    )?;
+    writeln!(w, "| A | The rate is above Hungary's, the highest standard VAT rate in the OECD, so evasion rises | VAT {} against {}% [R4]; the gross GST/HST gap is already {}% at {}% [R34] |", pct(ra), fact("hu_rate"), num(GST_GAP_GROSS_2022), num(GST_RATE))?;
+    writeln!(
+        w,
+        "| A | The prebate costs about as much as all of today's direct program expenses | net ${}B a year against ${}B [R2] |",
+        b(prebate_net(ra)),
+        b(crate::data::DIRECT_PROGRAM_EXPENSES)
+    )?;
+    writeln!(w, "| B | The land value is not verified, so the LVT may raise much less | if the LVT raised nothing, B's rate would be A's: {} |", pct(ra))?;
+    writeln!(w, "| B | Provinces and municipalities already tax property | the LVT must first replace ${}B of property tax (§5.4) |", b(property_tax_total()))?;
+    writeln!(w, "| C | Wealth is hard to value and mobile; the PBO already cuts the base by {}% for avoidance | VAT {} with it, {} without it |", num(WEALTH_TAX_BEHAVIOUR_PCT), pct(rc), pct(rb))?;
+    writeln!(w, "| All | With PIT at zero, the deemed disposition at death goes with it, so gains never realised are never taxed | only the VAT on what the owners spend, and package C's wealth tax, reach them |")?;
+    writeln!(w, "| All | Retirees who saved out of taxed income pay VAT again when they spend | see the retiree row in §13.4 |")?;
     Ok(w)
 }

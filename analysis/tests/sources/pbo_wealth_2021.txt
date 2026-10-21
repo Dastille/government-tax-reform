@@ -1,0 +1,12 @@
+URL: https://distribution-a617274656661637473.pbo-dpb.ca/e45d50992f5e3c2e474f60ce79b76664db4bdf21c2f2059901c3575c65f6c0fd
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+Short Title: Implement annual net wealth tax
+Impose an annual tax of 1% on net wealth owned by Canadian resident economic families on December 31 st of each year, beginning in 2021. Families with net wealth below a threshold of $10 million are exempt from the tax
+| $ millions | 2021-2022 | 2022-2023 | 2023-2024 | 2024-2025 | 2025-2026 | Total |
+| Total cost | -10,854 | -11,356 | -12,146 | -12,594 | -13,122 | -60,072 |
+A negative number implies an increase in the budgetary balance (higher revenues or lower spending).
+To account for this behaviour, each economic family's net wealth was reduced by 35 per cent.
+Administrative costs were assumed to amount to 2% of gross revenues.

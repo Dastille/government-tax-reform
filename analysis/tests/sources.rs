@@ -812,6 +812,105 @@ fn checks() -> Vec<Check> {
         "emta_companies",
         format!("normal rate of {}", fact("ee_rate")),
     ));
+    // v3 end state.
+    let cra = "cra_t1_2022";
+    for (i, top) in BRACKET_TOPS_2022.iter().enumerate() {
+        let next = BRACKET_TOPS_2022
+            .get(i + 1)
+            .map_or_else(String::new, |n| format!(" to ${}", thousands(*n)));
+        let lead = if next.is_empty() { "Over " } else { "" };
+        v.push(contains(
+            "BRACKET_TOPS_2022",
+            cra,
+            format!(
+                "| {lead}${}{next} | {}%",
+                thousands(*top),
+                plain(BRACKETS_2023[i + 1])
+            ),
+        ));
+    }
+    v.push(contains(
+        "BPA_2022",
+        cra,
+        format!("For 2022, this amount is ${}.", thousands(BPA_2022)),
+    ));
+    v.push(contains(
+        "CG_INCLUSION_PCT",
+        cra,
+        format!("only {}% of the gains realized", plain(CG_INCLUSION_PCT)),
+    ));
+    let ns = "ns_high_income_2022";
+    v.push(contains(
+        "TOP1_THRESHOLD_2022",
+        ns,
+        format!(
+            "over ${} in 2022 represented the top 1 per cent",
+            thousands(TOP1_THRESHOLD_2022)
+        ),
+    ));
+    v.push(contains(
+        "TOP10_THRESHOLD_2022",
+        ns,
+        format!("capital gains) of ${}.", thousands(TOP10_THRESHOLD_2022)),
+    ));
+    v.push(contains(
+        "TOP1_INCOME_SHARE_2022",
+        ns,
+        format!(
+            "reported {}% of the total income",
+            plain(TOP1_INCOME_SHARE_2022)
+        ),
+    ));
+    v.push(contains(
+        "TOP1_TAX_SHARE_2022",
+        ns,
+        format!(
+            "paid {}% of Federal and Provincial income taxes",
+            plain(TOP1_TAX_SHARE_2022)
+        ),
+    ));
+    v.push(contains(
+        "EFFECTIVE_RATE_2022",
+        ns,
+        format!(
+            "the effective tax rate was {}% in 2022",
+            plain(EFFECTIVE_RATE_2022)
+        ),
+    ));
+    let pbo = "pbo_wealth_2021";
+    v.push(cell(
+        "WEALTH_TAX_2024_25",
+        pbo,
+        "Total cost",
+        4,
+        format!("-{}", thousands(WEALTH_TAX_2024_25)),
+    ));
+    v.push(contains(
+        "WEALTH_TAX_RATE_PCT",
+        pbo,
+        format!(
+            "annual tax of {}% on net wealth",
+            plain(WEALTH_TAX_RATE_PCT)
+        ),
+    ));
+    v.push(contains(
+        "WEALTH_TAX_THRESHOLD",
+        pbo,
+        format!("threshold of ${} million", plain(WEALTH_TAX_THRESHOLD)),
+    ));
+    v.push(contains(
+        "WEALTH_TAX_BEHAVIOUR_PCT",
+        pbo,
+        format!("reduced by {} per cent", plain(WEALTH_TAX_BEHAVIOUR_PCT)),
+    ));
+    v.push(contains(
+        "WEALTH_TAX_ADMIN_PCT",
+        pbo,
+        format!(
+            "amount to {}% of gross revenues",
+            plain(WEALTH_TAX_ADMIN_PCT)
+        ),
+    ));
     v
 }
 
@@ -825,6 +924,22 @@ fn us_date(d: &str) -> String {
 /// Phrases the paper states as text (dates, mechanisms), each with its verbatim support.
 /// `(stem, excerpt phrase, paper phrase)`.
 const TEXT_CHECKS: &[(&str, &str, &str)] = &[
+    (
+        "justice_ita_s70",
+        "deemed to have, immediately before the taxpayer’s death, disposed of each capital property",
+        "deemed to have, immediately before the taxpayer's death, disposed of each capital property",
+    ),
+    (
+        "justice_const_s109",
+        "All Lands, Mines, Minerals, and Royalties belonging to the several Provinces",
+        "Mines, minerals and royalties belong to the provinces",
+    ),
+    (
+        "pbo_wealth_2021",
+        "Families with net wealth below a threshold of $10 million are exempt",
+        "on family net wealth above",
+    ),
+
     (
         "afr2024_25_expenses",
         "distinguishes its day-to-day operational spending from expenditure that stimulates public and private sector capital formation",
@@ -1047,6 +1162,8 @@ fn unverified_inputs_are_not_marked_verified() {
         "IO_GOS_2022",
         "IO_IMPORTS_2022",
         "IO_JOBS_2022",
+        "MBM_FAMILY4_UNVERIFIED",
+        "CHILD_SHARE_0_14_UNVERIFIED",
     ] {
         let rows: Vec<_> = INPUTS.iter().filter(|c| c.inputs.contains(&name)).collect();
         assert!(!rows.is_empty(), "{name} has no ledger row");

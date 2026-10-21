@@ -1,0 +1,6 @@
+URL: https://laws-lois.justice.gc.ca/eng/const/section-109.html
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+109 All Lands, Mines, Minerals, and Royalties belonging to the several Provinces of Canada, Nova Scotia, and New Brunswick at the Union, and all Sums then due or payable for such Lands, Mines, Minerals, or Royalties, shall belong to the several Provinces of Ontario, Quebec, Nova Scotia, and New Brunswick in which the same are situate or arise

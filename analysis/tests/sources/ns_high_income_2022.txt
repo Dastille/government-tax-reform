@@ -1,0 +1,11 @@
+URL: https://novascotia.ca/finance/statistics/archive_news.asp?df=&dg=&dti=3&dto=0&id=20388
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+HIGH INCOME TRENDS AND EFFECTIVE TAX RATES, 2022
+In Canada, those reporting total income (including capital gains) over $322,000 in 2022 represented the top 1 per cent of taxfilers.
+The top 10% of taxfilers in Canada had total income (including capital gains) of $115,000.
+The top 1% of earners in Canada reported 12.6% of the total income (including capital gains) in 2022 and paid 22.7% of Federal and Provincial income taxes.
+Across Canada, the effective tax rate was 20.1% in 2022.
+Statistics Canada. Table 11-10-0054-01; Table 11-10-0056-01

@@ -321,3 +321,69 @@ pub const HORIZON_YEARS: u32 = 100;
 /// Design choice of this revision (the Swiss rule requires repayment "in subsequent
 /// years" without a fixed count).
 pub const REPAY_YEARS: u32 = 3;
+
+// ---------------------------------------------------------------------------
+// v3 end state: k = 0 with a balanced budget (section 13 of the paper).
+// ---------------------------------------------------------------------------
+/// Federal bracket thresholds, 2022 tax year, $ of taxable income (CRA, Individual Income
+/// Tax Return Statistics, 2022 tax year, "Federal Income Tax Brackets").
+/// <https://www.canada.ca/en/revenue-agency/programs/about-canada-revenue-agency-cra/income-statistics-gst-hst-statistics/t1-final-statistics/2022-tax-year.html>
+pub const BRACKET_TOPS_2022: [f64; 4] = [50_197.0, 100_392.0, 155_625.0, 221_708.0];
+/// Federal basic personal amount, 2022, $ (same page: "For 2022, this amount is $14,398").
+pub const BPA_2022: f64 = 14_398.0;
+/// Share of a realised capital gain that is taxable, per cent (same page: "only 50% of the
+/// gains realized in 2022 are reported").
+pub const CG_INCLUSION_PCT: f64 = 50.0;
+
+/// Top 1% of Canadian taxfilers, 2022: total income (including capital gains) threshold, $
+/// (Nova Scotia Finance, "High income trends and effective tax rates, 2022", from
+/// Statistics Canada Tables 11-10-0054-01 and 11-10-0056-01).
+/// <https://novascotia.ca/finance/statistics/archive_news.asp?df=&dg=&dti=3&dto=0&id=20388>
+pub const TOP1_THRESHOLD_2022: f64 = 322_000.0;
+/// Top 10% threshold, 2022, $ (same source).
+pub const TOP10_THRESHOLD_2022: f64 = 115_000.0;
+/// Top 1% share of total income (including capital gains), 2022, per cent (same source).
+pub const TOP1_INCOME_SHARE_2022: f64 = 12.6;
+/// Top 1% share of federal and provincial income taxes, 2022, per cent (same source).
+pub const TOP1_TAX_SHARE_2022: f64 = 22.7;
+/// Effective income tax rate, all taxfilers, Canada, 2022, per cent (same source).
+pub const EFFECTIVE_RATE_2022: f64 = 20.1;
+
+/// PBO costing of an annual 1% tax on family net wealth above $10M: revenue in 2024-25,
+/// $M (PBO, September 2021 election proposal costing, "Implement annual net wealth tax";
+/// PBO shows revenue as a negative cost). It already assumes a 35% behavioural reduction
+/// of net wealth and administration costs of 2% of gross revenue.
+/// <https://distribution-a617274656661637473.pbo-dpb.ca/e45d50992f5e3c2e474f60ce79b76664db4bdf21c2f2059901c3575c65f6c0fd>
+pub const WEALTH_TAX_2024_25: f64 = 12_594.0;
+/// Rate of the PBO wealth tax, per cent (same source).
+pub const WEALTH_TAX_RATE_PCT: f64 = 1.0;
+/// Exemption threshold of the PBO wealth tax, $M of family net wealth (same source).
+pub const WEALTH_TAX_THRESHOLD: f64 = 10.0;
+/// Behavioural reduction of net wealth in the PBO costing, per cent (same source).
+pub const WEALTH_TAX_BEHAVIOUR_PCT: f64 = 35.0;
+/// Administration costs in the PBO costing, per cent of gross revenue (same source).
+pub const WEALTH_TAX_ADMIN_PCT: f64 = 2.0;
+
+/// Market Basket Measure threshold, family of four, "Ontario, population 500,000 and
+/// over", 2024, $ (Statistics Canada Table 11-10-0066-01). **UNVERIFIED**: read from the
+/// search tool's index copy; the Statistics Canada site was down on 2026-10-21.
+pub const MBM_FAMILY4_UNVERIFIED: f64 = 54_369.0;
+/// Share of the population aged 0 to 14 on 1 July 2024, per cent (Statistics Canada, The
+/// Daily, 25 September 2024). **UNVERIFIED**: from the search tool's summary of the release;
+/// the site was down on 2026-10-21.
+pub const CHILD_SHARE_0_14_UNVERIFIED: f64 = 15.2;
+
+/// Representative single filers for the distribution table: total income, $. The first
+/// row is the MBM single-person line (half the family-of-four line); the third and fifth
+/// are the top 10% and top 1% thresholds above. These three are scenario points.
+pub const DIST_INCOME_SCENARIO: [f64; 3] = [50_000.0, 200_000.0, 1_000_000.0];
+/// Consumption as a share of total income for the rows of the distribution table, in row
+/// order (MBM line, 50k, top-10% line, 200k, top-1% line, 1M). Scenario parameters: the
+/// Survey of Household Spending quintile tables were not retrievable on 2026-10-21.
+pub const DIST_SPEND_SHARE_SCENARIO: [f64; 6] = [1.0, 0.9, 0.8, 0.7, 0.6, 0.4];
+/// Consumption of the "asset-rich" row: a household with no realised income that spends
+/// from unrealised gains or borrowing, $. Scenario parameter.
+pub const ASSET_RICH_SPENDING_SCENARIO: f64 = 250_000.0;
+/// Retiree row: total income and consumption, $ (spends savings on top of income).
+/// Scenario parameters.
+pub const RETIREE_SCENARIO: [f64; 2] = [30_000.0, 50_000.0];
