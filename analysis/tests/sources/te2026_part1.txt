@@ -1,0 +1,7 @@
+URL: https://www.canada.ca/en/department-finance/services/publications/federal-tax-expenditures/2026/part-1.html
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: curl, HTML tags stripped
+Excerpt (verbatim; whitespace collapsed):
+---
+A number of provinces have replaced their retail sales taxes with the Harmonized Sales Tax (HST). The base of the HST is virtually identical to that of the GST, and the HST is applied at a rate equal to the rate of the GST plus a provincial component that varies by province and is determined by each province. Sections of this report that refer to the GST/HST apply to both the federal and provincial portions of the tax whereas references to the GST apply only to the federal portion.
+each stage of production, businesses can claim tax credits to recover the GST paid on their business inputs, so that the GST effectively applies only to the value added at each stage. Since the only tax that is not refunded is the tax collected on supplies to final consumers, the GST is effectively imposed on final consumption.

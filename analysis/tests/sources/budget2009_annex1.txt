@@ -1,0 +1,8 @@
+URL: https://budget.canada.ca/2009/plan/bpa1-eng.html
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: curl, HTML tags stripped
+Excerpt (verbatim; whitespace collapsed):
+---
+Table A1.1 Expenditure and Tax Multipliers 2009 2010 2010Q4 (dollar impact on the level of real GDP of a permanent one dollar increase in fiscal measures)
+Personal income tax measures 0.4 0.9 1.0
+Corporate income tax measures 1 0.1 0.2 0.3
