@@ -614,8 +614,32 @@ fn expected() -> BTreeMap<String, String> {
         e.push(("ng_choam_price", short(CHOAM_TIER1_PRICE)));
         e.push(("ng_choam_cost", commas(&short(CHOAM_UNIT_COST_LOW))));
     }
+    {
+        // §14.7: recomputed from data and the end-state API, not from ubi.rs.
+        use vat_revenue_model::endstate::{prebate_each, prebate_people, Package};
+        let r = Package::all()[2].rate();
+        let money = |x: f64| format!("${}", commas(&format!("{:.0}", x.round())));
+        e.push(("ubi_prebate_each", money(prebate_each(r))));
+        e.push(("ubi_obip_single", money(OBIP_SINGLE)));
+        e.push(("ubi_obip_couple", money(OBIP_COUPLE)));
+        e.push(("ubi_pbo_b", usd_b(PBO_GBI_GROSS_2024_25)));
+        e.push(("ubi_pbo_hours", short(PBO_GBI_HOURS_PCT)));
+        e.push(("ubi_or_hours", short(OPENRESEARCH_HOURS_DROP)));
+        e.push(("ubi_gross_b", usd_b(OBIP_SINGLE * prebate_people() / 1e6)));
+        e.push(("ubi_people_m", format!("{:.1}", prebate_people() / 1e6)));
+        {
+            use vat_revenue_model::ubi::Payment;
+            let a = Payment::Prebate.rate(0.0).expect("balances");
+            let gb = Payment::PrebatePlusGbi.rate(0.0).expect("balances");
+            let u = Payment::Ubi.rate(0.0).expect("balances");
+            e.push(("ubi_add_b", format!("{:.1}", gb - a)));
+            e.push(("ubi_add_c", format!("{:.1}", u - a)));
+        }
+        e.push(("ubi_mult", short(UBI_LAND_WEALTH_MULTIPLE_SCENARIO)));
+        e.push(("ubi_hu", "27".to_string()));
+    }
     // Tables come straight from the table builders in `report.rs`, not from `docs.rs`.
-    let tables: [(&str, TableFn); 28] = [
+    let tables: [(&str, TableFn); 29] = [
         ("table:first_principles", report::table_first_principles),
         ("table:baseline", report::table_baseline),
         ("table:static", report::table_static),
@@ -642,6 +666,7 @@ fn expected() -> BTreeMap<String, String> {
         ("table:counter_endstate", report::table_counter_endstate),
         ("table:nextgen", report::table_nextgen),
         ("table:counter_nextgen", report::table_counter_nextgen),
+        ("table:ubi", report::table_ubi),
         ("table:key_figures", report::key_figures),
         ("table:readme", report::readme_table),
     ];

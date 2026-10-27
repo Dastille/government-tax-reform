@@ -420,3 +420,25 @@ pub const SPACE_PROCUREMENT_SCENARIO: [f64; 3] = [1_000.0, 2_500.0, 5_000.0];
 /// Change in total health spending from biotech, per cent, low/central/high (negative =
 /// saving). Scenario parameters; no medical efficacy claim is made.
 pub const BIOTECH_HEALTH_SHIFT_PCT_SCENARIO: [f64; 3] = [-2.0, 0.0, 2.0];
+
+// ---- §14.8 Basic income and robotics (v3.1, accessed 2026-10-27). ----
+
+/// Ontario Basic Income Pilot guarantee, single person, $ a year (as costed nationally by
+/// the PBO, April 2021, RP-2122-001-S).
+/// <https://www.pbo-dpb.ca/en/publications/RP-2122-001-S--distributional-fiscal-analysis-national-guaranteed-basic-income--analyse-financiere-distributive-un-revenu-base-garanti-echelle-nationale>
+pub const OBIP_SINGLE: f64 = 16_989.0;
+/// Ontario Basic Income Pilot guarantee, couple, $ a year (same source).
+pub const OBIP_COUPLE: f64 = 24_027.0;
+/// PBO total gross cost of a national guaranteed basic income on the pilot's terms,
+/// 2024-25, $M (federal and provincial combined; includes disability top-up and
+/// behavioural cost; income-tested at 50 cents per dollar of earnings) (same source).
+pub const PBO_GBI_GROSS_2024_25: f64 = 91_189.0;
+/// PBO estimate of the GBI's effect on hours worked, per cent (same source).
+pub const PBO_GBI_HOURS_PCT: f64 = -1.3;
+/// `OpenResearch` Unconditional Cash Study: fewer hours worked per week by recipients
+/// (NBER Working Paper 32719).
+/// <https://www.openresearchlab.org/findings/key-findings-employment-and-income>
+pub const OPENRESEARCH_HOURS_DROP: f64 = 1.3;
+/// Land value tax and wealth tax multiple in option (c) of §14.8. Scenario parameter: no
+/// source shows either base can bear it.
+pub const UBI_LAND_WEALTH_MULTIPLE_SCENARIO: f64 = 2.0;

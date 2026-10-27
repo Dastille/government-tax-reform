@@ -949,6 +949,38 @@ fn checks() -> Vec<Check> {
             plain(CHOAM_UNIT_COST_LOW)
         ),
     ));
+    let gbi = "pbo_gbi_2021";
+    v.push(contains(
+        "OBIP_SINGLE",
+        gbi,
+        format!("at least ${} and", thousands(OBIP_SINGLE)),
+    ));
+    v.push(contains(
+        "OBIP_COUPLE",
+        gbi,
+        format!("and ${} of income per year", thousands(OBIP_COUPLE)),
+    ));
+    v.push(contains(
+        "PBO_GBI_GROSS_2024_25",
+        gbi,
+        format!("89,306 {} 93,279", thousands(PBO_GBI_GROSS_2024_25)),
+    ));
+    v.push(contains(
+        "PBO_GBI_HOURS_PCT",
+        gbi,
+        format!(
+            "hours worked ({}% at the national level)",
+            plain(PBO_GBI_HOURS_PCT)
+        ),
+    ));
+    v.push(contains(
+        "OPENRESEARCH_HOURS_DROP",
+        "openresearch_employment_2024",
+        format!(
+            "average of {} fewer hours per week",
+            plain(OPENRESEARCH_HOURS_DROP)
+        ),
+    ));
     v
 }
 

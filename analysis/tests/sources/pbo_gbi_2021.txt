@@ -1,0 +1,8 @@
+URL: https://www.pbo-dpb.ca/en/publications/RP-2122-001-S--distributional-fiscal-analysis-national-guaranteed-basic-income--analyse-financiere-distributive-un-revenu-base-garanti-echelle-nationale
+Accessed: 2026-10-27 (America/Toronto)
+Retrieved: curl (HTML, tags stripped)
+Excerpt (verbatim; whitespace collapsed):
+---
+This pilot guaranteed individuals and couples at least $16,989 and $24,027 of income per year, respectively. This benefit is phased out at a rate of $0.50 for every dollar of employment income.
+2021 – 22 2022 – 23 2023 – 24 2024 – 25 2025 – 26 Total gross cost 85,026 87,570 89,306 91,189 93,279
+The effect on payroll (-0.5% at the national level) is weaker than the effect on hours worked (-1.3% at the national level).

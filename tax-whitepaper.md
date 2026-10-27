@@ -719,7 +719,29 @@ Federal taxes only, single filers, package B. "Today" is federal PIT on the 2022
 - **CHOAM.** Payback rows come from the CHOAM paper at its PR head [R43]. TODO: CHOAM should cite this section's price-fall scaling next to its payback rows; not done in this revision.
 - **Stellar.** TODO: no Stellar figure is imported yet; materials and launch costs, if used, must come from the Stellar model, not from this paper.
 
-### 14.7 Counter-arguments
+### 14.7 Basic income and robotics
+
+**Prebate and basic income are different things.** The §13 prebate is a cheque that refunds the VAT on spending up to the poverty line: at package C's rate it is $6,852 per eligible resident a year (the §13 age line). It cancels the tax; it does not replace a wage. A basic income replaces part of a wage. The Ontario Basic Income Pilot guaranteed $16,989 a year to a single person and $24,027 to a couple, reduced by half of each dollar earned [R44]. The PBO costed that design nationally at $91.2B in gross federal and provincial cost for the base year [R44]. Paying the single amount to everyone eligible for the prebate, with no income test, would cost $594.8B (35.0M people).
+
+**Robotics.** Factory and humanoid robots are treated as a larger version of the §14.2 wage shock, with lost wages not replaced and spending falling with them. No robot unit count, price, deployment date or company revenue is used: public statements by Tesla or its chief executive about humanoid robots are claims, and their deployment and revenue are **unverified**.
+
+**Fit.** Each option is solved for the VAT rate that balances package C with no income tax. Option (b) adds the PBO cost on top of the prebate and holds it fixed; under a wage shock an income-tested benefit would pay more, so its row is a lower bound. Option (c) replaces the prebate. Option (d) multiplies the land value tax and the wealth tax by 2, a scenario with no source showing either base can bear it.
+
+| Option | Payments, net ($B, no shock) | No shock | Wage base -10.0% | -25.0% | -40.0% |
+|---|---|---|---|---|---|
+| (a) prebate only | 200.8 | 31.2% | 34.9% | 42.4% | 54.2% |
+| (b) prebate + PBO basic income | 358.2 | 41.5% | 46.5% | 56.7% | 72.8% |
+| (c) universal basic income, VAT-funded | 528.7 | 52.8% | 56.0% | 61.5% | 68.3% |
+| (d) (c) + higher land and wealth taxes | 532.1 | 50.0% | 53.0% | 58.3% | 64.8% |
+
+**When it does not work.** Every option balances only at a rate above Hungary's 27%, the highest standard VAT in the OECD [R4]. Before any robotics shock, the PBO basic income adds 10.3 points to the rate and a universal one adds 21.6. Under the high shock every option needs a rate no country charges. Raising land and wealth taxes moves the rate by a few points, because those levers are small next to the VAT. So, on these numbers, a full basic income with no income tax balances on paper but not at any rate tested in practice; the prebate alone is the only option within reach of observed VAT rates, and only with no large shock.
+
+**Counter-arguments.**
+- **Work incentives.** The PBO estimated the pilot-style basic income would cut hours worked by -1.3% nationally [R44]. In the largest recent US trial, recipients of unconditional cash worked 1.3 fewer hours a week than the control group [R45]. Fewer hours means less spending and a smaller VAT base; the table does not include this.
+- **Inflation.** A VAT raises prices once at launch. If the prebate or basic income is indexed to prices, its cost rises with the rate; the model already scales the prebate with the rate. Whether a large rate increase also starts a wage-price spiral is **unverified**.
+- **Political feasibility.** This paper found no country that combines a VAT above Hungary's with a basic income; the search was not exhaustive, so this is **unverified**. Absence of a precedent does not prove the design fails; it means there is none to point to.
+
+### 14.8 Counter-arguments
 
 | Counter-argument | Measure |
 |---|---|
@@ -798,6 +820,8 @@ Federal taxes only, single filers, package B. "Today" is federal PIT on the 2022
 - [R41] UN Global SDG Database, indicator 10.4.1, "Labour share of GDP" (UNECE copy). https://w3.unece.org/SDG/en/Indicator?id=30
 - [R42] Canadian Institute for Health Information, "National health expenditure trends" (2025 edition). https://www.cihi.ca/en/national-health-expenditure-trends
 - [R43] CHOAM initiative, "CHOAM-Idea_Draft.md" at commit d31a02a (PR head; rows rendered from NRCan and OEB inputs). https://github.com/Dastille/CHOAM-initiative/blob/d31a02a/CHOAM-Idea_Draft.md
+- [R44] Parliamentary Budget Officer, "Distributional and Fiscal Analysis of a National Guaranteed Basic Income", RP-2122-001-S. https://www.pbo-dpb.ca/en/publications/RP-2122-001-S--distributional-fiscal-analysis-national-guaranteed-basic-income--analyse-financiere-distributive-un-revenu-base-garanti-echelle-nationale
+- [R45] OpenResearch, "Key Findings: Employment", Unconditional Cash Study. https://www.openresearchlab.org/findings/key-findings-employment-and-income
 - Nova Scotia Department of Finance, "Government Financial Statistics, 2024" (21 November 2025), from Statistics Canada Table 10-10-0147-01. https://novascotia.ca/finance/statistics/archive_news.asp?df=&dg=&dti=3&dto=0&id=21517 · Statistics Canada, *The Daily*, 25 September 2024 (population, 1 July 2024). https://www150.statcan.gc.ca/n1/daily-quotidien/240925/dq240925d-eng.htm
 
 ---

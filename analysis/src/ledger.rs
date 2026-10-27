@@ -422,4 +422,22 @@ pub const INPUTS: &[Claim] = &[
             "BIOTECH_HEALTH_SHIFT_PCT_SCENARIO",
         ],
     ),
+    c(
+        "Ontario Basic Income Pilot: ${{ubi_obip_single}} single, ${{ubi_obip_couple}} couple; PBO national GBI gross cost ${{ubi_pbo_b}}B; hours worked {{ubi_pbo_hours}}%",
+        Source,
+        "PBO, Distributional and Fiscal Analysis of a National Guaranteed Basic Income [R44]; excerpt `pbo_gbi_2021`",
+        &["OBIP_SINGLE", "OBIP_COUPLE", "PBO_GBI_GROSS_2024_25", "PBO_GBI_HOURS_PCT"],
+    ),
+    c(
+        "Unconditional cash recipients worked {{ubi_or_hours}} fewer hours a week",
+        Source,
+        "OpenResearch Unconditional Cash Study [R45]; excerpt `openresearch_employment_2024`",
+        &["OPENRESEARCH_HOURS_DROP"],
+    ),
+    c(
+        "Option (c) multiplies the land value tax and the wealth tax",
+        Scenario,
+        "Illustrative multiple; no source shows the land or wealth base can bear it",
+        &["UBI_LAND_WEALTH_MULTIPLE_SCENARIO"],
+    ),
 ];

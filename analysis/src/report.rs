@@ -1530,3 +1530,38 @@ pub fn table_counter_nextgen() -> Result<String> {
     writeln!(w, "| A wage shock also hits today's system | at the high shock PIT loses ${}B a year; today's gross GST/HST gap is {}% [R34], so neither base is safe from enforcement risk |", b(pit_loss(S[2])), num(GST_GAP_GROSS_2022))?;
     Ok(w)
 }
+
+/// §14.8: VAT rate that balances each payment option under each robotics wage shock.
+///
+/// # Errors
+/// Formatting only.
+pub fn table_ubi() -> Result<String> {
+    use crate::data::NEXTGEN_SHOCK_PCT_SCENARIO as S;
+    use crate::ubi::{Payment, MAX_RATE};
+    let mut w = String::new();
+    writeln!(
+        w,
+        "| Option | Payments, net ($B, no shock) | No shock | Wage base -{} | -{} | -{} |\n|---|---|---|---|---|---|",
+        pct(S[0]),
+        pct(S[1]),
+        pct(S[2])
+    )?;
+    let cell = |o: Payment, d: f64| {
+        o.rate(d)
+            .map_or_else(|| format!("none up to {}", pct(MAX_RATE)), pct)
+    };
+    for o in Payment::all() {
+        let r0 = o.rate(0.0).unwrap_or(MAX_RATE);
+        writeln!(
+            w,
+            "| {} | {} | {} | {} | {} | {} |",
+            o.label(),
+            b(o.transfer(r0)),
+            cell(o, 0.0),
+            cell(o, S[0]),
+            cell(o, S[1]),
+            cell(o, S[2])
+        )?;
+    }
+    Ok(w)
+}

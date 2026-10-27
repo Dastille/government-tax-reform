@@ -16,5 +16,6 @@ pub mod model;
 pub mod nextgen;
 pub mod report;
 pub mod transition;
+pub mod ubi;
 
 pub use error::{Error, Result};

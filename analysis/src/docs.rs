@@ -580,8 +580,44 @@ pub fn values() -> Result<BTreeMap<String, String>> {
         put("ng_choam_price", num(CHOAM_TIER1_PRICE));
         put("ng_choam_cost", thousands(&num(CHOAM_UNIT_COST_LOW)));
     }
+    {
+        use crate::data::{
+            OBIP_COUPLE, OBIP_SINGLE, OPENRESEARCH_HOURS_DROP, PBO_GBI_GROSS_2024_25,
+            PBO_GBI_HOURS_PCT, UBI_LAND_WEALTH_MULTIPLE_SCENARIO,
+        };
+        put(
+            "ubi_prebate_each",
+            report::dollars(crate::endstate::prebate_each(crate::nextgen::base_rate())),
+        );
+        put("ubi_obip_single", report::dollars(OBIP_SINGLE));
+        put("ubi_obip_couple", report::dollars(OBIP_COUPLE));
+        put("ubi_pbo_b", b(PBO_GBI_GROSS_2024_25));
+        put("ubi_pbo_hours", num(PBO_GBI_HOURS_PCT));
+        put("ubi_or_hours", num(OPENRESEARCH_HOURS_DROP));
+        put("ubi_gross_b", b(crate::ubi::ubi_gross()));
+        put(
+            "ubi_people_m",
+            format!("{:.1}", crate::endstate::prebate_people() / 1e6),
+        );
+        {
+            use crate::ubi::Payment;
+            let r = |o: Payment| o.rate(0.0).unwrap_or(crate::ubi::MAX_RATE);
+            let a = r(Payment::Prebate);
+            put(
+                "ubi_add_b",
+                format!("{:.1}", r(Payment::PrebatePlusGbi) - a),
+            );
+            put("ubi_add_c", format!("{:.1}", r(Payment::Ubi) - a));
+        }
+        put("ubi_mult", num(UBI_LAND_WEALTH_MULTIPLE_SCENARIO));
+        let hu = FACTS
+            .iter()
+            .find(|(k, _)| *k == "hu_rate")
+            .map_or("", |(_, v)| *v);
+        put("ubi_hu", hu.to_string());
+    }
     // Tables and blocks.
-    let tables: [report::Section; 28] = [
+    let tables: [report::Section; 29] = [
         ("table:first_principles", report::table_first_principles),
         ("table:baseline", report::table_baseline),
         ("table:static", report::table_static),
@@ -608,6 +644,7 @@ pub fn values() -> Result<BTreeMap<String, String>> {
         ("table:counter_endstate", report::table_counter_endstate),
         ("table:nextgen", report::table_nextgen),
         ("table:counter_nextgen", report::table_counter_nextgen),
+        ("table:ubi", report::table_ubi),
         ("table:key_figures", report::key_figures),
         ("table:readme", report::readme_table),
     ];

@@ -126,6 +126,9 @@ Generated from `analysis/src/ledger.rs`. Excerpt files are in `analysis/tests/so
 | Health spending, Canada, 2025 forecast: $399B, 12.7% of GDP | Verified (source excerpt) | CIHI National health expenditure trends 2025 [R42]; excerpt `cihi_nhex_2025` |
 | CHOAM unit: 5,815 kWh/yr, Tier-1 price $0.112/kWh, low-case unit $50,000 | Verified (source excerpt) | CHOAM paper at d31a02a, rows E2, E4, E7 [R43]; excerpt `choam_d31a02a` (a sister-repo model output from NRCan and OEB, not re-derived here) |
 | Next-generation shocks: power price and wage base falls, quantum gap multiple, space procurement, biotech health shift | Scenario parameter, not data | Illustrative low/central/high points chosen for §14; no forecast of any technology is made |
+| Ontario Basic Income Pilot: $$16,989 single, $$24,027 couple; PBO national GBI gross cost $91.2B; hours worked -1.3% | Verified (source excerpt) | PBO, Distributional and Fiscal Analysis of a National Guaranteed Basic Income [R44]; excerpt `pbo_gbi_2021` |
+| Unconditional cash recipients worked 1.3 fewer hours a week | Verified (source excerpt) | OpenResearch Unconditional Cash Study [R45]; excerpt `openresearch_employment_2024` |
+| Option (c) multiplies the land value tax and the wealth tax | Scenario parameter, not data | Illustrative multiple; no source shows the land or wealth base can bear it |
 
 ## Source caveats
 

@@ -262,4 +262,5 @@ pub const ALLOWLIST: &[Entry] = &[
     e("ledger.rs", "Labour share of GDP, Canada", "2024", "data year, column 2024 of the Canada row (excerpt unece_sdg_10_4_1)"),
     e("ledger.rs", "Labour share of GDP, Canada", "10.4.1", "indicator number (excerpt unece_sdg_10_4_1): \"indicator 10.4.1\""),
     e("ledger.rs", "Health spending, Canada", "2025", "CIHI forecast year (excerpt cihi_nhex_2025): \"expected to reach $399 billion in 2025\""),
+    e("tax-whitepaper.md", "**Prebate and basic income are", "half", "PBO [R44], excerpt pbo_gbi_2021: \"phased out at a rate of $0.50 for every dollar\", i.e. half of each dollar earned"),
 ];
