@@ -1,0 +1,7 @@
+URL: https://www.cihi.ca/en/national-health-expenditure-trends
+Accessed: 2026-10-27 (America/Toronto)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+Total health care spending in Canada is expected to reach $399 billion in 2025, or $9,626 per Canadian.
+It is anticipated that health expenditures will represent 12.7% of Canada’s gross domestic product (GDP) in 2025.

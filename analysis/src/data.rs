@@ -387,3 +387,36 @@ pub const ASSET_RICH_SPENDING_SCENARIO: f64 = 250_000.0;
 /// Retiree row: total income and consumption, $ (spends savings on top of income).
 /// Scenario parameters.
 pub const RETIREE_SCENARIO: [f64; 2] = [30_000.0, 50_000.0];
+
+// ---- §14 Next-generation backbone (v3.1, accessed 2026-10-27). ----
+
+/// Labour share of GDP, Canada, 2024, per cent: compensation of employees over GDP (UN
+/// Global SDG Database indicator 10.4.1, UNECE copy; Statistics Canada's own table
+/// 36-10-0114-01 was not read).
+/// <https://w3.unece.org/SDG/en/Indicator?id=30>
+pub const LABOUR_SHARE_2024: f64 = 59.6;
+/// Total health care spending, Canada, 2025 forecast, $M (CIHI, National health
+/// expenditure trends, 2025).
+/// <https://www.cihi.ca/en/national-health-expenditure-trends>
+pub const HEALTH_SPENDING_2025: f64 = 399_000.0;
+/// Health spending, per cent of GDP, 2025 forecast (same source).
+pub const HEALTH_PCT_GDP_2025: f64 = 12.7;
+/// CHOAM row E2: annual yield of a 5 kWp array in Toronto, kWh (Natural Resources Canada inputs, rendered by
+/// the CHOAM model crate at d31a02a).
+pub const CHOAM_YIELD_KWH: f64 = 5_815.0;
+/// CHOAM row E7: OEB Tier-1 price, $/kWh (11.2 c/kWh).
+pub const CHOAM_TIER1_PRICE: f64 = 0.112;
+/// CHOAM row E4: unit cost of the low case, $.
+pub const CHOAM_UNIT_COST_LOW: f64 = 50_000.0;
+/// Low/central/high shocks of §14, per cent: fall in the retail power price (energy) and
+/// fall in the wage base (AI and automation). Scenario parameters.
+pub const NEXTGEN_SHOCK_PCT_SCENARIO: [f64; 3] = [10.0, 25.0, 40.0];
+/// Quantum-era compliance high case: GST/HST gap twice today's gross gap, per cent.
+/// Scenario parameter (multiplier on the CRA gross gap).
+pub const QUANTUM_GAP_MULTIPLE_SCENARIO: f64 = 2.0;
+/// Space procurement added to federal need, $M a year, low/central/high. Scenario
+/// parameters; no sourced space-revenue figure is used.
+pub const SPACE_PROCUREMENT_SCENARIO: [f64; 3] = [1_000.0, 2_500.0, 5_000.0];
+/// Change in total health spending from biotech, per cent, low/central/high (negative =
+/// saving). Scenario parameters; no medical efficacy claim is made.
+pub const BIOTECH_HEALTH_SHIFT_PCT_SCENARIO: [f64; 3] = [-2.0, 0.0, 2.0];

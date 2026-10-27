@@ -1,0 +1,8 @@
+URL: https://github.com/Dastille/CHOAM-initiative/blob/d31a02a/CHOAM-Idea_Draft.md
+Accessed: 2026-10-27 (America/Toronto)
+Retrieved: git show d31a02a:CHOAM-Idea_Draft.md (CHOAM PR #3 head; values rendered by its own model crate from NRCan and OEB inputs)
+Excerpt (verbatim):
+---
+| E2 | 5 kWp annual yield, Toronto | 5815 kWh/yr | 5 x 4.25 x 365 x 0.7497 |
+| E4 | Energy-only payback on a $50000 unit (5 kWp), at Tier 1 | 76.8 yr | 50000 / 651.28 |
+| E7 | Max unit cost for a 7-yr energy-only ROI (5 kWp), at Tier 1 (11.2 c/kWh) | $4558.96 | 7 x 5815 x 0.112 |

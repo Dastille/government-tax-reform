@@ -603,8 +603,19 @@ fn expected() -> BTreeMap<String, String> {
         e.push(("es_wt_behaviour", short(WEALTH_TAX_BEHAVIOUR_PCT)));
         e.push(("es_wt_admin", short(WEALTH_TAX_ADMIN_PCT)));
     }
+    {
+        // §14: the unshocked rate comes from the end-state package, not from nextgen.rs.
+        let c = vat_revenue_model::endstate::Package::all()[2];
+        e.push(("ng_base_rate", format!("{:.1}", c.rate())));
+        e.push(("ng_labour_share", short(LABOUR_SHARE_2024)));
+        e.push(("ng_health_b", usd_b0(HEALTH_SPENDING_2025)));
+        e.push(("ng_health_pct", short(HEALTH_PCT_GDP_2025)));
+        e.push(("ng_choam_kwh", commas(&short(CHOAM_YIELD_KWH))));
+        e.push(("ng_choam_price", short(CHOAM_TIER1_PRICE)));
+        e.push(("ng_choam_cost", commas(&short(CHOAM_UNIT_COST_LOW))));
+    }
     // Tables come straight from the table builders in `report.rs`, not from `docs.rs`.
-    let tables: [(&str, TableFn); 26] = [
+    let tables: [(&str, TableFn); 28] = [
         ("table:first_principles", report::table_first_principles),
         ("table:baseline", report::table_baseline),
         ("table:static", report::table_static),
@@ -629,6 +640,8 @@ fn expected() -> BTreeMap<String, String> {
         ("table:distribution", report::table_distribution),
         ("table:options", report::table_options),
         ("table:counter_endstate", report::table_counter_endstate),
+        ("table:nextgen", report::table_nextgen),
+        ("table:counter_nextgen", report::table_counter_nextgen),
         ("table:key_figures", report::key_figures),
         ("table:readme", report::readme_table),
     ];

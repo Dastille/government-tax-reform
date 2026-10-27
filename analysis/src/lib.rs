@@ -13,6 +13,7 @@ pub mod endstate;
 pub mod error;
 pub mod ledger;
 pub mod model;
+pub mod nextgen;
 pub mod report;
 pub mod transition;
 

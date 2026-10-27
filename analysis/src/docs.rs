@@ -564,8 +564,24 @@ pub fn values() -> Result<BTreeMap<String, String>> {
         put("es_wt_behaviour", num(WEALTH_TAX_BEHAVIOUR_PCT));
         put("es_wt_admin", num(WEALTH_TAX_ADMIN_PCT));
     }
+    {
+        use crate::data::{
+            CHOAM_TIER1_PRICE, CHOAM_UNIT_COST_LOW, CHOAM_YIELD_KWH, HEALTH_PCT_GDP_2025,
+            HEALTH_SPENDING_2025, LABOUR_SHARE_2024,
+        };
+        put(
+            "ng_base_rate",
+            format!("{:.1}", crate::nextgen::base_rate()),
+        );
+        put("ng_labour_share", num(LABOUR_SHARE_2024));
+        put("ng_health_b", bi(HEALTH_SPENDING_2025));
+        put("ng_health_pct", num(HEALTH_PCT_GDP_2025));
+        put("ng_choam_kwh", thousands(&num(CHOAM_YIELD_KWH)));
+        put("ng_choam_price", num(CHOAM_TIER1_PRICE));
+        put("ng_choam_cost", thousands(&num(CHOAM_UNIT_COST_LOW)));
+    }
     // Tables and blocks.
-    let tables: [report::Section; 26] = [
+    let tables: [report::Section; 28] = [
         ("table:first_principles", report::table_first_principles),
         ("table:baseline", report::table_baseline),
         ("table:static", report::table_static),
@@ -590,6 +606,8 @@ pub fn values() -> Result<BTreeMap<String, String>> {
         ("table:distribution", report::table_distribution),
         ("table:options", report::table_options),
         ("table:counter_endstate", report::table_counter_endstate),
+        ("table:nextgen", report::table_nextgen),
+        ("table:counter_nextgen", report::table_counter_nextgen),
         ("table:key_figures", report::key_figures),
         ("table:readme", report::readme_table),
     ];

@@ -12,10 +12,11 @@ use std::path::Path;
 use vat_revenue_model::data::*;
 use vat_revenue_model::ledger::{Status, INPUTS};
 
-/// Access dates of the excerpt sets: v2.0 (2026-10-18) and v3.0 additions (2026-10-21).
-const ACCESSED: [&str; 2] = [
+/// Access dates of the excerpt sets: v2.0 (2026-10-18), v3.0 (2026-10-21), v3.1 (2026-10-27).
+const ACCESSED: [&str; 3] = [
     "Accessed: 2026-10-18 (America/New_York)",
     "Accessed: 2026-10-21 (America/New_York)",
+    "Accessed: 2026-10-27 (America/Toronto)",
 ];
 
 fn root() -> &'static Path {
@@ -909,6 +910,43 @@ fn checks() -> Vec<Check> {
         format!(
             "amount to {}% of gross revenues",
             plain(WEALTH_TAX_ADMIN_PCT)
+        ),
+    ));
+    v.push(contains(
+        "LABOUR_SHARE_2024",
+        "unece_sdg_10_4_1",
+        format!("| 59.4 | {} | 59.7 |", plain(LABOUR_SHARE_2024)),
+    ));
+    v.push(contains(
+        "HEALTH_SPENDING_2025",
+        "cihi_nhex_2025",
+        format!(
+            "reach ${} billion in 2025",
+            plain(HEALTH_SPENDING_2025 / 1000.0)
+        ),
+    ));
+    v.push(contains(
+        "HEALTH_PCT_GDP_2025",
+        "cihi_nhex_2025",
+        format!("represent {}% of Canada", plain(HEALTH_PCT_GDP_2025)),
+    ));
+    let ch = "choam_d31a02a";
+    v.push(contains(
+        "CHOAM_YIELD_KWH",
+        ch,
+        format!("| {} kWh/yr |", plain(CHOAM_YIELD_KWH)),
+    ));
+    v.push(contains(
+        "CHOAM_TIER1_PRICE",
+        ch,
+        format!("7 x {} x {} |", plain(CHOAM_YIELD_KWH), CHOAM_TIER1_PRICE),
+    ));
+    v.push(contains(
+        "CHOAM_UNIT_COST_LOW",
+        ch,
+        format!(
+            "on a ${} unit (5 kWp), at Tier 1",
+            plain(CHOAM_UNIT_COST_LOW)
         ),
     ));
     v

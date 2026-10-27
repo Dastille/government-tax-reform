@@ -393,4 +393,33 @@ pub const INPUTS: &[Claim] = &[
             "ASSET_RICH_SPENDING_SCENARIO",
         ],
     ),
+    c(
+        "Labour share of GDP, Canada, 2024: {{ng_labour_share}}%",
+        Source,
+        "UN Global SDG Database indicator 10.4.1, UNECE copy [R41]; excerpt `unece_sdg_10_4_1`. Statistics Canada's own compensation table was not read",
+        &["LABOUR_SHARE_2024"],
+    ),
+    c(
+        "Health spending, Canada, 2025 forecast: ${{ng_health_b}}B, {{ng_health_pct}}% of GDP",
+        Source,
+        "CIHI National health expenditure trends 2025 [R42]; excerpt `cihi_nhex_2025`",
+        &["HEALTH_SPENDING_2025", "HEALTH_PCT_GDP_2025"],
+    ),
+    c(
+        "CHOAM unit: {{ng_choam_kwh}} kWh/yr, Tier-1 price ${{ng_choam_price}}/kWh, low-case unit ${{ng_choam_cost}}",
+        Source,
+        "CHOAM paper at d31a02a, rows E2, E4, E7 [R43]; excerpt `choam_d31a02a` (a sister-repo model output from NRCan and OEB, not re-derived here)",
+        &["CHOAM_YIELD_KWH", "CHOAM_TIER1_PRICE", "CHOAM_UNIT_COST_LOW"],
+    ),
+    c(
+        "Next-generation shocks: power price and wage base falls, quantum gap multiple, space procurement, biotech health shift",
+        Scenario,
+        "Illustrative low/central/high points chosen for §14; no forecast of any technology is made",
+        &[
+            "NEXTGEN_SHOCK_PCT_SCENARIO",
+            "QUANTUM_GAP_MULTIPLE_SCENARIO",
+            "SPACE_PROCUREMENT_SCENARIO",
+            "BIOTECH_HEALTH_SHIFT_PCT_SCENARIO",
+        ],
+    ),
 ];

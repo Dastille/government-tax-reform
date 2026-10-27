@@ -1452,3 +1452,81 @@ pub fn table_counter_endstate() -> Result<String> {
     writeln!(w, "| All | Retirees who saved out of taxed income pay VAT again when they spend | see the retiree row in §13.4 |")?;
     Ok(w)
 }
+
+/// §14: the five technology shocks, low/central/high, each run through package C.
+///
+/// # Errors
+/// Formatting only.
+pub fn table_nextgen() -> Result<String> {
+    use crate::data::NEXTGEN_SHOCK_PCT_SCENARIO as S;
+    use crate::nextgen::{
+        ai_base_drop, ai_deficit, ai_rate, base_rate, biotech_cases, biotech_rate, choam_payback,
+        health_change, pit_loss, quantum_gaps, quantum_rate, space_cases, space_rate, today_loss,
+    };
+    let mut w = String::new();
+    writeln!(
+        w,
+        "| Revolution | Shock (low / central / high) | Result (low / central / high) |\n|---|---|---|"
+    )?;
+    let j3 = |f: &dyn Fn(f64) -> String, xs: [f64; 3]| {
+        xs.iter().map(|x| f(*x)).collect::<Vec<_>>().join(" / ")
+    };
+    writeln!(
+        w,
+        "| Energy | retail power price falls {} | CHOAM energy-only payback on the low-case unit: {} yr, against {} yr today (E4) [R43] |",
+        j3(&pct, S),
+        j3(&|x| format!("{x:.1}", x = choam_payback(x)), S),
+        format_args!("{:.1}", choam_payback(0.0))
+    )?;
+    writeln!(
+        w,
+        "| AI and automation | wage base falls {} | today's system loses ${}B of PIT, ${}B with net GST; end state, full pass-through to spending: base falls {}, package C deficit ${}B at {}, rebalancing rate {}; spending held: no deficit |",
+        j3(&pct, S),
+        j3(&|x| b(pit_loss(x)), S),
+        j3(&|x| b(today_loss(x)), S),
+        j3(&|x| pct(ai_base_drop(x)), S),
+        j3(&|x| b(ai_deficit(x)), S),
+        pct(base_rate()),
+        j3(&|x| pct(ai_rate(x)), S)
+    )?;
+    writeln!(
+        w,
+        "| Quantum computing | GST/HST gap {} [R34] | package C rate {} |",
+        j3(&pct, quantum_gaps()),
+        j3(&|x| pct(quantum_rate(x)), quantum_gaps())
+    )?;
+    writeln!(
+        w,
+        "| Space | federal procurement ${}B a year | package C rate {} |",
+        j3(&b, space_cases()),
+        j3(&|x| pct(space_rate(x)), space_cases())
+    )?;
+    writeln!(
+        w,
+        "| Genetics and biotech | total health spending changes {} ($B: {}) [R42] | package C rate if Ottawa bore all of it: {} |",
+        j3(&pct, biotech_cases()),
+        j3(&|x| b(health_change(x)), biotech_cases()),
+        j3(&|x| pct(biotech_rate(x)), biotech_cases())
+    )?;
+    Ok(w)
+}
+
+/// §14.7: strongest counter-arguments to the backbone, with the measure.
+///
+/// # Errors
+/// Formatting only.
+pub fn table_counter_nextgen() -> Result<String> {
+    use crate::data::{GST_GAP_GROSS_2022, NEXTGEN_SHOCK_PCT_SCENARIO as S};
+    use crate::endstate::{prebate_net, rate_without_prebate};
+    use crate::nextgen::{
+        ai_deficit, ai_rate, base_rate, choam_payback, package, pit_loss, today_loss,
+    };
+    let mut w = String::new();
+    writeln!(w, "| Counter-argument | Measure |\n|---|---|")?;
+    writeln!(w, "| Timing is unknown: none of the five shocks has a date, so a backbone built for them may be built for the wrong decade | every row of the §14 table is a scenario point, not a forecast; the end state balances at {} with no shock at all |", pct(base_rate()))?;
+    writeln!(w, "| AI's gains go to capital owners, who spend a smaller share of income, so the VAT base falls with wages | at the high wage shock with full pass-through the rate rises from {} to {}, and the end-state deficit (${}B) exceeds today's system's loss (${}B); the VAT advantage holds only to the extent spending is sustained. Package C's wealth tax and land value tax are the levers that reach owners who do not spend |", pct(base_rate()), pct(ai_rate(S[2])), b(ai_deficit(S[2])), b(today_loss(S[2])))?;
+    writeln!(w, "| If the prebate fails (late, mistargeted, or cut), the VAT is regressive | without the prebate package C balances at {}, but the bottom rows of §13.4 lose; the prebate costs net ${}B a year |", pct(rate_without_prebate(&package())), b(prebate_net(base_rate())))?;
+    writeln!(w, "| Cheaper power raises use (rebound), so savings and emissions gains are smaller than the price fall | rebound is not modelled; for CHOAM a price fall lengthens energy-only payback ({} yr at a {} fall) rather than shortening it |", format_args!("{:.1}", choam_payback(S[1])), pct(S[1]))?;
+    writeln!(w, "| A wage shock also hits today's system | at the high shock PIT loses ${}B a year; today's gross GST/HST gap is {}% [R34], so neither base is safe from enforcement risk |", b(pit_loss(S[2])), num(GST_GAP_GROSS_2022))?;
+    Ok(w)
+}

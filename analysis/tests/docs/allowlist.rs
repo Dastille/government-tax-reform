@@ -255,4 +255,11 @@ pub const ALLOWLIST: &[Entry] = &[
     e("tax-whitepaper.md", "- [R38] Constitution Act", "1867", "statute title: THE CONSTITUTION ACTS 1867 to 1982"),
     e("tax-whitepaper.md", "- [R38] Constitution Act", "109", "Constitution Act, 1867 [R38]: \"109 All Lands, Mines, Minerals, and Royalties\""),
     e("tax-whitepaper.md", "- [R39] Income Tax Act, ", "70", "Income Tax Act [R39]: \"70 (1) In computing the income of a taxpayer\""),
+    e("tax-whitepaper.md", "- **(a) Revenue base.** No federal space", "109", "section locator of the Constitution Act, 1867 [R38]: \"Resource royalties belong to the provinces [R38, s. 109]\""),
+    e("tax-whitepaper.md", "- **(b) Spending.** Total health", "2025", "CIHI forecast year (excerpt cihi_nhex_2025): \"expected to reach $399 billion in 2025\""),
+    e("tax-whitepaper.md", "- [R41] UN Global SDG", "10.4.1", "indicator number (excerpt unece_sdg_10_4_1): \"indicator 10.4.1\""),
+    e("tax-whitepaper.md", "- [R42] Canadian Institute", "2025", "edition year (excerpt cihi_nhex_2025): \"National health expenditure trends, 2025\""),
+    e("ledger.rs", "Labour share of GDP, Canada", "2024", "data year, column 2024 of the Canada row (excerpt unece_sdg_10_4_1)"),
+    e("ledger.rs", "Labour share of GDP, Canada", "10.4.1", "indicator number (excerpt unece_sdg_10_4_1): \"indicator 10.4.1\""),
+    e("ledger.rs", "Health spending, Canada", "2025", "CIHI forecast year (excerpt cihi_nhex_2025): \"expected to reach $399 billion in 2025\""),
 ];

@@ -663,7 +663,75 @@ Federal taxes only, single filers, package B. "Today" is federal PIT on the 2022
 
 ---
 
-## 14. Limitations
+## 14. Next-generation backbone
+
+**Claim.** The end state of §13 takes federal revenue from spending, land and large fortunes, not from wage withholding, so a technology shock that shrinks wages moves the budget only to the extent that it also shrinks spending; this section measures how far each shock moves package C's balancing rate (31.2% with no shock).
+
+**Rule for the tax mix.** The tax mix must not depend on wage withholding, because automation erodes the wage base. Materials and energy costs that enter the plan are taken from the sister models (CHOAM for housing and power), not typed in; the Stellar link is a TODO below.
+
+**Method.** Each shock either scales the VAT base or adds to federal need. The model then solves package C (VAT, land value tax, wealth tax, spending review and prebate, §13) for the VAT rate that balances the budget again. The shocks are scenario points with no dates; none is a forecast (`analysis/src/nextgen.rs`).
+
+| Revolution | Shock (low / central / high) | Result (low / central / high) |
+|---|---|---|
+| Energy | retail power price falls 10.0% / 25.0% / 40.0% | CHOAM energy-only payback on the low-case unit: 85.3 / 102.4 / 128.0 yr, against 76.8 yr today (E4) [R43] |
+| AI and automation | wage base falls 10.0% / 25.0% / 40.0% | today's system loses $23.4 / 58.6 / 93.7B of PIT, $26.6 / 66.4 / 106.2B with net GST; end state, full pass-through to spending: base falls 6.0% / 14.9% / 23.8%, package C deficit $29.5 / 73.8 / 118.0B at 31.2%, rebalancing rate 34.9% / 42.4% / 54.2%; spending held: no deficit |
+| Quantum computing | GST/HST gap 5.8% / 13.5% / 27.0% [R34] | package C rate 31.2% / 36.1% / 50.1% |
+| Space | federal procurement $1.0 / 2.5 / 5.0B a year | package C rate 31.3% / 31.5% / 31.7% |
+| Genetics and biotech | total health spending changes -2.0% / 0.0% / 2.0% ($B: -8.0 / 0.0 / 8.0) [R42] | package C rate if Ottawa bore all of it: 30.3% / 31.2% / 32.1% |
+
+### 14.1 Energy
+
+- **(a) Revenue base.** Cheaper power lowers the price of an input to almost everything; the nominal VAT base falls unless real spending rises. No source for the energy share of household spending was read, so this effect is **unverified** and not modelled.
+- **(b) Spending.** Grid, storage and transmission investment is mostly provincial; no federal figure is used.
+- **(c) Why the end-state mix.** A VAT on final consumption does not tax the energy embedded in exports or in business inputs, so cheaper power passes to buyers without a federal revenue swing tied to any one industry.
+- **(d) Scenario.** CHOAM values each kWh of its rooftop array at the OEB Tier-1 price [R43]. Its energy-only payback is unit cost divided by the yearly value of the power, so if the retail price falls by a share x, payback is multiplied by one over one minus x: it gets longer, not shorter. The table shows the low-case unit at each price fall. A cheaper grid makes self-generation pay back more slowly; it helps CHOAM only through lower occupant bills and, if sourced later, lower material costs. IEA and NRCan price projections were not read; any projected price fall is **unverified**.
+
+### 14.2 AI and automation
+
+- **(a) Revenue base.** Compensation of employees was 59.6% of GDP in Canada [R41]. Today's federal system takes its largest revenue line from personal income tax, which is withheld mostly from wages. If automation moves income from wages to capital, that line falls with it. The table treats PIT as proportional to wages; PIT also falls on interest, dividends and gains, so this overstates the loss. Statistics Canada's compensation table and any PBO or OECD projection of the labour share were not read: the size and timing of any fall are **unverified**.
+- **(b) Spending.** Displacement raises income-support demand; no source costs it.
+- **(c) Why the end-state mix.** In the end state no revenue line is withheld from wages. If displaced income is replaced (by capital income that is spent, or by transfers that are spent), the VAT base holds and package C still balances. If it is not replaced, spending falls by the wage fall times the labour share, and the VAT base falls with it: the table shows that case, and in it the end state's deficit is larger than today's system's loss, because the VAT carries all of federal revenue. The advantage of the end-state mix under this shock is therefore conditional on spending being sustained; the land value tax and the wealth tax are the levers that do not depend on it.
+- **(d) Scenario.** Wage base falls in the low, central and high cases, with the prebate held per person.
+
+### 14.3 Quantum computing
+
+- **(a) Revenue base.** No direct effect is sourced. The risk modelled is enforcement: if current encryption of invoices, e-filing and payment records were broken before replacement standards are in place, the GST/HST gap could rise. When or whether that happens is **unverified**; no claim about quantum hardware timelines is made.
+- **(b) Spending.** Migration of CRA and payment systems to post-quantum standards; no cost source was read.
+- **(c) Why the end-state mix.** A VAT with input credits leaves an invoice trail at every stage, and land does not move; both are easier to re-verify than self-reported income. A higher VAT also raises the reward for evasion (§13.5).
+- **(d) Scenario.** The CRA's net and gross GST/HST gaps [R34], and a scenario multiple of the gross gap. The model's base already nets today's net gap, so only the excess is removed.
+
+### 14.4 Space
+
+- **(a) Revenue base.** No federal space-revenue figure was found; any claim of launch, satellite or asteroid revenue is **unverified** and not used. Resource royalties belong to the provinces [R38, s. 109], and whether that extends to extraterrestrial resources is **unverified**; this plan claims no royalty revenue.
+- **(b) Spending.** Space is treated as federal procurement and industrial policy: it is a cost line, and the table adds it to need.
+- **(c) Why the end-state mix.** Procurement paid from a broad consumption base, land and wealth does not need a new tax on the industry it is meant to build.
+- **(d) Scenario.** Low, central and high procurement levels, chosen for scale only.
+
+### 14.5 Genetics and biotech
+
+- **(a) Revenue base.** No sourced effect on the VAT base. Health care services are VAT-exempt today; §13 taxes household exemptions in the end state.
+- **(b) Spending.** Total health spending in Canada is forecast at $399B in 2025, 12.7% of GDP [R42]. Most of it is provincial or private; the federal share is not modelled here, so the table is an upper bound.
+- **(c) Why the end-state mix.** If biotech raised healthy working years, part of the gain would come back through spending under any tax; a consumption base captures it whether it appears as wages or as returns to capital.
+- **(d) Scenario.** Health spending shifts down, flat and up. This paper makes no medical claim: whether any therapy lowers or raises total spending is **unverified**.
+
+### 14.6 Cross-links and open items
+
+- **CHOAM.** Payback rows come from the CHOAM paper at its PR head [R43]. TODO: CHOAM should cite this section's price-fall scaling next to its payback rows; not done in this revision.
+- **Stellar.** TODO: no Stellar figure is imported yet; materials and launch costs, if used, must come from the Stellar model, not from this paper.
+
+### 14.7 Counter-arguments
+
+| Counter-argument | Measure |
+|---|---|
+| Timing is unknown: none of the five shocks has a date, so a backbone built for them may be built for the wrong decade | every row of the §14 table is a scenario point, not a forecast; the end state balances at 31.2% with no shock at all |
+| AI's gains go to capital owners, who spend a smaller share of income, so the VAT base falls with wages | at the high wage shock with full pass-through the rate rises from 31.2% to 54.2%, and the end-state deficit ($118.0B) exceeds today's system's loss ($106.2B); the VAT advantage holds only to the extent spending is sustained. Package C's wealth tax and land value tax are the levers that reach owners who do not spend |
+| If the prebate fails (late, mistargeted, or cut), the VAT is regressive | without the prebate package C balances at 18.3%, but the bottom rows of §13.4 lose; the prebate costs net $200.8B a year |
+| Cheaper power raises use (rebound), so savings and emissions gains are smaller than the price fall | rebound is not modelled; for CHOAM a price fall lengthens energy-only payback (102.4 yr at a 25.0% fall) rather than shortening it |
+| A wage shock also hits today's system | at the high shock PIT loses $93.7B a year; today's gross GST/HST gap is 13.5% [R34], so neither base is safe from enforcement risk |
+
+---
+
+## 15. Limitations
 
 - **Accounting model, not a general-equilibrium model.** The MPC, taxable share and multipliers are fixed. There are no wage, price-level, exchange-rate or interest-rate responses beyond the stated incidence assumption.
 - **Incidence.** Headline figures assume full pass-through with the real basket held (A). If nominal spending does not rise with prices (B), revenue at 20% is about $26B lower and k rises from 47.3% to 56.1%. Reality is likely between the two; it is not estimated here.
@@ -678,11 +746,12 @@ Federal taxes only, single filers, package B. "Today" is federal PIT on the 2022
 - **End-state inputs.** The MBM line, the age share and the land value are **unverified**; the wealth tax uses the PBO costing as published.
 - **Transition financing.** The rule in §10 keeps each year's deficit at or below the baseline, so no transition debt is modelled; federal debt is 41.2% of GDP [R2]. The rule's result depends on the spin-up inputs below.
 - **Spin-up inputs.** The capital semi-elasticity is **unverified**. The input-output values, and the capital share derived from them, are **unverified**: they were read from a search index's copy of the Statistics Canada table because the live site was down when accessed. The capital proxy includes land and government assets. The METR cut in the low and central cases is a scenario, not an estimate of the federal share.
+- **Next-generation shocks (§14).** Every shock is a scenario point with no date. The labour share is from the UN SDG copy, not the Statistics Canada table; CHOAM's inputs are taken from its paper, not re-derived; IEA, NRCan price projections, OECD and PBO labour projections, and any space-revenue figure are **unverified** and not used.
 - **Portability.** Other mid-sized advanced economies have different VRRs and income-tax shares. Rerun the model with their inputs.
 
 ---
 
-## 15. References
+## 16. References
 
 - [R1] Receiver General for Canada, *Public Accounts of Canada 2025*, Vol. I, Section 3 "Revenues", Tables 3.2 and 3.3. https://www.tpsgc-pwgsc.gc.ca/recgen/cpc-pac/2025/vol1/s3/rvnu-eng.html
 - [R2] Department of Finance Canada, *Annual Financial Report of the Government of Canada, Fiscal Year 2024–2025*, Tables 2 and 4. https://www.canada.ca/en/department-finance/services/publications/annual-financial-report/2025.html
@@ -726,6 +795,9 @@ Federal taxes only, single filers, package B. "Today" is federal PIT on the 2022
 - [R38] Constitution Act, 1867, s. 109. https://laws-lois.justice.gc.ca/eng/const/section-109.html
 - [R39] Income Tax Act, s. 70. https://laws-lois.justice.gc.ca/eng/acts/I-3.3/section-70.html
 - [R40] Statistics Canada, Table 11-10-0066-01, "Market Basket Measure (MBM) thresholds" (**unverified**; site unreachable when accessed). https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1110006601
+- [R41] UN Global SDG Database, indicator 10.4.1, "Labour share of GDP" (UNECE copy). https://w3.unece.org/SDG/en/Indicator?id=30
+- [R42] Canadian Institute for Health Information, "National health expenditure trends" (2025 edition). https://www.cihi.ca/en/national-health-expenditure-trends
+- [R43] CHOAM initiative, "CHOAM-Idea_Draft.md" at commit d31a02a (PR head; rows rendered from NRCan and OEB inputs). https://github.com/Dastille/CHOAM-initiative/blob/d31a02a/CHOAM-Idea_Draft.md
 - Nova Scotia Department of Finance, "Government Financial Statistics, 2024" (21 November 2025), from Statistics Canada Table 10-10-0147-01. https://novascotia.ca/finance/statistics/archive_news.asp?df=&dg=&dti=3&dto=0&id=21517 · Statistics Canada, *The Daily*, 25 September 2024 (population, 1 July 2024). https://www150.statcan.gc.ca/n1/daily-quotidien/240925/dq240925d-eng.htm
 
 ---

@@ -122,6 +122,10 @@ Generated from `analysis/src/ledger.rs`. Excerpt files are in `analysis/tests/so
 | Wealth tax: 1% above $10M raises $12.6B; behaviour 35%, administration 2% | Verified (source excerpt) | PBO election costing [R37]; excerpt `pbo_wealth_2021` |
 | MBM family-of-four line $54,369 (large Ontario cities); share aged 0 to 14 15.2% | **UNVERIFIED** | Statistics Canada Table 11-10-0066-01 [R40] and The Daily, read from a search index; the site was down when accessed |
 | Distribution rows: incomes, consumption shares, retiree and asset-rich spending | Scenario parameter, not data | Representative filers; the household spending tables by quintile were not retrievable |
+| Labour share of GDP, Canada, 2024: 59.6% | Verified (source excerpt) | UN Global SDG Database indicator 10.4.1, UNECE copy [R41]; excerpt `unece_sdg_10_4_1`. Statistics Canada's own compensation table was not read |
+| Health spending, Canada, 2025 forecast: $399B, 12.7% of GDP | Verified (source excerpt) | CIHI National health expenditure trends 2025 [R42]; excerpt `cihi_nhex_2025` |
+| CHOAM unit: 5,815 kWh/yr, Tier-1 price $0.112/kWh, low-case unit $50,000 | Verified (source excerpt) | CHOAM paper at d31a02a, rows E2, E4, E7 [R43]; excerpt `choam_d31a02a` (a sister-repo model output from NRCan and OEB, not re-derived here) |
+| Next-generation shocks: power price and wage base falls, quantum gap multiple, space procurement, biotech health shift | Scenario parameter, not data | Illustrative low/central/high points chosen for §14; no forecast of any technology is made |
 
 ## Source caveats
 
