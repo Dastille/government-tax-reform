@@ -1,0 +1,7 @@
+URL: https://www.bundesfinanzministerium.de/Content/EN/Gesetze/Laws/2009-08-10-article-115-act.html
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+Borrowing of up to 0.35 percent in relation to nominal gross domestic product shall be permissible as a structural component.
+negative balance is not to exceed a threshold of 1.5 percent

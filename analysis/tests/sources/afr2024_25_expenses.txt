@@ -1,0 +1,13 @@
+URL: https://www.canada.ca/en/department-finance/services/publications/annual-financial-report/2025.html
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+Table 5 Expenses
+| Total direct program expenses | 237,594 | 235,965 | 1,629 | 0.7 |
+| Public debt charges | 53,410 | 47,273 | 6,137 | 13.0 |
+Table 6 Federal Debt (Accumulated Deficit) $ millions
+| Annual operating deficit | (36,348) | (61,876) | 25,528 |
+Condensed Consolidated Statement of Financial Position as at March 31, 2025 $ millions
+| Unmatured debt | 1,485,887 | 1,376,822 |
+the government is moving toward a new capital budgeting approach that distinguishes its day-to-day operational spending from expenditure that stimulates public and private sector capital formation.

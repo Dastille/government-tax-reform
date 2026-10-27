@@ -1,0 +1,7 @@
+URL: https://www.government.se/government-of-sweden/ministry-of-finance/central-government-budget/the-fiscal-policy-framework/
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+The target for general government net lending is one-third of 1% of GDP on average over a business cycle. From 2027 onwards, the target is to achieve balance over a business cycle. The debt anchor of 35% of GDP
+originates from the deep economic crisis that Sweden underwent in the early 1990s

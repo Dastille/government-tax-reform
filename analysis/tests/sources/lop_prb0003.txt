@@ -1,0 +1,6 @@
+URL: https://publications.gc.ca/Collection-R/LoPBdP/BP/prb0003-e.htm
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: curl, HTML tags stripped
+Excerpt (verbatim; whitespace collapsed):
+---
+It was introduced on 1 January 1991 to replace the Federal Sales Tax (FST), which had been in existence since 1924.

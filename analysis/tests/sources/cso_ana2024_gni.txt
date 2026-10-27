@@ -1,0 +1,9 @@
+URL: https://www.cso.ie/en/releasesandpublications/ep/p-ana/annualnationalaccounts2024/gniandde-globalisedresults/
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+designed to exclude globalisation effects that are disproportionally impacting the measurement of the size of the Irish economy
+expressed as a share of GDP, from 55.5% to 57.1%
+| 1. Gross domestic product at current market prices | B.1*g | 363,753 | 381,729 | 448,445 | 520,718 | 524,729 | 562,794 |
+| 10. Modified gross national income at current market prices | | 206,596 | 198,283 | 230,178 | 266,682 | 291,428 | 321,098 |

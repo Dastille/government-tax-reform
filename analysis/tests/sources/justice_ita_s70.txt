@@ -1,0 +1,10 @@
+URL: https://laws-lois.justice.gc.ca/eng/acts/I-3.3/section-70.html
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+Act current to 2026-09-30 and last amended on 2026-06-18.
+(5) Where in a taxation year a taxpayer dies,
+(a) the taxpayer shall be deemed to have, immediately before the taxpayer’s death, disposed of each capital property of the taxpayer and received proceeds of disposition therefor equal to the fair market value of the property immediately before the death;
+(6) Where any property of a taxpayer who was resident in Canada immediately before the taxpayer’s death that is a property to which subsection 70(5) would otherwise apply is, as a consequence of the death, transferred or distributed to
+(a) the taxpayer’s spouse or common-law partner who was resident in Canada immediately before the taxpayer’s death

@@ -1,0 +1,13 @@
+URL: https://www.canada.ca/en/revenue-agency/programs/about-canada-revenue-agency-cra/income-statistics-gst-hst-statistics/t1-final-statistics/2022-tax-year.html
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+Individual Income Tax Return Statistics (2022 tax year)
+| $50,197 or less | 15% |
+| $50,197 to $100,392 | 20.5% plus |
+| $100,392 to $155,625 | 26% plus |
+| $155,625 to $221,708 | 29% plus |
+| Over $221,708 | 33% plus $51,344 |
+For 2022, this amount is $14,398.
+taxable capital gains are net amounts because only 50% of the gains realized in 2022 are reported.

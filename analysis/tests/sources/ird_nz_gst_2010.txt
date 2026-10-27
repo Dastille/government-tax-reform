@@ -1,0 +1,6 @@
+URL: https://www.taxtechnical.ird.govt.nz/new-legislation/act-articles/taxation-budget-measures-act-2010/gst-rate-increase
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+The rate of goods and services tax (GST) will increase from 12.5% to 15% from 1 October 2010, as part of a switch in the tax mix from income tax to consumption tax announced in Budget 2010.

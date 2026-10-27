@@ -1,0 +1,9 @@
+URL: https://www.budget.canada.ca/archives/budget95/binb/budget1995-eng.pdf
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: curl of the PDF, text by pdftotext (two-column layout; margin notes interleave with body text)
+Excerpt (verbatim; whitespace collapsed):
+---
+The Program Review encompassed about $52 billion worth of spending, excluding only major statu- tory transfers.
+Hence, by 1997-98, spending subject to the lower in Program Review will have declined 18.9 per cent relative to three years 1994-95.
+The savings come primarily from $25.3 billion of cumulative spending reductions – nearly seven dollars of spending reduction for every dollar of tax revenue increase (Table 1.2);
+The deficit will be reduced to of higher $32.7 billion in 1995-96 and to 3 per cent of GDP or $24.3 billion interest rates in 1996-97.

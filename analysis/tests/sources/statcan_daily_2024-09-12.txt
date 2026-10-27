@@ -1,0 +1,6 @@
+URL: https://www150.statcan.gc.ca/n1/daily-quotidien/240912/dq240912a-eng.htm
+Accessed: 2026-10-18 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+The household saving rate (seasonally adjusted) increased to 7.2% in the second quarter, as gains in disposable income outweighed increases in nominal consumption expenditure.

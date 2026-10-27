@@ -1,0 +1,7 @@
+URL: https://www.canada.ca/en/revenue-agency/corporate/about-canada-revenue-agency-cra/tax-canada-a-conceptual-study/tax-gap-brief-overview/2026-overall-federal-tax-gap-report.html
+Accessed: 2026-10-21 (America/New_York)
+Retrieved: WebFetch (HTML converted to Markdown by the fetch tool)
+Excerpt (verbatim; whitespace collapsed):
+---
+| Gross GST/HST gap | $7.9 billion | 13.5% of GST/HST revenue |
+| Net GST/HST gap | $3.4 billion | 5.8% of GST/HST revenue |
